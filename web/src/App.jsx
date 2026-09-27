@@ -19,6 +19,7 @@ import { SheetHost } from './sheets/SheetHost.jsx';
 import { AuthScreen, LoadingScreen, LoadErrorScreen, NotConfiguredScreen, TurnedOffScreen } from './screens/auth/AuthScreen.jsx';
 import { Toast } from './components/Toast.jsx';
 import { InstallPrompt } from './components/InstallPrompt.jsx';
+import { Tour } from './components/Tour.jsx';
 
 export class App extends AppController {
   render() {
@@ -56,7 +57,8 @@ export class App extends AppController {
         <SheetHost v={v} />
         <Toast v={v} />
         {/* not over screens that have their own bottom action bar */}
-        {!is.capture && !is.detail && !is.details && !is.chat && !v.sheet.show ? <InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
+        {v.tour ? <Tour tour={v.tour} /> : null}
+        {!v.tour && !is.capture && !is.detail && !is.details && !is.chat && !v.sheet.show ? <InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
       </div>
     );
   }

@@ -10,14 +10,14 @@ export function Sidebar({ v }) {
         <img src="images/logo-badge.jpg" alt="" width="38" height="38" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }} />
         <div style={{ fontWeight: 800, fontSize: 19, letterSpacing: '-0.02em', fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Let Report</div>
       </div>
-      <div style={{ padding: '0 4px 14px' }}>
+      <div style={{ padding: '0 4px 14px' }} data-tour="report">
         <Button variant="success" icon="camera" fullWidth onClick={v.nav.capture}>{v.t.reportIssue}</Button>
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {tabs.map((tb, i) => {
           const on = tb.fg === 'var(--blue-600)';
           return (
-            <div key={i} {...tap(tb.go, 'nav-item' + (on ? ' on' : ''))} aria-current={on ? 'page' : undefined}>
+            <div key={i} {...tap(tb.go, 'nav-item' + (on ? ' on' : ''))} aria-current={on ? 'page' : undefined} data-tour={tb.key}>
               <Icon name={tb.icon} size={20} />
               <span>{tb.label}</span>
               {tb.hasBadge ? <span className={'nav-badge' + (tb.icon === 'bell' ? '' : ' blue')}>{tb.badge}</span> : null}
@@ -34,7 +34,7 @@ export function Sidebar({ v }) {
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 16, borderTop: '1.5px solid var(--blue-100)' }}>
         <div style={{ display: 'flex', justifyContent: 'flex-start' }}><LangToggle v={v} /></div>
-        <div {...tap(v.openRoles)} aria-label={v.t.switchRole} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, border: '1.5px solid var(--blue-200)', background: 'var(--blue-50)' }}>
+        <div {...tap(v.openRoles)} aria-label={v.t.switchRole} data-tour="me" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, border: '1.5px solid var(--blue-200)', background: 'var(--blue-50)' }}>
           <Avatar src={v.me.avatar} size={36} />
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 14, fontWeight: 800 }}>{v.me.name}</span>

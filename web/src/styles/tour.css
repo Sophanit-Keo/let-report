@@ -1,0 +1,19 @@
+/* Guided tour ("How to use Let Report") */
+.tour { position: fixed; inset: 0; z-index: 90; }
+.tour-block { position: absolute; inset: 0; }                       /* the app can't be tapped during the tour */
+.tour-dim { position: absolute; inset: 0; background: rgba(8, 24, 48, .62); }
+.tour-hole { position: absolute; border-radius: 14px; box-shadow: 0 0 0 9999px rgba(8, 24, 48, .62), 0 0 0 3px var(--blue-300); pointer-events: none; transition: all 220ms cubic-bezier(.2,.7,.2,1); }
+.tour-card { position: absolute; background: #fff; border-radius: 20px; padding: 18px 18px 16px; box-shadow: 0 18px 50px rgba(8, 24, 48, .35); display: flex; flex-direction: column; gap: 8px; outline: none; transition: top 220ms cubic-bezier(.2,.7,.2,1), left 220ms cubic-bezier(.2,.7,.2,1); animation: tour-in 200ms ease-out; }
+@keyframes tour-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.tour-card-top { display: flex; align-items: center; gap: 10px; }
+.tour-ic { width: 36px; height: 36px; border-radius: 11px; background: var(--blue-600); display: flex; align-items: center; justify-content: center; flex: none; }
+.tour-count { flex: 1; font-size: 12px; font-weight: 700; color: var(--gray-500); }
+.tour-skip { font-size: 14px; font-weight: 700; color: var(--blue-700); padding: 6px 10px; border-radius: 10px; }
+@media (hover: hover) { .tour-skip:hover { background: var(--blue-50); } }
+.tour-title { margin: 4px 0 0; font-size: 19px; font-weight: 800; letter-spacing: -0.01em; }
+.tour-body { margin: 0; font-size: 14px; line-height: 1.5; color: var(--gray-700); }
+.tour-dots { display: flex; gap: 5px; justify-content: center; padding: 6px 0 2px; }
+.tour-dots span { width: 6px; height: 6px; border-radius: 3px; background: var(--blue-200); transition: all 200ms; }
+.tour-dots span.on { width: 18px; background: var(--blue-600); }
+.tour-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+@media (prefers-reduced-motion: reduce) { .tour-hole, .tour-card { transition: none; animation: none; } }

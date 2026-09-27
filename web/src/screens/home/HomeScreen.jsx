@@ -141,7 +141,7 @@ export function HomeScreen({ v }) {
             </div>
           ) : null}
 
-          <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-tour="lines">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h2 style={{ ...secHead, margin: 0 }}>{t.linesNow}</h2>
               {v.linesHead.canAdd ? (

@@ -12,3 +12,4 @@ export { ReportCard } from './ReportCard.jsx';
 export { Toggle } from './Toggle.jsx';
 export { TopBar } from './TopBar.jsx';
 export { PushCard } from './PushCard.jsx';
+export { Tour } from './Tour.jsx';

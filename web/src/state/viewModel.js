@@ -116,7 +116,7 @@ export function buildViewModel(app) {
 
     const chatUnread=app.chatUnread();
     const tabDef=[['home','house',T.home],['list','clipboard-list',T.reports],['chat','message-circle',T.chat.tab],['tasks','list-checks',T.tasks],['alerts','bell',T.alerts]];
-    const tabs=tabDef.map(([k,ic,l])=>({icon:ic,label:l,fg:s.screen===k?'var(--blue-600)':'var(--navy-300)',go:()=>app.go(k),
+    const tabs=tabDef.map(([k,ic,l])=>({key:k,icon:ic,label:l,fg:s.screen===k?'var(--blue-600)':'var(--navy-300)',go:()=>app.go(k),
       hasBadge:(k==='alerts'&&unread>0)||(k==='tasks'&&taskItems.length>0)||(k==='chat'&&chatUnread>0),badge:k==='alerts'?unread:k==='chat'?(chatUnread>99?'99+':chatUnread):taskItems.length}));
 
     // detail
@@ -259,6 +259,15 @@ export function buildViewModel(app) {
         toggle:()=>{ if(ps.busy) return; if(pOn) app.disablePush(); else app.enablePush(); }},
       test:()=>app.testPush(), enable:()=>app.enablePush(), later:()=>app.pushLater(),
       showCard:ps.support==='yes'&&ps.permission!=='denied'&&!pOn&&!ps.later};
+    // "How to use" guide
+    let tour=null;
+    if(s.tour){ const steps=app.tourSteps(), i=s.tour.step, key=steps[i], G=T.guide;
+      const txt=key==='tasks'?(G.tasks[role]||G.tasks.qc):G[key];
+      const ICON={welcome:'hand',report:'camera',list:'clipboard-list',detail:'list-checks',tasks:'list-checks',chat:'message-circle',alerts:'bell',lines:'thermometer',me:'users',done:'circle-check'};
+      tour={key, target:['welcome','detail','done'].includes(key)?null:key, icon:ICON[key]||'hand', title:txt[0].replace('{name}',me.name), body:txt[1],
+        n:i+1, total:steps.length, first:i===0, last:i===steps.length-1, dots:steps.map((x,j)=>j===i),
+        next:()=>app.tourGo(i+1), back:()=>app.tourGo(i-1), skip:()=>app.endTour(),
+        labels:{skip:G.skip,next:i===steps.length-1?G.start:G.next,back:G.back,of:G.of}}; }
     const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>app.setState({lang:k})};});
 
     return {
@@ -266,7 +275,7 @@ export function buildViewModel(app) {
       tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts','team','chat'].includes(s.screen), chatHideTabs:is.chat&&!!s.chatRoom, chat:is.chat?buildChatView(app,T):null,
       sel, detailBar, back:()=>app.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
       darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:app.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
-      langs, push, openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),
+      langs, push, tour, openGuide:()=>app.startTour(), openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),
       cap:capV, cats, catsDark, sevs, sevsDark, sevCards, shoot, skipPhoto:()=>app.setState(st=>({cap:{...st.cap,photo:false,stage:'pick'}})),
       retake:()=>app.setState(st=>({cap:{...st.cap,stage:'camera'}})),
       stepBack:()=>{ app._sig=null; app.setState(st=>{const cp=st.cap; const stage=cp.stage==='sign'?(flow==='B'?'sev':'pick'):cp.stage==='sev'?'pick':'camera'; return {cap:{...cp,stage},signed:false};}); },

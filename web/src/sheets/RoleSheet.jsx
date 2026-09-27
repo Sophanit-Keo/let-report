@@ -39,6 +39,15 @@ export function RoleSheet({ v }) {
         </div>
       ) : null}
 
+      <div {...tap(v.openGuide, 'card-tap')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, border: '1.5px solid var(--blue-200)' }}>
+        <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--blue-600)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name="hand" size={18} color="#fff" /></div>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <span style={{ fontSize: 15, fontWeight: 800 }}>{t.guide.open}</span>
+          <span style={{ fontSize: 12, color: 'var(--gray-500)' }}>{t.guide.openSub}</span>
+        </div>
+        <Icon name="chevron-right" size={18} color="var(--navy-300)" />
+      </div>
+
       {a.isManager ? (
         <div {...tap(a.manageTeam, 'card-tap')} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 14, border: '1.5px solid var(--blue-200)' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: 'var(--navy-900)', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name="users" size={18} color="#fff" /></div>

@@ -15,6 +15,7 @@ import { loadPrefs, savePrefs } from './storage.js';
 import { buildViewModel } from './viewModel.js';
 import { chatState, chatMethods } from './chat.js';
 import { pushState, pushMethods } from './push.js';
+import { tourState, tourMethods } from './tour.js';
 
 const REFRESH_MS = 15000;
 const AVATARS = { Sokha: 'images/avatars/sokha.png', Vina: 'images/avatars/vina.png', Dara: 'images/avatars/dara.png', Chanthy: MGR_AV };
@@ -48,11 +49,13 @@ export class AppController extends React.Component {
     ...chatState,
     // push notifications (./push.js)
     ...pushState,
+    // "How to use" guide (./tour.js)
+    ...tourState,
   };
   scrollRef = React.createRef();
 
   componentDidMount() {
-    this._onKey = e => { if (e.key === 'Escape') { if (this.state.sheet) this.setState({ sheet: null }); else if (this.state.screen === 'capture') this.go('home'); } };
+    this._onKey = e => { if (e.key === 'Escape') { if (this.state.tour) this.endTour(); else if (this.state.sheet) this.setState({ sheet: null }); else if (this.state.screen === 'capture') this.go('home'); } };
     this._onFocus = () => { if (document.visibilityState !== 'hidden') this.refresh(); };
     this.listenForLinks();
     window.addEventListener('keydown', this._onKey);
@@ -99,7 +102,8 @@ export class AppController extends React.Component {
       this.loadPhotos(reports);
       this.syncChat();
       if (this._pushFor !== this.myId()) { this._pushFor = this.myId(); this.initPush(); }
-      if (this._link) { const l = this._link; this._link = null; this.openLink(l); }
+      // after the new data is on screen: open a notification's link, or the guide for new people
+      this.setState(null, () => { if (this._link) { const l = this._link; this._link = null; this.openLink(l); } else this.maybeStartTour(); });
     } catch (e) {
       this.setState({ booting: false, loadError: first ? e.message : null });
       if (!first && e.code !== 'offline') this.toast(e.message);
@@ -414,5 +418,5 @@ export class AppController extends React.Component {
   isConfigured() { return isConfigured(); }
 }
 
-// Chat and comment actions live in ./chat.js, push notifications in ./push.js.
-Object.assign(AppController.prototype, chatMethods, pushMethods);
+// Chat and comment actions live in ./chat.js, push notifications in ./push.js, the guide in ./tour.js.
+Object.assign(AppController.prototype, chatMethods, pushMethods, tourMethods);
