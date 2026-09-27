@@ -42,7 +42,8 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | Work on reports (assign, fix, verify, escalate) | ✓ | ✓ | ✓ | ✓ |
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
-| Add, edit or remove production lines | | | | ✓ |
+| Edit a line's name, type, product and target | ✓ | ✓ | ✓ | ✓ |
+| Add or remove production lines | | | | ✓ |
 | Change people's roles, delete reports | | | | ✓ |
 
 Photos and signatures are stored in a **private** bucket, and the app shows them through links that expire after 6 hours. Data refreshes every 15 seconds and whenever you come back to the app.
@@ -126,7 +127,7 @@ web/
 - **Workflow:** fix on the spot, assign corrective action, mark done, verify and close, manager approval, escalation ladder (QC → QA → Supervisor → Manager).
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
-- **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output and leave a note for the next shift. Managers add, edit and remove lines.
+- **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Managers add and remove lines.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 
