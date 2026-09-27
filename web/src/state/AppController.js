@@ -14,6 +14,7 @@ import { dueLabel } from '../data/constants.js';
 import { loadPrefs, savePrefs } from './storage.js';
 import { buildViewModel } from './viewModel.js';
 import { chatState, chatMethods } from './chat.js';
+import { pushState, pushMethods } from './push.js';
 
 const REFRESH_MS = 15000;
 const AVATARS = { Sokha: 'images/avatars/sokha.png', Vina: 'images/avatars/vina.png', Dara: 'images/avatars/dara.png', Chanthy: MGR_AV };
@@ -45,12 +46,15 @@ export class AppController extends React.Component {
     sheet: null, asg: {}, trendBy: 'line', esc: {}, lines: [], lineId: null, lineForm: {}, lineConfirm: false, lineNote: null,
     // chat + comments (./chat.js)
     ...chatState,
+    // push notifications (./push.js)
+    ...pushState,
   };
   scrollRef = React.createRef();
 
   componentDidMount() {
     this._onKey = e => { if (e.key === 'Escape') { if (this.state.sheet) this.setState({ sheet: null }); else if (this.state.screen === 'capture') this.go('home'); } };
     this._onFocus = () => { if (document.visibilityState !== 'hidden') this.refresh(); };
+    this.listenForLinks();
     window.addEventListener('keydown', this._onKey);
     document.addEventListener('visibilitychange', this._onFocus);
     window.addEventListener('online', this._onFocus);
@@ -69,7 +73,7 @@ export class AppController extends React.Component {
     clearInterval(this._poll); clearTimeout(this._tt);
     window.removeEventListener('keydown', this._onKey); document.removeEventListener('visibilitychange', this._onFocus); window.removeEventListener('online', this._onFocus);
     if (this._offAuth) this._offAuth();
-    if (this._rt) this._rt.close(); clearTimeout(this._liveRefresh);
+    if (this._rt) this._rt.close(); clearTimeout(this._liveRefresh); this.stopListeningForLinks();
   }
   componentDidUpdate(pp, ps) {
     if (ps.screen !== this.state.screen && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
@@ -94,6 +98,8 @@ export class AppController extends React.Component {
       this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, booting: false, loadError: null });
       this.loadPhotos(reports);
       this.syncChat();
+      if (this._pushFor !== this.myId()) { this._pushFor = this.myId(); this.initPush(); }
+      if (this._link) { const l = this._link; this._link = null; this.openLink(l); }
     } catch (e) {
       this.setState({ booting: false, loadError: first ? e.message : null });
       if (!first && e.code !== 'offline') this.toast(e.message);
@@ -120,7 +126,7 @@ export class AppController extends React.Component {
     if (r.session) { this.setState({ booting: true }); await this.refresh(true); }
     return r;
   };
-  signOut = async () => { await auth.signOut(); };
+  signOut = async () => { await this.forgetPushDevice(); this._pushFor = null; await auth.signOut(); };
   resetPassword = email => auth.resetPassword(email);
   email() { const s = this.state.session; return (s && s.user && s.user.email) || ''; }
 
@@ -408,5 +414,5 @@ export class AppController extends React.Component {
   isConfigured() { return isConfigured(); }
 }
 
-// Chat and comment actions live in ./chat.js.
-Object.assign(AppController.prototype, chatMethods);
+// Chat and comment actions live in ./chat.js, push notifications in ./push.js.
+Object.assign(AppController.prototype, chatMethods, pushMethods);

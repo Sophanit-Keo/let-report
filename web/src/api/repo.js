@@ -117,6 +117,12 @@ export const repo = {
   async loadChatReads() { const rows = await db.select('chat_reads'); const out = {}; rows.forEach(r => { out[r.room] = r.read_at; }); return out; },
   markRoomRead(room, at) { return db.upsert('chat_reads', { room, read_at: at }); },
 
+  // ───── Push notifications ─────
+  async pushKey() { const rows = await db.select('app_settings', { key: 'eq.vapid_public_key' }); return rows[0] ? rows[0].value : null; },
+  savePushSubscription(row) { return db.upsert('push_subscriptions', { ...row, updated_at: new Date().toISOString() }); },
+  removePushSubscription(endpoint) { return db.remove('push_subscriptions', { endpoint: 'eq.' + endpoint }); },
+  testPush(text) { return functions.invoke('push', { action: 'test', text }); },
+
   // ───── Discussion comments on a trouble ─────
   async loadComments(since) {
     const rows = await db.select('report_comments', { order: 'created_at.desc', limit: 1000, ...(since ? { created_at: 'gt.' + since } : {}) });

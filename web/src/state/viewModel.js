@@ -5,6 +5,9 @@ import { timeLabel, stampLabel, daysAgo, addDaysIso } from '../utils/time.js';
 import { draftOf } from './draft.js';
 import { buildChatView, buildDiscussion } from './chatView.js';
 
+// Alerts about something I did myself (sent by the app or the database) are not shown to me.
+const OWN_HIDDEN=['message-circle','file-plus','user-plus','rotate-ccw','shield-check','circle-check'];
+
 const PW_WORDS=['mango','lotus','river','tiger','mekong','jasmine','rice','palm','amber','cloud'];
 const WORDS_PW=()=>PW_WORDS[Math.floor(Math.random()*PW_WORDS.length)]+'-'+String(Math.floor(1000+Math.random()*9000));
 
@@ -106,7 +109,7 @@ export function buildViewModel(app) {
     const dueChecks=s.reports.filter(r=>app.canCheck(r)).map(r=>({head:T.hcDueHead,sub:T.hcTypes[r.holdCheck.type]+' · '+r.pname+(r.lot?' · '+r.lot:'')+(r.qty?' · '+r.qty+' '+r.unit:''),open:()=>app.go('detail',{selId:r.id})}));
     const myId=app.myId();
     // alerts for my role or for me by name (not the comment alerts I sent myself)
-    const myNotes=s.notes.filter(n=>(n.roles.includes(role)||(n.userIds||[]).includes(myId))&&!(n.icon==='message-circle'&&n.by&&n.by===myId));
+    const myNotes=s.notes.filter(n=>(n.roles.includes(role)||(n.userIds||[]).includes(myId))&&!(n.by&&n.by===myId&&OWN_HIDDEN.includes(n.icon)));
     const unread=myNotes.filter(n=>!s.read[n.key]).length;
     const alertItems=myNotes.map((n,i)=>({text:n.text,t:timeLabel(n.t),icon:n.icon,icBg:TONE[n.tone][0],icFg:TONE[n.tone][1],unread:!s.read[n.key],bd:i?'var(--gray-100)':'transparent',bg:s.read[n.key]?'#fff':'var(--blue-50)',
       open:()=>{ app.markRead(n.key); if(n.id) app.go('detail',{selId:n.id}); }}));
@@ -248,6 +251,14 @@ export function buildViewModel(app) {
       generate:()=>setNP({password:WORDS_PW()}),roles:ORDER.map(k=>({label:T.short[k],...pill(np.role===k),pick:()=>setNP({role:k})})),
       disabled:!!s.busy||!(np.name||'').trim()||!/.+@.+\..+/.test(np.email||'')||(np.password||'').length<6,save:app.addPerson,busy:!!s.busy};
 
+    // push notifications (this device)
+    const ps=s.push, P=T.push, pOn=ps.on;
+    const push={support:ps.support, on:pOn, busy:ps.busy,
+      status:ps.support==='ios-install'?P.iosInstall:ps.permission==='denied'?P.blocked:pOn?P.onSub:P.offSub,
+      toggle:{bg:pOn?'var(--green-50)':'#fff',bd:pOn?'var(--green-300)':'var(--blue-200)',ic:pOn?'var(--green-700)':'var(--navy-500)',track:pOn?'var(--green-600)':'var(--gray-300)',knob:pOn?'21px':'3px',
+        toggle:()=>{ if(ps.busy) return; if(pOn) app.disablePush(); else app.enablePush(); }},
+      test:()=>app.testPush(), enable:()=>app.enablePush(), later:()=>app.pushLater(),
+      showCard:ps.support==='yes'&&ps.permission!=='denied'&&!pOn&&!ps.later};
     const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>app.setState({lang:k})};});
 
     return {
@@ -255,7 +266,7 @@ export function buildViewModel(app) {
       tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts','team','chat'].includes(s.screen), chatHideTabs:is.chat&&!!s.chatRoom, chat:is.chat?buildChatView(app,T):null,
       sel, detailBar, back:()=>app.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
       darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:app.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
-      langs, openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),
+      langs, push, openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),
       cap:capV, cats, catsDark, sevs, sevsDark, sevCards, shoot, skipPhoto:()=>app.setState(st=>({cap:{...st.cap,photo:false,stage:'pick'}})),
       retake:()=>app.setState(st=>({cap:{...st.cap,stage:'camera'}})),
       stepBack:()=>{ app._sig=null; app.setState(st=>{const cp=st.cap; const stage=cp.stage==='sign'?(flow==='B'?'sev':'pick'):cp.stage==='sev'?'pick':'camera'; return {cap:{...cp,stage},signed:false};}); },

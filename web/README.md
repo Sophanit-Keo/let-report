@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0005`), then deploy the function in `supabase/functions/admin-users` (`supabase functions deploy admin-users`). This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0006`), then deploy the two functions: `supabase functions deploy admin-users` and `supabase functions deploy push --no-verify-jwt`. For push notifications, also run once in the SQL Editor: `select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');` (the notification keys are made automatically the first time). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -44,6 +44,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
 | Team room chat; private chat with any one person (only the two of them can read it) | ✓ | ✓ | ✓ | ✓ |
 | Comment on any trouble; delete their own comments and messages | ✓ | ✓ | ✓ | ✓ |
+| Turn push notifications on or off for their own devices | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
 | Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
 | Remove production lines | | | | ✓ |
@@ -76,6 +77,7 @@ web/
 ├── vercel.json                Vercel build settings
 ├── .env.example               Supabase settings template (copy to .env)
 ├── supabase/migrations/       database schema, security rules, storage bucket
+├── supabase/functions/        admin-users (team accounts), push (sends push notifications)
 ├── scripts/
 │   └── build.mjs              esbuild build and dev server
 ├── public/                    copied into dist/ as-is
@@ -95,6 +97,7 @@ web/
 │   │   ├── AppController.js   state and actions (sign-in, send, assign, escalate, verify, hold checks); saves to Supabase
 │   │   ├── viewModel.js       turns state into what each screen shows
 │   │   ├── chat.js            chat + comment actions (mixed into AppController)
+│   │   ├── push.js            push notifications on/off, test, open the screen a notification points to
 │   │   ├── chatView.js        what the Chat screen and a trouble's Discussion show
 │   │   ├── draft.js           "Add details" form values
 │   │   └── storage.js         language preference (this browser)
@@ -144,6 +147,7 @@ web/
 - **Install on phones and tablets:** the app suggests installing itself (Android: an Install button; iPhone/iPad: Share → Add to Home Screen steps). "Not now" hides it for 7 days. A small service worker (`public/sw.js`) makes this possible and opens the app faster; data from Supabase is never cached.
 - **Live chat:** a team room for everyone plus private 1-to-1 chats, with text and photos, unread badges, a green dot for who is online, and a pop-up when a message arrives on another screen. Messages appear instantly (Supabase Realtime); if the live connection drops, the app catches up on its own. People can delete their own messages.
 - **Discussion on each trouble:** comments with text and photos at the bottom of a report. The reporter, everyone who commented before, and the role the trouble is with now get an alert.
+- **Push notifications:** turn them on from the card on Home or in the account menu (each phone, tablet or computer separately; iPhone/iPad need the app added to the Home Screen first). You get a notification for chat messages, comments, new troubles, critical troubles, escalations, corrective actions assigned to you or sent back, actions ready to verify, and troubles closed, even when the app is closed. Tapping it opens that trouble or chat. When the app is open on screen you see it in the app instead. The database sends them (a trigger calls the `push` function), so they arrive no matter who made the change.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 

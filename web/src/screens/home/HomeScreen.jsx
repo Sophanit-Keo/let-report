@@ -1,5 +1,5 @@
 // HomeScreen: greeting, due hold checks, role-specific cards and sections, team, trend, production lines.
-import { Avatar, Button, Icon, LangToggle, MeButton, ReportCard } from '../../components/index.js';
+import { Avatar, Button, Icon, LangToggle, MeButton, PushCard, ReportCard } from '../../components/index.js';
 import { tap } from '../../utils/tap.js';
 import { chip } from '../../styles/inline.js';
 
@@ -24,6 +24,7 @@ export function HomeScreen({ v }) {
 
       <div className="home-grid">
         <div className="home-col">
+          <PushCard p={v.push} t={t} />
           {v.dueChecks.map((d, i) => (
             <div key={i} {...tap(d.open, 'card-tap')} style={{ background: 'var(--amber-100)', border: '1.5px solid var(--amber-500)', borderRadius: 18, padding: 14, display: 'flex', gap: 12, alignItems: 'center', animation: 'lrFade 200ms' }}>
               <div style={{ width: 40, height: 40, borderRadius: 12, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name="bell-ring" size={20} color="var(--amber-700)" /></div>
