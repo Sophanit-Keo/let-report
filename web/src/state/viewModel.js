@@ -28,7 +28,7 @@ export function buildViewModel(app) {
       return {id:l.id,name:l.name,type:l.type,product:l.product||'—',note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
         bd:n&&l.status==='stopped'?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
         open:()=>app.openLine(l.id)};});
-    const linesHead={canAdd:app.canManageLines(),add:()=>app.openLineForm(null),empty:!lines.length};
+    const linesHead={canAdd:true,add:()=>app.openLineForm(null),empty:!lines.length};
     // Line control sheet
     const selLine=(s.lines||[]).find(l=>l.id===s.lineId);
     const lineSheet=selLine?(()=>{const l=selLine, n=issuesOn(l.name), setQty=q=>app.updateLine(l.id,{qty:Math.max(0,Math.round(q)||0)});
