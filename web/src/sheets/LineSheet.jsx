@@ -1,5 +1,5 @@
 // Production line control: status, output today, note for the next shift, open reports.
-// Managers can also edit the line's info or remove it.
+// Everyone can edit the line's info (name, type, product, target); only managers can remove it.
 import { Button, Icon } from '../components/index.js';
 import { tap } from '../utils/tap.js';
 import { areaStyle, inputStyle } from '../styles/inline.js';
@@ -63,25 +63,27 @@ export function LineSheet({ v }) {
         <Icon name="chevron-right" size={16} color="var(--navy-300)" />
       </div>
 
-      {l.canManage ? (
-        l.confirm ? (
-          <div style={{ ...col(10), padding: 14, borderRadius: 14, background: 'var(--red-100)', border: '1.5px solid var(--red-500)' }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--red-700)' }}>{t.line.removeQ}</div>
-            <div style={{ fontSize: 13, color: 'var(--red-700)', lineHeight: 1.4 }}>{t.line.removeSub}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              <Button variant="secondary" fullWidth onClick={l.cancelRemove}>{t.line.cancel}</Button>
-              <button type="button" onClick={l.remove} style={{ height: 40, borderRadius: 8, border: 'none', background: 'var(--red-700)', color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>{t.line.remove}</button>
-            </div>
-          </div>
-        ) : (
+      {l.confirm ? (
+        <div style={{ ...col(10), padding: 14, borderRadius: 14, background: 'var(--red-100)', border: '1.5px solid var(--red-500)' }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--red-700)' }}>{t.line.removeQ}</div>
+          <div style={{ fontSize: 13, color: 'var(--red-700)', lineHeight: 1.4 }}>{t.line.removeSub}</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            <Button variant="secondary" icon="pencil-line" fullWidth onClick={l.edit}>{t.line.edit.split(' ')[0]}</Button>
+            <Button variant="secondary" fullWidth onClick={l.cancelRemove}>{t.line.cancel}</Button>
+            <button type="button" onClick={l.remove} style={{ height: 40, borderRadius: 8, border: 'none', background: 'var(--red-700)', color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>{t.line.remove}</button>
+          </div>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: l.canManage ? '1fr 1fr' : '1fr', gap: 8 }}>
+          {/* Everyone can edit a line's name, type, product and target */}
+          <Button variant="secondary" icon="pencil-line" fullWidth onClick={l.edit}>{l.canManage ? t.line.edit.split(' ')[0] : t.line.edit}</Button>
+          {/* Only plant managers can remove a line */}
+          {l.canManage ? (
             <div {...tap(l.askRemove)} style={{ height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: 'var(--red-700)', border: '2px solid var(--red-100)' }}>
               <Icon name="trash-2" size={16} color="var(--red-700)" />{t.line.remove}
             </div>
-          </div>
-        )
-      ) : null}
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,4 @@
-// Add a production line, or edit its name, type, product and target (plant managers).
+// Add a production line (plant managers), or edit its name, type, product and target (everyone).
 import { Button, Field, Pill } from '../components/index.js';
 import { inputStyle } from '../styles/inline.js';
 import { title, col, grid } from './sheetStyles.js';

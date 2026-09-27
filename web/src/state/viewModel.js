@@ -39,7 +39,7 @@ export function buildViewModel(app) {
         note:s.lineNote!=null?s.lineNote:(l.note||''), onNote:e=>app.setState({lineNote:e.target.value}), noteDirty:s.lineNote!=null&&s.lineNote!==(l.note||''),
         saveNote:()=>{app.updateLine(l.id,{note:(s.lineNote||'').trim()}); app.setState({lineNote:null});},
         issues:n, seeIssues:()=>app.setState({sheet:null},()=>app.go('list',{filter:'open',f:{date:'any',lines:[l.name],products:[],sevs:[]},q:''})),
-        canManage:app.canManageLines(), edit:()=>app.openLineForm(l), confirm:!!s.lineConfirm, askRemove:()=>app.setState({lineConfirm:true}), cancelRemove:()=>app.setState({lineConfirm:false}), remove:()=>app.removeLine(l.id)};})():null;
+        canManage:app.canManageLines(), canEdit:true, edit:()=>app.openLineForm(l), confirm:!!s.lineConfirm, askRemove:()=>app.setState({lineConfirm:true}), cancelRemove:()=>app.setState({lineConfirm:false}), remove:()=>app.removeLine(l.id)};})():null;
     // Add / edit line form
     const lf=s.lineForm||{}; const setLF=p=>app.setState(st=>({lineForm:{...st.lineForm,...p}}));
     const lineForm={isNew:!s.lineId,name:lf.name||'',product:lf.product||'',target:lf.target||'',onName:e=>setLF({name:e.target.value}),onProduct:e=>setLF({product:e.target.value}),onTarget:e=>setLF({target:e.target.value.replace(/[^0-9]/g,'')}),
