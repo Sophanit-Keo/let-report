@@ -1,4 +1,4 @@
-// Bottom bar on the report detail: the current role's next action and escalation.
+// Bottom bar on the report detail: the current role's next action, closing, and escalation.
 import { Button, Icon } from '../../components/index.js';
 
 export function DetailActionBar({ v }) {
@@ -8,6 +8,7 @@ export function DetailActionBar({ v }) {
     <div className="bottombar">
       <div className="bottombar-inner">
         {b.canAct ? <Button variant={b.variant} icon={b.icon} fullWidth onClick={b.onClick}>{b.label}</Button> : null}
+        {b.canClose ? <Button variant={b.canAct ? 'secondary' : 'success'} icon="circle-check" fullWidth onClick={b.openClose}>{b.closeLabel}</Button> : null}
         {b.canEsc ? <Button variant="secondary" icon="arrow-up-right" fullWidth onClick={b.escalate}>{b.escLabel}</Button> : null}
         {b.waiting ? (
           <div style={{ height: 40, borderRadius: 10, background: 'var(--gray-100)', color: 'var(--gray-500)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, fontWeight: 700, padding: '0 12px', textAlign: 'center' }}>

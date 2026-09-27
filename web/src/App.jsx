@@ -52,7 +52,8 @@ export class App extends AppController {
         {is.capture ? <CaptureFlow v={v} /> : null}
         <SheetHost v={v} />
         <Toast v={v} />
-        {!is.capture && !v.sheet.show ? <InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
+        {/* not over screens that have their own bottom action bar */}
+        {!is.capture && !is.detail && !is.details && !v.sheet.show ?<InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
       </div>
     );
   }

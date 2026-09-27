@@ -4,6 +4,7 @@ import { tap } from '../utils/tap.js';
 import { RoleSheet } from './RoleSheet.jsx';
 import { AssignSheet } from './AssignSheet.jsx';
 import { EscalateSheet } from './EscalateSheet.jsx';
+import { CloseSheet } from './CloseSheet.jsx';
 import { FiltersSheet } from './FiltersSheet.jsx';
 import { DecisionSheet } from './DecisionSheet.jsx';
 import { VerifySheet } from './VerifySheet.jsx';
@@ -28,6 +29,7 @@ export function SheetHost({ v }) {
         {s.roles ? <RoleSheet v={v} /> : null}
         {s.assign ? <AssignSheet v={v} /> : null}
         {s.escalate ? <EscalateSheet v={v} /> : null}
+        {s.close ? <CloseSheet v={v} /> : null}
         {s.filters ? <FiltersSheet v={v} /> : null}
         {s.decide ? <DecisionSheet v={v} /> : null}
         {s.verify ? <VerifySheet v={v} /> : null}

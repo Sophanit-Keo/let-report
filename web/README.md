@@ -40,6 +40,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 |---|---|---|---|---|
 | See all reports, create reports as themselves | ✓ | ✓ | ✓ | ✓ |
 | Work on reports (assign, fix, verify, escalate) | ✓ | ✓ | ✓ | ✓ |
+| Close a trouble at any stage, with a note (critical ones need manager approval) | ✓ | ✓ | ✓ | approves |
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
 | Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
@@ -102,7 +103,7 @@ web/
 │   │   ├── add-details/       form + save bar
 │   │   ├── report-sent/
 │   │   └── capture/           camera, flows A/B/C, sign step, shared parts
-│   ├── sheets/                SheetHost + one file per sheet (account, line, line form, assign, escalate, filters, decision, verify)
+│   ├── sheets/                SheetHost + one file per sheet (account, line, line form, assign, escalate, close, filters, decision, verify)
 │   ├── styles/
 │   │   ├── tokens/            design-system tokens (colours, type, spacing, effects)
 │   │   ├── base.css           fonts, resets, animations, focus states
@@ -129,7 +130,7 @@ web/
 - **Profile photo:** everyone can change their own photo and name from the account menu (tap your avatar).
 - **Two-tap report:** photo, then problem type, then severity, then sign and send. The camera is real: a live preview where the browser allows it, otherwise the phone camera or a photo picker. Critical reports alert QA and the manager.
 - **Add details:** location, product type and name, lot, quantity, product hold with a scheduled hold check, trouble, immediate action, suggestion, urgent, support needed, voice note.
-- **Workflow:** fix on the spot, assign corrective action, mark done, verify and close, manager approval, escalation ladder (QC → QA → Supervisor → Manager).
+- **Workflow:** fix on the spot, close a trouble (QC, QA, Supervisor, with a note), assign corrective action, mark done, verify and close, manager approval, escalation ladder (QC → QA → Supervisor → Manager).
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
 - **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Anyone can add a line with **+ Add line**; only managers remove lines.

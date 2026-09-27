@@ -197,6 +197,11 @@ export class AppController extends React.Component {
     if (r.status === 'open' && r.level === role) return role === 'qc' ? 'fix' : 'assign';
     return null;
   }
+  // QC, QA and Supervisor can close a trouble at any stage (critical ones still go to the manager for approval).
+  canClose(r, role = this.role()) {
+    if (r.status === 'closed' || r.needsApproval || !['qc', 'qa', 'supervisor'].includes(role)) return false;
+    return !['fix', 'verify'].includes(this.canAct(r, role));
+  }
   canEsc(r, role = this.role()) { return r.status !== 'closed' && r.level === role && role !== 'manager' && !r.needsApproval; }
   canCheck(r, role = this.role()) {
     const hc = r.holdCheck, me = this.me().name; if (!hc || hc.status !== 'due') return false;

@@ -121,7 +121,7 @@ export function buildViewModel(app) {
       const pti=PTYPES.indexOf(raw.ptype), sup=(raw.support||[]).map(x=>T.supports[SUPPORTS.indexOf(x)]).join(', '), ui=UNITS.indexOf(raw.unit);
       const rows=[[T.rowLoc,raw.loc],[T.rowType,pti>=0?T.ptypes[pti]:''],[T.rowName,raw.pname],[T.rowLot,raw.lot],[T.rowQty,raw.qty?raw.qty+' '+T.units[ui<0?0:ui]:''],[T.rowHold,raw.hold?T.yes:T.no],
         [T.troubleL,raw.desc],[T.rowDid,raw.action],[T.rowSug,raw.suggestion],[T.rowSup,sup]].concat(raw.voice?[[T.rowVoice,T.recorded]]:[]).concat([[T.reporter,raw.by+' · '+stampLabel(raw.signedAt||(raw.tl[0]&&raw.tl[0][2]))]]).map(([k,v],i)=>({k,v:v||T.missing,fg:v?'var(--navy-900)':'var(--gray-500)',bd:i?'var(--gray-100)':'transparent'}));
-      const tl=raw.tl.map((e,i)=>({text:T.tl[e[0]]+(e[3]||''),who:e[1],t:stampLabel(e[2]),dot:e[0]==='alert'?'var(--red-500)':e[0]==='verified'?'var(--green-600)':e[0]==='reopened'?'var(--amber-500)':'var(--blue-500)',lineOp:i===raw.tl.length-1?0:1}));
+      const tl=raw.tl.map((e,i)=>({text:T.tl[e[0]]+(e[3]||''),who:e[1],t:stampLabel(e[2]),dot:e[0]==='alert'?'var(--red-500)':e[0]==='verified'||e[0]==='closedBy'||e[0]==='fixed'||e[0]==='approved'?'var(--green-600)':e[0]==='reopened'?'var(--amber-500)':'var(--blue-500)',lineOp:i===raw.tl.length-1?0:1}));
       sel={...d,steps,rows,tl,hasCapa:!!raw.capa,capa:raw.capa?{...raw.capa,avatar:AV[raw.capa.owner]}:{},hasHc:!!raw.holdCheck, hc:app.hcView(raw,T,me), needsDetails:!raw.desc&&raw.by===me.name&&raw.status!=='closed', urgent:!!raw.urgent, hold:!!raw.hold};
       const lvI=ORDER.indexOf(raw.level||'qa');
       sel.ladder=ORDER.map((k,i)=>({short:T.short[k],avatar:PEOPLE[k].avatar,arrow:i>0,bg:i===lvI&&raw.status!=='closed'?'var(--blue-50)':'#fff',bd:i===lvI&&raw.status!=='closed'?'var(--blue-600)':i<lvI?'var(--green-300)':'var(--gray-200)',
@@ -136,7 +136,9 @@ export function buildViewModel(app) {
           verify:{icon:'shield-check',variant:'success',onClick:()=>app.setState({sheet:'verify'})}};
         const wait=raw.needsApproval?T.bar.waitApprove:raw.status==='action'?T.bar.waitAction+' · '+(raw.capa?raw.capa.owner:''):raw.status==='verify'?T.bar.waitVerify:T.nowWith+' '+T.short[raw.level||'qa']+' · '+PEOPLE[raw.level||'qa'].name;
         const escB={canEsc:canE,escLabel:canE?T.bar.escTo+' '+T.short[nextL]:'',escalate:()=>app.setState({sheet:'escalate',esc:{reason:null,note:''}})};
-        detailBar= act ? {show:is.detail,canAct:true,waiting:false,label:T.bar[act],...actions[act],...escB} : {show:is.detail,canAct:false,waiting:!canE,label:wait,...escB};
+        const canC=app.canClose(raw);
+        const closeB={canClose:canC,closeLabel:raw.sev===3?T.bar.closeCrit:T.bar.close,openClose:()=>app.setState({sheet:'close',closeNote:''})};
+        detailBar= act ? {show:is.detail,canAct:true,waiting:false,label:T.bar[act],...actions[act],...escB,...closeB} : {show:is.detail,canAct:false,waiting:!canE&&!canC,label:wait,...escB,...closeB};
       }
     }
 
@@ -271,7 +273,7 @@ export function buildViewModel(app) {
       saveDetails:()=>{ const d=s.draft; app.update(s.selId,r=>({...r,loc:d.loc,ptype:d.ptype,pname:d.pname==='__other'?d.pnameText:d.pname,lot:d.lot,qty:d.qty,unit:d.unit,hold:d.hold,desc:d.desc,action:d.action,suggestion:d.suggestion,urgent:d.urgent,support:d.support,voice:!!d.voice,
         holdCheck:d.hold?(r.holdCheck&&r.holdCheck.status!=='scheduled'&&r.holdCheck.type===d.hcType?r.holdCheck:{type:d.hcType,days:d.hcDays,owner:d.hcOwner,status:'scheduled',dueAt:addDaysIso(d.hcDays),due:dueLabel(d.hcDays)}):null,
         tl:[...r.tl,['details',me.name,app.now()]].concat(d.hold&&!(r.holdCheck)?[['hcSet',me.name,app.now()]]:[])})); app.setState({prev:'list',screen:'detail'}); },
-      sheet:{show:!!s.sheet,person:s.sheet==='person'&&!!pp,addPerson:s.sheet==='addPerson',line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
+      sheet:{show:!!s.sheet,person:s.sheet==='person'&&!!pp,addPerson:s.sheet==='addPerson',line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',close:s.sheet==='close',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
       asg:a, roots, owners, dues, asgDisabled:!(a.root!=null&&a.owner&&(a.text||'').trim()),
       onAsgText:e=>{const v=e.target.value; app.setState(st=>({asg:{...st.asg,text:v}}));},
       doAssign:()=>{ const due=T.dues[a.due]; app.update(s.selId,r=>({...r,status:'action',capa:{root:T.roots[a.root],text:a.text,owner:a.owner,due},tl:[...r.tl,['assigned',me.name,app.now(),' '+a.owner]]})); app.setState({sheet:null}); },
@@ -286,6 +288,12 @@ export function buildViewModel(app) {
         const why=T.reasons[e.reason]+(e.note?' · '+e.note:'');
         app.update(s.selId,r=>({...r,level:nx,tl:[...r.tl,['esc',me.name,t,' '+T.short[nx]+' · '+why]]}));
         app.setState({sheet:null}); app.addNote({id:s.selId,icon:'arrow-up-right',tone:'blue',text:me.name+' escalated '+s.selId+' to you: '+rr.title,roles:[nx]}); },
+      closeForm:(()=>{const rr=s.reports.find(x=>x.id===s.selId)||{}; const note=s.closeNote||''; return {crit:rr.sev===3,note,disabled:!note.trim()};})(),
+      onCloseNote:e=>{const v=e.target.value; app.setState({closeNote:v});},
+      doClose:()=>{ const rr=s.reports.find(x=>x.id===s.selId); const note=(s.closeNote||'').trim(); if(!rr||!note) return; const needA=rr.sev===3;
+        app.update(s.selId,r=>needA?({...r,status:'verify',needsApproval:true,level:'manager',tl:[...r.tl,['closeAsk',me.name,app.now(),' · '+note]]}):({...r,status:'closed',needsApproval:false,tl:[...r.tl,['closedBy',me.name,app.now(),' · '+note]]}));
+        app.setState({sheet:null,closeNote:''});
+        app.addNote(needA?{id:s.selId,icon:'stamp',tone:'blue',text:me.name+' asks to close '+s.selId+': '+rr.title,roles:['manager']}:{id:s.selId,icon:'circle-check',tone:'green',text:me.name+' closed '+s.selId+': '+rr.title,roles:['qc','qa','supervisor','manager'].filter(x=>x!==role)}); },
       verifyNo:()=>{ app.update(s.selId,r=>({...r,status:'action',tl:[...r.tl,['reopened',me.name,app.now()]]})); app.setState({sheet:null}); },
       toast:app.toastView(), onPhoto, role, flow, lang:app.lang(), screen:s.screen, scrollRef:app.scrollRef
     };
