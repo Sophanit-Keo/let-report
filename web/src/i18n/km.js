@@ -67,4 +67,7 @@ export const KM = {
     removeSub:'របាយការណ៍របស់ពួកគេនៅដដែល។ ពួកគេមិនអាចចូលបានទៀតទេ។', cancel:'បោះបង់', save:'រក្សាទុក', manage:'គ្រប់គ្រងក្រុម',
     changePhoto:'ប្តូររូបថត', photoSaved:'បានប្តូររូបថត។', saved:'បានរក្សាទុក។', added:'បានបន្ថែម។', removed:'បានលុប។', count:'នាក់',
     offTitle:'គណនីរបស់អ្នកត្រូវបានបិទ', offSub:'សូមសុំអ្នកគ្រប់គ្រងរោងចក្របើកវាឡើងវិញ។', edit:'កែព័ត៌មាន', yourName:'ឈ្មោះរបស់អ្នក'},
+  install:{title:'ដំឡើង Let Report', sub:'បើកពីអេក្រង់ដើមដូចកម្មវិធី៖ ពេញអេក្រង់ លឿនជាង ចុចតែម្តង។', btn:'ដំឡើង', later:'ពេលក្រោយ',
+    iosTitle:'បន្ថែម Let Report ទៅអេក្រង់ដើម', ios1:'ចុចប៊ូតុងចែករំលែក', ios1b:'នៅរបារកម្មវិធីរុករក', ios2:'ជ្រើស "Add to Home Screen"', ios3:'ចុច "Add"',
+    other1:'បើកម៉ឺនុយកម្មវិធីរុករក', other2:'ជ្រើស "Install app" ឬ "Add to Home screen"', menuItem:'ដំឡើងកម្មវិធី', done:'Let Report បានដំឡើងហើយ។ បើកពីអេក្រង់ដើម។'},
 };

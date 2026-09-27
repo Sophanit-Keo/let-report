@@ -17,6 +17,7 @@ import { CaptureFlow } from './screens/capture/CaptureFlow.jsx';
 import { SheetHost } from './sheets/SheetHost.jsx';
 import { AuthScreen, LoadingScreen, LoadErrorScreen, NotConfiguredScreen, TurnedOffScreen } from './screens/auth/AuthScreen.jsx';
 import { Toast } from './components/Toast.jsx';
+import { InstallPrompt } from './components/InstallPrompt.jsx';
 
 export class App extends AppController {
   render() {
@@ -29,7 +30,7 @@ export class App extends AppController {
       : this.state.loadError ? <LoadErrorScreen v={v} app={this} />
       : this.state.booting ? <LoadingScreen v={v} />
       : v.turnedOff ? <TurnedOffScreen v={v} app={this} /> : null;
-    if (gate) return <div className={'app' + km}>{gate}<Toast v={v} /></div>;
+    if (gate) return <div className={'app' + km}>{gate}<Toast v={v} /><InstallPrompt t={v.t} /></div>;
     return (
       <div className={'app' + km}>
         <Sidebar v={v} />
@@ -51,6 +52,7 @@ export class App extends AppController {
         {is.capture ? <CaptureFlow v={v} /> : null}
         <SheetHost v={v} />
         <Toast v={v} />
+        {!is.capture && !v.sheet.show ? <InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
       </div>
     );
   }

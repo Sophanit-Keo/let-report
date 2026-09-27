@@ -137,3 +137,13 @@
 .toast { position: fixed; left: 50%; transform: translateX(-50%); top: calc(var(--safe-t) + 12px); z-index: 50; width: calc(100% - 24px); max-width: 480px;
   display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--navy-900); color: #fff; font-size: 14px; font-weight: 600; line-height: 1.4;
   box-shadow: var(--shadow-floating); animation: lrFade 200ms var(--ease-standard); }
+
+/* "Install the app" card (phones and tablets) */
+.install-card {
+  position: fixed; left: 12px; right: 12px; bottom: calc(var(--safe-b) + 12px); z-index: 25; margin: 0 auto; max-width: 480px;
+  display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px;
+  background: var(--blue-50); border: 1.5px solid var(--blue-200); box-shadow: var(--shadow-floating);
+  animation: lrUp 240ms var(--ease-standard);
+}
+.install-card.above-tabs { bottom: calc(var(--safe-b) + 84px); }
+@media (min-width: 1024px) { .install-card.above-tabs { bottom: 24px; } }

@@ -133,6 +133,7 @@ web/
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
 - **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Anyone can add a line with **+ Add line**; only managers remove lines.
+- **Install on phones and tablets:** the app suggests installing itself (Android: an Install button; iPhone/iPad: Share → Add to Home Screen steps). "Not now" hides it for 7 days. A small service worker (`public/sw.js`) makes this possible and opens the app faster; data from Supabase is never cached.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 

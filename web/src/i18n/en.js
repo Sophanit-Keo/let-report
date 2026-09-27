@@ -67,4 +67,7 @@ export const EN = {
     removeSub:'Their reports stay in the app. They can no longer sign in.', cancel:'Cancel', save:'Save', manage:'Manage team',
     changePhoto:'Change photo', photoSaved:'Photo updated.', saved:'Saved.', added:'added.', removed:'removed.', count:'people',
     offTitle:'Your account is turned off', offSub:'Ask your plant manager to turn it back on.', edit:'Edit person', yourName:'Your name'},
+  install:{title:'Install Let Report', sub:'Open it from your home screen like an app: full screen, faster, one tap away.', btn:'Install', later:'Not now',
+    iosTitle:'Add Let Report to your Home Screen', ios1:'Tap the Share button', ios1b:'in the browser bar', ios2:'Choose "Add to Home Screen"', ios3:'Tap "Add"',
+    other1:'Open the browser menu', other2:'Choose "Install app" or "Add to Home screen"', menuItem:'Install app', done:'Let Report is installed. Open it from your home screen.'},
 };

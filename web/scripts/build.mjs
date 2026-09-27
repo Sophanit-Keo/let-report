@@ -33,6 +33,9 @@ mkdirSync(out, { recursive: true });
 cpSync('public', out, { recursive: true });
 const html = readFileSync('index.html', 'utf8').replaceAll('%V%', Date.now().toString(36));
 writeFileSync(`${out}/index.html`, html);
+// service worker gets the same version, so a new deploy replaces the old cache
+const version = html.match(/app\.js\?v=([a-z0-9]+)/)[1];
+writeFileSync(`${out}/sw.js`, readFileSync('public/sw.js', 'utf8').replaceAll('%V%', version));
 
 const options = {
   entryPoints: { app: 'src/main.jsx' },
