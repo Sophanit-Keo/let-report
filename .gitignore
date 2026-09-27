@@ -1,0 +1,15 @@
+# Old copies from before the folder reorganization (safe to delete from disk)
+/app/
+/project/
+
+# Dependencies, builds, secrets
+node_modules/
+dist/
+.env
+.env.local
+.vercel/
+
+# System files
+.DS_Store
+Thumbs.db
+desktop.ini

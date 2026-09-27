@@ -1,0 +1,46 @@
+/* Sizes are at master-canvas scale (1080 px wide post). For UI screens multiply by --type-ui-scale (0.55). */
+:root{--type-ui-scale:.55;/* @kind other */
+
+--fs-display:96px;--lh-display:1.04;/* @kind font */
+--ls-display:-0.025em;/* @kind font */
+--fw-display:800;/* @kind font */
+
+--fs-h1:72px;--lh-h1:1.08;/* @kind font */
+--ls-h1:-0.02em;/* @kind font */
+--fw-h1:800;/* @kind font */
+
+--fs-h2:52px;--lh-h2:1.14;/* @kind font */
+--ls-h2:-0.015em;/* @kind font */
+--fw-h2:800;/* @kind font */
+
+--fs-h3:38px;--lh-h3:1.2;/* @kind font */
+--ls-h3:-0.01em;/* @kind font */
+--fw-h3:700;/* @kind font */
+
+--fs-section:30px;--lh-section:1.25;/* @kind font */
+--ls-section:0;/* @kind font */
+--fw-section:700;/* @kind font */
+
+--fs-body:30px;--lh-body:1.4;/* @kind font */
+--ls-body:0;/* @kind font */
+--fw-body:500;/* @kind font */
+
+--fs-body-sm:24px;--lh-body-sm:1.4;/* @kind font */
+--ls-body-sm:0;/* @kind font */
+--fw-body-sm:500;/* @kind font */
+
+--fs-caption:20px;--lh-caption:1.35;/* @kind font */
+--ls-caption:0.005em;/* @kind font */
+--fw-caption:500;/* @kind font */
+
+--fs-label:24px;--lh-label:1.2;/* @kind font */
+--ls-label:0;/* @kind font */
+--fw-label:700;/* @kind font */
+
+--fs-badge:22px;--lh-badge:1;/* @kind font */
+--ls-badge:0.02em;/* @kind font */
+--fw-badge:800;/* @kind font */
+
+--fs-script:40px;--lh-script:1.1;/* @kind font */
+
+}

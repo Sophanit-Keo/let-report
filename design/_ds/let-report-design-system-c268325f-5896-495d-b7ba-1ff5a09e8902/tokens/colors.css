@@ -1,0 +1,23 @@
+:root{
+/* navy — trust, headings, body text */
+--navy-900:#0F2D58;--navy-800:#163A6E;--navy-700:#1E4577;--navy-500:#4A6488;--navy-300:#9AABC3;
+/* educational blue — questions, interaction */
+--blue-700:#155AA3;--blue-600:#1F74D0;--blue-500:#2686E6;--blue-300:#8DC0F3;--blue-200:#C4DFFA;--blue-100:#E3F0FC;--blue-50:#F2F8FE;
+/* food-safety green — positive, labels, records */
+--green-700:#176B3B;--green-600:#1E8449;--green-500:#38B573;--green-300:#9BDAB7;--green-100:#E4F5EB;--green-50:#F3FAF6;
+/* semantic support */
+--amber-700:#8A5300;--amber-500:#F2A51A;--amber-100:#FFF3D9;
+--red-700:#B42318;--red-500:#E0483E;--red-100:#FDE8E6;
+/* neutrals */
+--white:#FFFFFF;--gray-50:#F5F7FA;--gray-100:#EEF2F6;--gray-200:#DDE5EE;--gray-300:#C5D0DC;--gray-500:#6B7A8F;--gray-700:#3D4B5E;
+/* semantic aliases */
+--color-brand-primary:var(--navy-900);--color-brand-secondary:var(--green-500);--color-brand-accent:var(--blue-500);
+--color-background-primary:var(--blue-50);--color-background-secondary:var(--green-50);--color-surface:var(--white);--color-surface-tint:var(--blue-100);
+--color-text-primary:var(--navy-900);--color-text-secondary:var(--gray-700);--color-text-muted:var(--gray-500);--color-text-inverse:var(--white);
+--color-success:var(--green-600);--color-success-bg:var(--green-100);--color-info:var(--blue-600);--color-info-bg:var(--blue-100);
+--color-warning:var(--amber-500);--color-warning-text:var(--amber-700);--color-warning-bg:var(--amber-100);
+--color-error:var(--red-500);--color-error-text:var(--red-700);--color-error-bg:var(--red-100);
+--color-border:var(--blue-200);--color-border-neutral:var(--gray-200);
+--color-action-primary:var(--blue-600);--color-action-primary-hover:var(--blue-700);--color-action-success:var(--green-600);--color-action-success-hover:var(--green-700);
+--color-link:var(--blue-600);--color-link-hover:var(--navy-900);
+}

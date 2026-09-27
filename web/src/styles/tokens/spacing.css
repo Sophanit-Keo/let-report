@@ -1,0 +1,6 @@
+:root{
+--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--space-8:64px;--space-9:96px;
+--canvas-margin:44px;--canvas-gutter:20px;--canvas-columns:12;/* @kind other */
+
+--card-padding:24px;--card-padding-lg:32px;--card-gap:20px;--section-gap:48px;--heading-body-gap:12px;--media-text-gap:16px;
+}

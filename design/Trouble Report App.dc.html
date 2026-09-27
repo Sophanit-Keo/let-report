@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/let-report-design-system-c268325f-5896-495d-b7ba-1ff5a09e8902/styles.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@500;700;800&display=swap">
+  <script src="_ds/let-report-design-system-c268325f-5896-495d-b7ba-1ff5a09e8902/_ds_bundle.js"></script>
+  <style>body{margin:0;background:linear-gradient(180deg,#EAF4FD 0%,#F7FBFF 100%);min-height:100vh}a{color:var(--blue-600)}a:hover{color:var(--navy-900)}textarea,input{font-family:inherit}*::-webkit-scrollbar{display:none}@keyframes lrUp{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}@keyframes lrFade{from{opacity:0}to{opacity:1}}@keyframes lrPulse{0%,100%{opacity:1}50%{opacity:.35}}</style>
+</helmet>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;box-sizing:border-box">
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ darkFrame }}" hint-size="402px,874px">
+<div style="height:874px;display:flex;flex-direction:column;background:var(--blue-50);font-family:{{ font }};color:var(--navy-900);position:relative;overflow:hidden">
+
+  <div ref="{{ scrollRef }}" style="flex:1;overflow-y:auto;overflow-x:hidden">
+
+    <sc-if value="{{ is.home }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:58px 20px 24px;display:flex;flex-direction:column;gap:20px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <img src="assets/logo-badge.jpg" alt="" style="width:34px;height:34px;border-radius:50%;object-fit:cover">
+          <div style="font-weight:800;font-size:17px;letter-spacing:-0.02em;flex:1;font-family:'Plus Jakarta Sans',sans-serif">Let Report</div>
+          <div style="display:flex;background:#fff;border:1.5px solid var(--blue-200);border-radius:999px;padding:3px;gap:2px">
+            <sc-for list="{{ langs }}" as="l" hint-placeholder-count="2">
+              <div onClick="{{ l.pick }}" style="height:26px;padding:0 10px;border-radius:999px;display:flex;align-items:center;font-size:12px;font-weight:700;cursor:pointer;background:{{ l.bg }};color:{{ l.fg }}">{{ l.label }}</div>
+            </sc-for>
+          </div>
+          <div onClick="{{ openRoles }}" style="position:relative;cursor:pointer">
+            <img src="{{ me.avatar }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100);border:1.5px solid var(--blue-200);display:block">
+            <div style="position:absolute;right:-3px;bottom:-3px;width:16px;height:16px;border-radius:50%;background:var(--navy-900);display:flex;align-items:center;justify-content:center;border:2px solid var(--blue-50)">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="repeat-2" size="9px" color="#fff" stroke-width="{{ 3 }}" hint-size="9px,9px"></x-import>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-weight:800;font-size:26px;letter-spacing:-0.02em;line-height:1.2">{{ t.greet }}, {{ me.name }}</div>
+          <div style="font-size:14px;color:var(--gray-500);font-weight:500">{{ me.roleLabel }} · {{ t.site }}</div>
+        </div>
+        <sc-for list="{{ dueChecks }}" as="d" hint-placeholder-count="0">
+          <div onClick="{{ d.open }}" style="background:var(--amber-100);border:1.5px solid var(--amber-500);border-radius:18px;padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer;animation:lrFade 200ms">
+            <div style="width:40px;height:40px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;flex:none"><x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="bell-ring" size="20px" color="var(--amber-700)" hint-size="20px,20px"></x-import></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:14px;font-weight:800;color:var(--amber-700)">{{ d.head }}</div>
+              <div style="font-size:13px;color:var(--amber-700);line-height:1.4">{{ d.sub }}</div>
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-right" size="18px" color="var(--amber-700)" hint-size="18px,18px"></x-import>
+          </div>
+        </sc-for>
+        <div style="background:var(--navy-900);border-radius:24px;padding:20px;display:flex;flex-direction:column;gap:16px;box-shadow:var(--shadow-floating)">
+          <div style="display:flex;gap:14px;align-items:flex-start">
+            <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;flex:none">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="triangle-alert" size="24px" color="#fff" hint-size="24px,24px"></x-import>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="color:#fff;font-weight:800;font-size:19px;letter-spacing:-0.01em">{{ t.spotted }}</div>
+              <div style="color:var(--blue-200);font-size:14px;line-height:1.45">{{ t.spottedSub }}</div>
+            </div>
+          </div>
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="success" size="sm" icon="camera" full-width="{{ true }}" onClick="{{ nav.capture }}" hint-size="100%,40px">{{ t.reportIssue }}</x-import>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+          <sc-for list="{{ stats }}" as="s" hint-placeholder-count="3">
+            <div onClick="{{ s.onClick }}" style="background:#fff;border:1.5px solid var(--blue-200);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:2px;cursor:pointer">
+              <div style="font-weight:800;font-size:24px;letter-spacing:-0.02em;color:{{ s.fg }}">{{ s.n }}</div>
+              <div style="font-size:12px;font-weight:600;color:var(--gray-500);line-height:1.3">{{ s.label }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <div style="display:flex;align-items:baseline;justify-content:space-between">
+            <div style="font-weight:800;font-size:17px;letter-spacing:-0.01em">{{ t.needs }}</div>
+            <div onClick="{{ nav.list }}" style="font-size:13px;font-weight:700;color:var(--blue-600);cursor:pointer">{{ t.seeAll }}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <sc-for list="{{ lines }}" as="ln" hint-placeholder-count="3">
+              <div onClick="{{ ln.open }}" style="background:#fff;border:1.5px solid {{ ln.bd }};border-radius:18px;padding:14px;display:flex;flex-direction:column;gap:10px;cursor:pointer;box-sizing:border-box">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+                  <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:6px;background:var(--navy-900);color:#fff">{{ ln.type }}</span>
+                  <span style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:{{ ln.stFg }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ ln.dot }};animation:{{ ln.anim }}"></span>{{ ln.stLabel }}</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:16px;font-weight:800;letter-spacing:-0.01em">{{ ln.name }}</div>
+                  <div style="font-size:13px;color:var(--gray-500);font-weight:500">{{ ln.product }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <div style="display:flex;align-items:baseline;gap:4px">
+                    <span style="font-size:24px;font-weight:800;letter-spacing:-0.02em">{{ ln.qty }}</span>
+                    <span style="font-size:13px;font-weight:700">{{ t.pal }}</span>
+                    <span style="font-size:12px;color:var(--gray-500);font-weight:600;margin-left:auto">/ {{ ln.target }} {{ t.pal }}</span>
+                  </div>
+                  <div style="height:6px;border-radius:3px;background:var(--gray-100);overflow:hidden"><div style="height:100%;width:{{ ln.pct }};background:{{ ln.bar }};border-radius:3px;transition:width 400ms cubic-bezier(.2,.7,.2,1)"></div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:{{ ln.isFg }};padding-top:8px;border-top:1px solid var(--gray-100)">
+                  <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ ln.isIcon }}" size="14px" color="{{ ln.isFg }}" hint-size="14px,14px"></x-import>{{ ln.issues }}
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.list }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:58px 20px 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-weight:800;font-size:28px;letter-spacing:-0.02em">{{ t.reports }}</div>
+        <div style="display:flex;gap:8px">
+          <div style="flex:1;height:46px;border-radius:14px;background:#fff;border:1.5px solid var(--blue-200);display:flex;align-items:center;gap:8px;padding:0 12px;min-width:0">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="search" size="18px" color="var(--navy-500)" hint-size="18px,18px"></x-import>
+            <input value="{{ q }}" onChange="{{ onQ }}" placeholder="{{ t.searchPh }}" style="flex:1;min-width:0;border:none;outline:none;background:transparent;font-size:15px;color:var(--navy-900)">
+            <sc-if value="{{ hasQ }}" hint-placeholder-val="{{ false }}">
+              <div onClick="{{ clearQ }}" style="width:22px;height:22px;border-radius:50%;background:var(--gray-100);display:flex;align-items:center;justify-content:center;cursor:pointer"><x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="x" size="13px" color="var(--gray-700)" hint-size="13px,13px"></x-import></div>
+            </sc-if>
+          </div>
+          <div onClick="{{ openFilters }}" style="width:46px;height:46px;border-radius:14px;background:{{ fBtn.bg }};border:1.5px solid {{ fBtn.bd }};display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;flex:none">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="sliders-horizontal" size="20px" color="{{ fBtn.fg }}" hint-size="20px,20px"></x-import>
+            <sc-if value="{{ fBtn.has }}" hint-placeholder-val="{{ false }}">
+              <span style="position:absolute;top:-6px;right:-6px;min-width:20px;height:20px;border-radius:10px;background:var(--blue-600);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid var(--blue-50);box-sizing:border-box">{{ fBtn.n }}</span>
+            </sc-if>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+            <div onClick="{{ f.onClick }}" style="height:34px;padding:0 14px;border-radius:999px;display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }};border:1.5px solid {{ f.bd }}">{{ f.label }}<span style="opacity:.7">{{ f.n }}</span></div>
+          </sc-for>
+        </div>
+        <sc-if value="{{ fBtn.has }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+            <sc-for list="{{ activeF }}" as="a" hint-placeholder-count="2">
+              <div onClick="{{ a.remove }}" style="height:30px;padding:0 8px 0 12px;border-radius:999px;background:var(--blue-100);color:var(--blue-700);display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;cursor:pointer">{{ a.label }}<x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="x" size="13px" color="var(--blue-700)" hint-size="13px,13px"></x-import></div>
+            </sc-for>
+            <div onClick="{{ resetF }}" style="font-size:12px;font-weight:700;color:var(--gray-500);cursor:pointer;padding:0 6px">{{ t.clearAll }}</div>
+          </div>
+        </sc-if>
+        <div style="font-size:12px;color:var(--gray-500);font-weight:600;margin-bottom:-6px">{{ resultText }}</div>
+        <sc-for list="{{ listItems }}" as="r" hint-placeholder-count="4">
+          <div onClick="{{ r.open }}" style="background:#fff;border:1.5px solid var(--blue-200);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer">
+            <div style="width:42px;height:42px;border-radius:12px;background:var(--blue-50);display:flex;align-items:center;justify-content:center;flex:none">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ r.icon }}" size="22px" color="var(--blue-600)" hint-size="22px,22px"></x-import>
+            </div>
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:5px">
+              <div style="font-size:12px;color:var(--gray-500);font-weight:600">{{ r.id }} · {{ r.loc }} · {{ r.time }}</div>
+              <div style="font-size:15px;font-weight:700;line-height:1.3;text-wrap:pretty">{{ r.title }}</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ r.sevBg }};color:{{ r.sevFg }}">{{ r.sev }}</span>
+                <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ r.stBg }};color:{{ r.stFg }}">{{ r.stLabel }}</span>
+              </div>
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-right" size="18px" color="var(--navy-300)" hint-size="18px,18px"></x-import>
+          </div>
+        </sc-for>
+        <sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="text-align:center;color:var(--gray-500);font-size:14px;padding:40px 0">{{ t.empty }}</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.tasks }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:58px 20px 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:4px">
+          <div style="font-weight:800;font-size:28px;letter-spacing:-0.02em">{{ t.tasks }}</div>
+          <div style="font-size:14px;color:var(--gray-500);line-height:1.45">{{ t.tasksSub }}</div>
+        </div>
+        <sc-for list="{{ taskItems }}" as="r" hint-placeholder-count="2">
+          <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--shadow-card)">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <span style="font-size:12px;color:var(--gray-500);font-weight:600">{{ r.id }} · {{ r.catLabel }}</span>
+              <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ r.sevBg }};color:{{ r.sevFg }}">{{ r.sev }}</span>
+            </div>
+            <div style="font-size:16px;font-weight:700;line-height:1.3">{{ r.title }}</div>
+            <div style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--blue-700)">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ r.taskIcon }}" size="16px" color="var(--blue-600)" hint-size="16px,16px"></x-import>{{ r.taskLabel }}
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="secondary" size="sm" full-width="{{ true }}" icon-right="arrow" onClick="{{ r.open }}" hint-size="100%,40px">{{ t.openReport }}</x-import>
+          </div>
+        </sc-for>
+        <sc-if value="{{ tasksEmpty }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:48px 0;color:var(--gray-500);font-size:14px">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="circle-check" size="36px" color="var(--green-600)" hint-size="36px,36px"></x-import>{{ t.noTasks }}
+          </div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.alerts }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:58px 20px 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="font-weight:800;font-size:28px;letter-spacing:-0.02em">{{ t.alerts }}</div>
+        <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;overflow:hidden">
+          <sc-for list="{{ alertItems }}" as="n" hint-placeholder-count="4">
+            <div onClick="{{ n.open }}" style="display:flex;gap:12px;padding:14px 16px;border-top:1px solid {{ n.bd }};cursor:pointer;background:{{ n.bg }}">
+              <div style="width:36px;height:36px;border-radius:10px;background:{{ n.icBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ n.icon }}" size="18px" color="{{ n.icFg }}" hint-size="18px,18px"></x-import>
+              </div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                <div style="font-size:14px;line-height:1.4;font-weight:600">{{ n.text }}</div>
+                <div style="font-size:12px;color:var(--gray-500)">{{ n.t }}</div>
+              </div>
+              <sc-if value="{{ n.unread }}" hint-placeholder-val="{{ false }}">
+                <div style="width:8px;height:8px;border-radius:50%;background:var(--blue-500);margin-top:6px;flex:none"></div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.detail }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:54px 0 130px;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px">
+          <div onClick="{{ back }}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-left" size="24px" color="var(--navy-900)" hint-size="24px,24px"></x-import>
+          </div>
+          <div style="flex:1;font-weight:700;font-size:15px;text-align:center">{{ sel.id }}</div>
+          <div style="width:40px"></div>
+        </div>
+        <div style="padding:4px 20px 0;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:{{ sel.sevBg }};color:{{ sel.sevFg }}">{{ sel.sev }}</span>
+              <span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:#fff;color:var(--navy-900);border:1.5px solid var(--blue-200)">{{ sel.catLabel }}</span>
+              <sc-if value="{{ sel.urgent }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--red-700);color:#fff">{{ t.urgentB }}</span></sc-if>
+              <sc-if value="{{ sel.hold }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--navy-900);color:#fff">{{ t.holdB }}</span></sc-if>
+            </div>
+            <div style="font-weight:800;font-size:24px;letter-spacing:-0.02em;line-height:1.2;text-wrap:pretty">{{ sel.title }}</div>
+            <div style="font-size:13px;color:var(--gray-500);font-weight:500">{{ t.reportedBy }} {{ sel.by }} · {{ sel.loc }} · {{ sel.time }}</div>
+          </div>
+
+          <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;padding:16px 8px 14px">
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr))">
+              <sc-for list="{{ sel.steps }}" as="st" hint-placeholder-count="4">
+                <div style="display:flex;flex-direction:column;align-items:center;gap:6px;position:relative">
+                  <div style="position:absolute;top:11px;left:-50%;right:50%;height:3px;background:{{ st.lineBg }};opacity:{{ st.lineOp }}"></div>
+                  <div style="width:24px;height:24px;border-radius:50%;background:{{ st.dotBg }};border:2px solid {{ st.dotBd }};display:flex;align-items:center;justify-content:center;position:relative;box-sizing:border-box;box-shadow:{{ st.ring }}">
+                    <sc-if value="{{ st.done }}" hint-placeholder-val="{{ false }}">
+                      <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="check" size="13px" color="#fff" stroke-width="{{ 3 }}" hint-size="13px,13px"></x-import>
+                    </sc-if>
+                  </div>
+                  <div style="font-size:11px;font-weight:700;color:{{ st.fg }};text-align:center;line-height:1.25">{{ st.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="height:170px;border-radius:20px;background:repeating-linear-gradient(135deg,var(--blue-100) 0 10px,var(--blue-50) 10px 20px);border:1.5px solid var(--blue-200);display:flex;align-items:flex-end;padding:12px;box-sizing:border-box">
+            <span style="font:600 11px ui-monospace,Menlo,monospace;color:var(--navy-500);background:rgba(255,255,255,.9);padding:4px 8px;border-radius:6px">{{ sel.photo }}</span>
+          </div>
+
+          <sc-if value="{{ sel.needsDetails }}" hint-placeholder-val="{{ false }}">
+            <div onClick="{{ nav.details }}" style="background:var(--amber-100);border:1.5px solid var(--amber-500);border-radius:16px;padding:14px;display:flex;gap:12px;align-items:center;cursor:pointer">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="pencil-line" size="22px" color="var(--amber-700)" hint-size="22px,22px"></x-import>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:14px;font-weight:800;color:var(--amber-700)">{{ t.addDetails }}</div>
+                <div style="font-size:13px;color:var(--amber-700);line-height:1.4">{{ t.addDetailsSub }}</div>
+              </div>
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-right" size="18px" color="var(--amber-700)" hint-size="18px,18px"></x-import>
+            </div>
+          </sc-if>
+
+          <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;overflow:hidden">
+            <sc-for list="{{ sel.rows }}" as="row" hint-placeholder-count="4">
+              <div style="display:flex;gap:12px;padding:12px 16px;border-top:1px solid {{ row.bd }};font-size:14px;line-height:1.45">
+                <div style="width:100px;flex:none;color:var(--gray-500);font-weight:600">{{ row.k }}</div>
+                <div style="flex:1;font-weight:600;color:{{ row.fg }}">{{ row.v }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ sel.hasHc }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-weight:800;font-size:17px">{{ t.hcTitle }}</div>
+              <div style="background:#fff;border:1.5px solid {{ sel.hc.bd }};border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <div style="width:40px;height:40px;border-radius:12px;background:{{ sel.hc.icBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ sel.hc.icon }}" size="20px" color="{{ sel.hc.icFg }}" hint-size="20px,20px"></x-import>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:15px;font-weight:800">{{ sel.hc.typeLabel }}</div>
+                    <div style="font-size:13px;color:var(--gray-500)">{{ sel.hc.sub }}</div>
+                  </div>
+                  <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ sel.hc.stBg }};color:{{ sel.hc.stFg }}">{{ sel.hc.stLabel }}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding-top:12px;border-top:1px solid var(--gray-100)">
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--gray-500);font-weight:600">{{ t.hcDue }}</span><span style="font-size:14px;font-weight:700">{{ sel.hc.due }}</span></div>
+                  <div style="display:flex;flex-direction:column;gap:2px"><span style="font-size:11px;color:var(--gray-500);font-weight:600">{{ t.hcWho }}</span><span style="font-size:14px;font-weight:700">{{ sel.hc.owner }}</span></div>
+                </div>
+                <sc-if value="{{ sel.hc.canCheck }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="success" size="sm" icon="circle-check" full-width="{{ true }}" onClick="{{ sel.hc.pass }}" hint-size="100%,40px">{{ sel.hc.passLabel }}</x-import>
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="secondary" size="sm" icon="circle-x" full-width="{{ true }}" onClick="{{ sel.hc.fail }}" hint-size="100%,40px">{{ sel.hc.failLabel }}</x-import>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.waiting }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;color:var(--gray-500);font-weight:600">{{ t.hcWaitOther }} {{ sel.hc.owner }}.</div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.needDecision }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:8px">
+                    <div style="font-size:13px;line-height:1.45;color:var(--red-700);font-weight:700">{{ t.hcFoundMsg }}</div>
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="navy" size="sm" icon="gavel" full-width="{{ true }}" onClick="{{ sel.hc.decide }}" hint-size="100%,40px">{{ t.decBtn }}</x-import>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.waitDecision }}" hint-placeholder-val="{{ false }}">
+                  <div style="font-size:13px;line-height:1.45;color:var(--red-700);font-weight:700">{{ t.hcFoundWait }}</div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.hasNote }}" hint-placeholder-val="{{ false }}">
+                  <div style="background:var(--blue-50);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.45"><span style="font-weight:800">{{ t.decNote }}:</span> {{ sel.hc.note }}</div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.hasHistory }}" hint-placeholder-val="{{ false }}">
+                  <div style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--gray-100)">
+                    <div style="font-size:11px;color:var(--gray-500);font-weight:700">{{ t.hcHistory }}</div>
+                    <sc-for list="{{ sel.hc.history }}" as="hh" hint-placeholder-count="1">
+                      <div style="display:flex;align-items:center;gap:8px;font-size:13px">
+                        <span style="width:22px;height:22px;border-radius:50%;background:var(--gray-100);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none">{{ hh.n }}</span>
+                        <span style="flex:1;font-weight:600;color:{{ hh.fg }}">{{ hh.res }}</span>
+                        <span style="color:var(--gray-500);font-size:12px">{{ hh.t }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{ sel.hc.scheduled }}" hint-placeholder-val="{{ false }}">
+                  <div onClick="{{ sel.hc.skip }}" style="display:flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:var(--blue-600);cursor:pointer;border:1.5px dashed var(--blue-300);border-radius:10px;padding:8px 10px;align-self:flex-start"><x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="fast-forward" size="14px" color="var(--blue-600)" hint-size="14px,14px"></x-import>{{ t.hcDemo }}</div>
+                </sc-if>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ sel.hasCapa }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="font-weight:800;font-size:17px">{{ t.capa }}</div>
+              <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px">
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--blue-100);color:var(--blue-700)">{{ t.rootCause }}: {{ sel.capa.root }}</span>
+                </div>
+                <div style="font-size:14px;line-height:1.5">{{ sel.capa.text }}</div>
+                <div style="display:flex;gap:10px;align-items:center;padding-top:12px;border-top:1px solid var(--gray-100)">
+                  <img src="{{ sel.capa.avatar }}" alt="" style="width:28px;height:28px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100)">
+                  <span style="flex:1;font-size:13px;font-weight:700">{{ sel.capa.owner }}</span>
+                  <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="clock" size="15px" color="var(--amber-700)" hint-size="15px,15px"></x-import>
+                  <span style="font-size:13px;font-weight:700;color:var(--amber-700)">{{ sel.capa.due }}</span>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-weight:800;font-size:17px">{{ t.activity }}</div>
+            <div style="display:flex;flex-direction:column">
+              <sc-for list="{{ sel.tl }}" as="e" hint-placeholder-count="3">
+                <div style="display:flex;gap:12px">
+                  <div style="display:flex;flex-direction:column;align-items:center;width:12px;flex:none">
+                    <div style="width:10px;height:10px;border-radius:50%;background:{{ e.dot }};margin-top:5px;flex:none"></div>
+                    <div style="flex:1;width:2px;background:var(--blue-200);opacity:{{ e.lineOp }}"></div>
+                  </div>
+                  <div style="padding-bottom:16px;display:flex;flex-direction:column;gap:2px">
+                    <div style="font-size:14px;line-height:1.45;font-weight:600">{{ e.text }}</div>
+                    <div style="font-size:12px;color:var(--gray-500)">{{ e.who }} · {{ e.t }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.details }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:54px 0 130px;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 12px">
+          <div onClick="{{ nav.detail }}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="x" size="22px" color="var(--navy-900)" hint-size="22px,22px"></x-import>
+          </div>
+          <div style="flex:1;font-weight:700;font-size:15px;text-align:center">{{ t.addDetails }}</div>
+          <div style="width:40px"></div>
+        </div>
+        <div style="padding:12px 20px;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.where }}</div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ locs }}" as="l" hint-placeholder-count="6">
+                <div onClick="{{ l.pick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ l.bg }};color:{{ l.fg }};border:1.5px solid {{ l.bd }}">{{ l.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.ptype }}</div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ ptypes }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ hasPtype }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.pname }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ pnames }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+              </sc-for>
+              </div>
+              <sc-if value="{{ pnameOther }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ draft.pnameText }}" onChange="{{ onPnameText }}" placeholder="Product name"  style="height:48px;border-radius:12px;border:1.5px solid var(--blue-200);padding:0 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;min-width:0;width:100%;box-sizing:border-box">
+              </sc-if>
+            </div>
+          </sc-if>
+          <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.lot }}</div>
+              <input value="{{ draft.lot }}" onChange="{{ onLot }}" placeholder="U260926-02"  style="height:48px;border-radius:12px;border:1.5px solid var(--blue-200);padding:0 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;min-width:0;width:100%;box-sizing:border-box">
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.qty }}</div>
+              <input value="{{ draft.qty }}" onChange="{{ onQty }}" placeholder="0" inputmode="numeric" style="height:48px;border-radius:12px;border:1.5px solid var(--blue-200);padding:0 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;min-width:0;width:100%;box-sizing:border-box">
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:-10px">
+            <sc-for list="{{ units }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+              </sc-for>
+          </div>
+          <div onClick="{{ holdT.toggle }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:{{ holdT.bg }};border:1.5px solid {{ holdT.bd }};cursor:pointer;transition:all 160ms cubic-bezier(.2,.7,.2,1)">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="circle-pause" size="22px" color="{{ holdT.ic }}" hint-size="22px,22px"></x-import>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">{{ t.hold }}</span><span style="font-size:12px;color:var(--gray-500);line-height:1.35">{{ t.holdSub }}</span></div>
+              <div style="width:44px;height:26px;border-radius:13px;background:{{ holdT.track }};position:relative;flex:none;transition:background 160ms"><div style="position:absolute;top:3px;left:{{ holdT.knob }};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,45,88,.25);transition:left 160ms cubic-bezier(.2,.7,.2,1)"></div></div>
+            </div>
+          <sc-if value="{{ draft.hold }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-top:-10px;background:#fff;border:1.5px solid var(--navy-900);border-top:none;border-radius:0 0 14px 14px;padding:14px;display:flex;flex-direction:column;gap:14px;animation:lrFade 160ms">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:13px;font-weight:700">{{ t.hcType }}</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ hcTypes }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:13px;font-weight:700">{{ t.hcRemind }}</div>
+                <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><sc-for list="{{ hcDaysL }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+                <div style="font-size:12px;color:var(--gray-500);display:flex;align-items:center;gap:6px"><x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="bell-ring" size="14px" color="var(--gray-500)" hint-size="14px,14px"></x-import>{{ hcDueText }}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="font-size:13px;font-weight:700">{{ t.hcWho }}</div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px"><sc-for list="{{ hcOwners }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+              </div>
+            </div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.whatSaw }}</div>
+            <textarea value="{{ draft.desc }}" onChange="{{ onDesc }}" placeholder="{{ t.troublePh }}" rows="3" style="border-radius:12px;border:1.5px solid var(--blue-200);padding:12px 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;resize:none;line-height:1.45"></textarea>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.whatDid }}</div>
+            <textarea value="{{ draft.action }}" onChange="{{ onAction }}" placeholder="{{ t.actionPh }}" rows="3" style="border-radius:12px;border:1.5px solid var(--blue-200);padding:12px 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;resize:none;line-height:1.45"></textarea>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.suggestion }}</div>
+            <textarea value="{{ draft.suggestion }}" onChange="{{ onSuggestion }}" placeholder="{{ t.suggestionPh }}" rows="3" style="border-radius:12px;border:1.5px solid var(--blue-200);padding:12px 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none;resize:none;line-height:1.45"></textarea>
+          </div>
+          <div onClick="{{ urgentT.toggle }}" style="display:flex;align-items:center;gap:12px;padding:14px;border-radius:14px;background:{{ urgentT.bg }};border:1.5px solid {{ urgentT.bd }};cursor:pointer;transition:all 160ms cubic-bezier(.2,.7,.2,1)">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="siren" size="22px" color="{{ urgentT.ic }}" hint-size="22px,22px"></x-import>
+              <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span style="font-size:14px;font-weight:700">{{ t.urgent }}</span><span style="font-size:12px;color:var(--gray-500);line-height:1.35">{{ t.urgentSub }}</span></div>
+              <div style="width:44px;height:26px;border-radius:13px;background:{{ urgentT.track }};position:relative;flex:none;transition:background 160ms"><div style="position:absolute;top:3px;left:{{ urgentT.knob }};width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,45,88,.25);transition:left 160ms cubic-bezier(.2,.7,.2,1)"></div></div>
+            </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.support }}</div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+              <sc-for list="{{ supports }}" as="o" hint-placeholder-count="3">
+                <div onClick="{{ o.pick }}" style="height:38px;padding:0 14px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="font-size:13px;font-weight:700">{{ t.voice }}</div>
+            <div onClick="{{ toggleVoice }}" style="height:56px;border-radius:14px;border:1.5px solid {{ voice.bd }};background:{{ voice.bg }};display:flex;align-items:center;gap:12px;padding:0 14px;cursor:pointer">
+              <div style="width:36px;height:36px;border-radius:50%;background:{{ voice.btn }};display:flex;align-items:center;justify-content:center;animation:{{ voice.anim }}">
+                <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ voice.icon }}" size="18px" color="#fff" hint-size="18px,18px"></x-import>
+              </div>
+              <div style="flex:1;font-size:14px;font-weight:700;color:{{ voice.fg }}">{{ voice.label }}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ is.done }}" hint-placeholder-val="{{ false }}">
+      <div style="min-height:874px;padding:0 28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;box-sizing:border-box;animation:lrFade 200ms cubic-bezier(.2,.7,.2,1)">
+        <div style="width:88px;height:88px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 10px var(--green-100)">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="check" size="44px" color="#fff" stroke-width="{{ 3 }}" hint-size="44px,44px"></x-import>
+        </div>
+        <div style="font-weight:800;font-size:26px;letter-spacing:-0.02em;margin-top:10px">{{ t.sent }}</div>
+        <div style="font-size:15px;line-height:1.5;color:var(--gray-700);max-width:300px">{{ lastId }} · {{ t.sentSub }}</div>
+        <sc-if value="{{ lastCritical }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;gap:10px;align-items:center;background:var(--red-100);border:1.5px solid var(--red-500);border-radius:14px;padding:12px 14px;text-align:left">
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="siren" size="22px" color="var(--red-700)" hint-size="22px,22px"></x-import>
+            <div style="font-size:13px;line-height:1.45;color:var(--red-700);font-weight:700">{{ t.alerted }}</div>
+          </div>
+        </sc-if>
+        <div style="display:flex;flex-direction:column;gap:10px;width:100%;margin-top:18px">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" full-width="{{ true }}" icon="pencil-line" onClick="{{ addDetailsNow }}" hint-size="100%,40px">{{ t.addDetails }}</x-import>
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="secondary" size="sm" full-width="{{ true }}" onClick="{{ nav.home }}" hint-size="100%,40px">{{ t.later }}</x-import>
+        </div>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ is.capture }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:#0B1A30;z-index:5;display:flex;flex-direction:column">
+      <sc-if value="{{ cap.showCamera }}" hint-placeholder-val="{{ true }}">
+        <div style="flex:1;position:relative;display:flex;flex-direction:column">
+          <div style="position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 40%,#2A3F5E 0%,#0B1A30 70%)"></div>
+          <div style="position:absolute;left:60px;right:60px;top:230px;height:300px">
+            <div style="position:absolute;left:0;top:0;width:36px;height:36px;border-left:3px solid #fff;border-top:3px solid #fff;border-radius:10px 0 0 0"></div>
+            <div style="position:absolute;right:0;top:0;width:36px;height:36px;border-right:3px solid #fff;border-top:3px solid #fff;border-radius:0 10px 0 0"></div>
+            <div style="position:absolute;left:0;bottom:0;width:36px;height:36px;border-left:3px solid #fff;border-bottom:3px solid #fff;border-radius:0 0 0 10px"></div>
+            <div style="position:absolute;right:0;bottom:0;width:36px;height:36px;border-right:3px solid #fff;border-bottom:3px solid #fff;border-radius:0 0 10px 0"></div>
+          </div>
+          <div style="position:relative;display:flex;align-items:center;padding:58px 16px 0">
+            <div onClick="{{ nav.home }}" style="width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="x" size="22px" color="#fff" hint-size="22px,22px"></x-import>
+            </div>
+            <div style="flex:1;text-align:center;color:#fff;font-size:15px;font-weight:700">{{ t.pointAt }}</div>
+            <div style="width:40px"></div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:0 40px 60px">
+            <div style="width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="image" size="22px" color="#fff" hint-size="22px,22px"></x-import>
+            </div>
+            <div onClick="{{ shoot }}" style="width:78px;height:78px;border-radius:50%;border:4px solid #fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-sizing:border-box">
+              <div style="width:62px;height:62px;border-radius:50%;background:#fff"></div>
+            </div>
+            <div onClick="{{ skipPhoto }}" style="width:52px;height:52px;border-radius:12px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;font-size:11px;font-weight:700;text-align:center;line-height:1.2">{{ t.skip }}</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cap.showOverlay }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;position:relative;display:flex;flex-direction:column;animation:lrFade 200ms cubic-bezier(.2,.7,.2,1)">
+          <div style="position:absolute;inset:0;background:repeating-linear-gradient(135deg,#1E3658 0 14px,#18304F 14px 28px)"></div>
+          <div style="position:absolute;left:16px;top:108px;font:600 11px ui-monospace,Menlo,monospace;color:#9AABC3">IMG_0423.jpg</div>
+          <div style="position:relative;display:flex;align-items:center;padding:58px 16px 0">
+            <div onClick="{{ retake }}" style="height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.14);display:flex;align-items:center;gap:6px;cursor:pointer;color:#fff;font-size:13px;font-weight:700">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="rotate-ccw" size="16px" color="#fff" hint-size="16px,16px"></x-import>{{ t.retake }}
+            </div>
+          </div>
+          <div style="flex:1"></div>
+          <div style="position:relative;background:var(--navy-900);border-radius:28px 28px 0 0;padding:20px 16px 44px;display:flex;flex-direction:column;gap:14px;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+            <div style="display:flex;align-items:center;gap:8px;color:#fff">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--blue-500);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">1</span>
+              <span style="font-size:15px;font-weight:800">{{ t.whatType }}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <sc-for list="{{ catsDark }}" as="c" hint-placeholder-count="8">
+                <div onClick="{{ c.pick }}" style="height:40px;padding:0 12px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;background:{{ c.bg }};color:{{ c.fg }};font-size:13px;font-weight:700;transition:all 120ms cubic-bezier(.2,.7,.2,1)">
+                  <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ c.icon }}" size="16px" color="{{ c.fg }}" hint-size="16px,16px"></x-import>{{ c.label }}
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ cap.isCustom }}" hint-placeholder-val="{{ false }}">
+              <input value="{{ cap.customText }}" onChange="{{ onCustom }}" placeholder="{{ t.customPh }}" style="height:46px;border-radius:12px;border:1.5px solid rgba(255,255,255,.3);background:rgba(255,255,255,.08);padding:0 14px;font-size:15px;color:#fff;outline:none;animation:lrFade 160ms">
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:8px;color:#fff;opacity:{{ cap.sevOp }};transition:opacity 200ms">
+              <span style="width:22px;height:22px;border-radius:50%;background:var(--blue-500);font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center">2</span>
+              <span style="font-size:15px;font-weight:800">{{ t.howSerious }}</span>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;opacity:{{ cap.sevOp }};pointer-events:{{ cap.sevPe }};transition:opacity 200ms">
+              <sc-for list="{{ sevsDark }}" as="s" hint-placeholder-count="4">
+                <div onClick="{{ s.pick }}" style="height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }}">{{ s.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cap.showSteps }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;background:var(--blue-50);display:flex;flex-direction:column;animation:lrFade 200ms cubic-bezier(.2,.7,.2,1)">
+          <div style="display:flex;align-items:center;gap:8px;padding:54px 12px 0">
+            <div onClick="{{ stepBack }}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-left" size="24px" color="var(--navy-900)" hint-size="24px,24px"></x-import>
+            </div>
+            <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:0 8px">
+              <sc-for list="{{ cap.bars }}" as="b" hint-placeholder-count="3">
+                <div style="height:4px;border-radius:4px;background:{{ b.bg }};transition:background 200ms"></div>
+              </sc-for>
+            </div>
+            <div style="width:40px"></div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;gap:14px;align-items:center">
+              <div style="width:64px;height:64px;border-radius:14px;flex:none;background:repeating-linear-gradient(135deg,var(--blue-100) 0 8px,var(--blue-50) 8px 16px);border:1.5px solid var(--blue-200)"></div>
+              <div style="font-weight:800;font-size:24px;letter-spacing:-0.02em;line-height:1.2">{{ cap.stepTitle }}</div>
+            </div>
+            <sc-if value="{{ cap.subCat }}" hint-placeholder-val="{{ true }}">
+              <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+                <sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+                  <div onClick="{{ c.pick }}" style="height:88px;border-radius:18px;padding:14px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer;background:{{ c.bg }};border:1.5px solid {{ c.bd }};box-sizing:border-box;box-shadow:var(--shadow-card)">
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ c.icon }}" size="26px" color="{{ c.ic }}" hint-size="26px,26px"></x-import>
+                    <span style="font-size:15px;font-weight:700;color:{{ c.fg }}">{{ c.label }}</span>
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ cap.isCustom }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;flex-direction:column;gap:10px;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+                  <input value="{{ cap.customText }}" onChange="{{ onCustom }}" placeholder="{{ t.customPh }}" style="height:48px;border-radius:12px;border:1.5px solid var(--blue-600);padding:0 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none">
+                  <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" icon-right="arrow" full-width="{{ true }}" disabled="{{ cap.customEmpty }}" onClick="{{ customNext }}" hint-size="100%,40px">{{ t.next }}</x-import>
+                </div>
+              </sc-if>
+            </sc-if>
+            <sc-if value="{{ cap.subSev }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:10px;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+                <sc-for list="{{ sevCards }}" as="s" hint-placeholder-count="4">
+                  <div onClick="{{ s.pick }}" style="border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center;cursor:pointer;background:#fff;border:1.5px solid var(--blue-200);box-shadow:var(--shadow-card)">
+                    <div style="width:14px;height:44px;border-radius:7px;background:{{ s.bar }};flex:none"></div>
+                    <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                      <div style="font-size:17px;font-weight:800;color:{{ s.fg }}">{{ s.label }}</div>
+                      <div style="font-size:13px;color:var(--gray-500);line-height:1.4">{{ s.hint }}</div>
+                    </div>
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-right" size="18px" color="var(--navy-300)" hint-size="18px,18px"></x-import>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cap.showSheet }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;position:relative;display:flex;flex-direction:column">
+          <div style="position:absolute;inset:0 0 auto 0;height:330px;background:repeating-linear-gradient(135deg,#1E3658 0 14px,#18304F 14px 28px)"></div>
+          <div style="position:relative;display:flex;align-items:center;justify-content:space-between;padding:58px 16px 0">
+            <div onClick="{{ retake }}" style="height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.14);display:flex;align-items:center;gap:6px;cursor:pointer;color:#fff;font-size:13px;font-weight:700">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="rotate-ccw" size="16px" color="#fff" hint-size="16px,16px"></x-import>{{ t.retake }}
+            </div>
+            <span style="font:600 11px ui-monospace,Menlo,monospace;color:#9AABC3">IMG_0423.jpg</span>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:250px;bottom:0;background:var(--blue-50);border-radius:28px 28px 0 0;padding:20px 20px 40px;display:flex;flex-direction:column;gap:16px;overflow-y:auto;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:14px;font-weight:800">{{ t.whatType }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <sc-for list="{{ cats }}" as="c" hint-placeholder-count="8">
+                  <div onClick="{{ c.pick }}" style="height:36px;padding:0 11px;border-radius:999px;display:flex;align-items:center;gap:6px;cursor:pointer;background:{{ c.bg }};border:1.5px solid {{ c.bd }};font-size:13px;font-weight:700;color:{{ c.fg }}">
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ c.icon }}" size="15px" color="{{ c.ic }}" hint-size="15px,15px"></x-import>{{ c.label }}
+                  </div>
+                </sc-for>
+              </div>
+              <sc-if value="{{ cap.isCustom }}" hint-placeholder-val="{{ false }}">
+                <input value="{{ cap.customText }}" onChange="{{ onCustom }}" placeholder="{{ t.customPh }}" style="height:44px;border-radius:12px;border:1.5px solid var(--blue-600);padding:0 14px;font-size:15px;color:var(--navy-900);background:#fff;outline:none">
+              </sc-if>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:14px;font-weight:800">{{ t.howSerious }}</div>
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">
+                <sc-for list="{{ sevs }}" as="s" hint-placeholder-count="4">
+                  <div onClick="{{ s.pick }}" style="height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ s.bg }};color:{{ s.fg }};border:1.5px solid {{ s.bd }}">{{ s.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <div style="font-size:14px;font-weight:800">{{ t.signHere }}</div>
+                <div onClick="{{ clearSig }}" style="font-size:13px;font-weight:700;color:var(--blue-600);cursor:pointer">{{ t.clear }}</div>
+              </div>
+              <canvas ref="{{ sigRef }}" width="724" height="200" style="width:362px;height:100px;border-radius:14px;background:#fff;border:1.5px dashed var(--blue-300);touch-action:none;cursor:crosshair"></canvas>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1.5px solid var(--blue-200);border-radius:14px">
+                <img src="{{ me.avatar }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100)">
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;color:var(--gray-500);font-weight:600">{{ t.reporter }}</span><span style="font-size:14px;font-weight:800">{{ me.name }} · {{ me.roleLabel }}</span></div>
+                <span style="font-size:12px;color:var(--gray-500);font-weight:600">{{ nowLabel }}</span>
+              </div>
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" icon="send" full-width="{{ true }}" disabled="{{ cap.sendDisabled }}" onClick="{{ send }}" hint-size="100%,40px">{{ t.send }}</x-import>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cap.showSign }}" hint-placeholder-val="{{ false }}">
+        <div style="flex:1;background:var(--blue-50);display:flex;flex-direction:column;animation:lrFade 200ms cubic-bezier(.2,.7,.2,1)">
+          <div style="display:flex;align-items:center;gap:8px;padding:54px 12px 0">
+            <div onClick="{{ stepBack }}" style="width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;cursor:pointer">
+              <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="chevron-left" size="24px" color="var(--navy-900)" hint-size="24px,24px"></x-import>
+            </div>
+            <div style="flex:1;font-weight:700;font-size:15px;text-align:center">{{ t.signSend }}</div>
+            <div style="width:40px"></div>
+          </div>
+          <div style="padding:16px 20px;display:flex;flex-direction:column;gap:18px">
+            <div style="background:#fff;border:1.5px solid var(--blue-200);border-radius:20px;padding:14px;display:flex;gap:14px;align-items:center">
+              <div style="width:72px;height:72px;border-radius:14px;flex:none;background:repeating-linear-gradient(135deg,var(--blue-100) 0 8px,var(--blue-50) 8px 16px);border:1.5px solid var(--blue-200)"></div>
+              <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                <div style="font-size:16px;font-weight:800">{{ cap.catLabel }}</div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:{{ cap.sevBg }};color:{{ cap.sevFg }}">{{ cap.sevLabel }}</span>
+                  <span style="font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--blue-100);color:var(--blue-700)">{{ cap.locLabel }}</span>
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;justify-content:space-between;align-items:baseline">
+                <div style="font-size:14px;font-weight:800">{{ t.signHere }}</div>
+                <div onClick="{{ clearSig }}" style="font-size:13px;font-weight:700;color:var(--blue-600);cursor:pointer">{{ t.clear }}</div>
+              </div>
+              <canvas ref="{{ sigRef }}" width="724" height="320" style="width:362px;height:160px;border-radius:16px;background:#fff;border:1.5px dashed var(--blue-300);touch-action:none;cursor:crosshair"></canvas>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border:1.5px solid var(--blue-200);border-radius:14px">
+                <img src="{{ me.avatar }}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100)">
+                <div style="flex:1;display:flex;flex-direction:column;gap:1px"><span style="font-size:11px;color:var(--gray-500);font-weight:600">{{ t.reporter }}</span><span style="font-size:14px;font-weight:800">{{ me.name }} · {{ me.roleLabel }}</span></div>
+                <span style="font-size:12px;color:var(--gray-500);font-weight:600">{{ nowLabel }}</span>
+              </div>
+            </div>
+            <sc-if value="{{ cap.critical }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;gap:10px;align-items:center;background:var(--red-100);border:1.5px solid var(--red-500);border-radius:14px;padding:12px 14px">
+                <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="siren" size="20px" color="var(--red-700)" hint-size="20px,20px"></x-import>
+                <div style="font-size:13px;line-height:1.45;color:var(--red-700);font-weight:700">{{ t.willAlert }}</div>
+              </div>
+            </sc-if>
+            <div style="font-size:13px;color:var(--gray-500);text-align:center">{{ t.detailsLater }}</div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" icon="send" full-width="{{ true }}" disabled="{{ cap.sendDisabled }}" onClick="{{ send }}" hint-size="100%,40px">{{ t.send }}</x-import>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ detailBar.show }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1.5px solid var(--blue-200);padding:14px 20px 36px;display:flex;flex-direction:column;gap:8px;z-index:3">
+      <sc-if value="{{ detailBar.canAct }}" hint-placeholder-val="{{ true }}">
+        <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="{{ detailBar.variant }}" size="sm" icon="{{ detailBar.icon }}" full-width="{{ true }}" onClick="{{ detailBar.onClick }}" hint-size="100%,40px">{{ detailBar.label }}</x-import>
+      </sc-if>
+      <sc-if value="{{ detailBar.waiting }}" hint-placeholder-val="{{ false }}">
+        <div style="height:40px;border-radius:10px;background:var(--gray-100);color:var(--gray-500);display:flex;align-items:center;justify-content:center;gap:8px;font-size:14px;font-weight:700">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="hourglass" size="16px" color="var(--gray-500)" hint-size="16px,16px"></x-import>{{ detailBar.label }}
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ is.details }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1.5px solid var(--blue-200);padding:14px 20px 36px;z-index:3">
+      <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" full-width="{{ true }}" onClick="{{ saveDetails }}" hint-size="100%,40px">{{ t.save }}</x-import>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:none;height:84px;background:#fff;border-top:1.5px solid var(--blue-200);display:grid;grid-template-columns:repeat(5,1fr);align-items:start;padding-top:8px;box-sizing:border-box;position:relative;z-index:2">
+      <sc-for list="{{ tabsL }}" as="tb" hint-placeholder-count="2">
+        <div onClick="{{ tb.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ tb.icon }}" size="24px" color="{{ tb.fg }}" hint-size="24px,24px"></x-import>
+          <span style="font-size:11px;font-weight:700;color:{{ tb.fg }}">{{ tb.label }}</span>
+        </div>
+      </sc-for>
+      <div style="display:flex;justify-content:center">
+        <div onClick="{{ nav.capture }}" style="width:58px;height:58px;margin-top:-24px;border-radius:50%;background:var(--green-600);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 0 rgba(15,45,88,.18),0 0 0 5px #fff">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="camera" size="26px" color="#fff" hint-size="26px,26px"></x-import>
+        </div>
+      </div>
+      <sc-for list="{{ tabsR }}" as="tb" hint-placeholder-count="2">
+        <div onClick="{{ tb.go }}" style="display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;position:relative">
+          <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ tb.icon }}" size="24px" color="{{ tb.fg }}" hint-size="24px,24px"></x-import>
+          <span style="font-size:11px;font-weight:700;color:{{ tb.fg }}">{{ tb.label }}</span>
+          <sc-if value="{{ tb.hasBadge }}" hint-placeholder-val="{{ false }}">
+            <span style="position:absolute;top:-4px;left:50%;margin-left:6px;min-width:18px;height:18px;border-radius:9px;background:var(--red-500);color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px;box-sizing:border-box;border:2px solid #fff">{{ tb.badge }}</span>
+          </sc-if>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ toast.show }}" hint-placeholder-val="{{ false }}">
+    <div onClick="{{ toast.open }}" style="position:absolute;left:12px;right:12px;top:54px;z-index:20;background:var(--red-700);color:#fff;border-radius:18px;padding:12px 14px;display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-floating);cursor:pointer;animation:lrFade 200ms cubic-bezier(.2,.7,.2,1)">
+      <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="siren" size="22px" color="#fff" hint-size="22px,22px"></x-import>
+      <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:13px;font-weight:800">{{ t.critAlert }}</div>
+        <div style="font-size:13px;line-height:1.35">{{ toast.text }}</div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ sheet.show }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;justify-content:flex-end">
+      <div onClick="{{ closeSheet }}" style="position:absolute;inset:0;background:rgba(15,45,88,.45);animation:lrFade 160ms"></div>
+      <div style="position:relative;background:#fff;border-radius:28px 28px 0 0;padding:10px 20px 40px;display:flex;flex-direction:column;gap:18px;max-height:760px;overflow-y:auto;animation:lrUp 200ms cubic-bezier(.2,.7,.2,1)">
+        <div style="width:40px;height:5px;border-radius:3px;background:var(--gray-200);align-self:center"></div>
+
+        <sc-if value="{{ sheet.roles }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="font-weight:800;font-size:20px;letter-spacing:-0.01em">{{ t.switchRole }}</div>
+            <sc-for list="{{ roleList }}" as="p" hint-placeholder-count="3">
+              <div onClick="{{ p.pick }}" style="display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;cursor:pointer;border:1.5px solid {{ p.bd }};background:{{ p.bg }}">
+                <img src="{{ p.avatar }}" alt="" style="width:44px;height:44px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100)">
+                <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                  <div style="font-size:15px;font-weight:800">{{ p.name }}</div>
+                  <div style="font-size:13px;color:var(--gray-500)">{{ p.roleLabel }} · {{ p.can }}</div>
+                </div>
+                <sc-if value="{{ p.active }}" hint-placeholder-val="{{ false }}">
+                  <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="circle-check" size="22px" color="var(--blue-600)" hint-size="22px,22px"></x-import>
+                </sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sheet.assign }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div style="font-weight:800;font-size:20px;letter-spacing:-0.01em">{{ t.assign }}</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.rootCause }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <sc-for list="{{ roots }}" as="o" hint-placeholder-count="5">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 14px;border-radius:999px;display:flex;align-items:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.whatToDo }}</div>
+              <textarea value="{{ asg.text }}" onChange="{{ onAsgText }}" rows="3" style="border-radius:12px;border:1.5px solid var(--blue-200);padding:12px 14px;font-size:14px;color:var(--navy-900);background:#fff;outline:none;resize:none;line-height:1.45"></textarea>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.owner }}</div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ owners }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:14px;cursor:pointer;border:1.5px solid {{ o.bd }};background:{{ o.bg }}">
+                    <img src="{{ o.avatar }}" alt="" style="width:40px;height:40px;border-radius:50%;object-fit:cover;object-position:top;background:var(--blue-100)">
+                    <div style="font-size:13px;font-weight:700">{{ o.name }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.due }}</div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+                <sc-for list="{{ dues }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for>
+              </div>
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" full-width="{{ true }}" disabled="{{ asgDisabled }}" onClick="{{ doAssign }}" hint-size="100%,40px">{{ t.assignBtn }}</x-import>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sheet.filters }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:18px">
+            <div style="display:flex;align-items:baseline;justify-content:space-between">
+              <div style="font-weight:800;font-size:20px;letter-spacing:-0.01em">{{ t.filters }}</div>
+              <div onClick="{{ resetF }}" style="font-size:13px;font-weight:700;color:var(--blue-600);cursor:pointer">{{ t.reset }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.fDate }}</div>
+              <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><sc-for list="{{ fDates }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.fLine }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ fLines }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.fProduct }}</div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ fProducts }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="font-size:13px;font-weight:700">{{ t.fSev }}</div>
+              <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px"><sc-for list="{{ fSevs }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+            </div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" full-width="{{ true }}" onClick="{{ closeSheet }}" hint-size="100%,40px">{{ showResults }}</x-import>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sheet.decide }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <div style="font-weight:800;font-size:20px;letter-spacing:-0.01em">{{ t.decTitle }}</div>
+              <div style="font-size:13px;color:var(--gray-500);line-height:1.45">{{ decSub }}</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <sc-for list="{{ decOpts }}" as="o" hint-placeholder-count="4">
+                <div onClick="{{ o.pick }}" style="display:flex;gap:12px;align-items:center;padding:12px;border-radius:14px;cursor:pointer;border:1.5px solid {{ o.bd }};background:{{ o.bg }};transition:all 120ms cubic-bezier(.2,.7,.2,1)">
+                  <div style="width:36px;height:36px;border-radius:10px;background:{{ o.icBg }};display:flex;align-items:center;justify-content:center;flex:none">
+                    <x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="{{ o.icon }}" size="18px" color="{{ o.icFg }}" hint-size="18px,18px"></x-import>
+                  </div>
+                  <div style="flex:1;display:flex;flex-direction:column;gap:2px">
+                    <span style="font-size:14px;font-weight:800">{{ o.label }}</span>
+                    <span style="font-size:12px;color:var(--gray-500);line-height:1.35">{{ o.sub }}</span>
+                  </div>
+                  <div style="width:20px;height:20px;border-radius:50%;border:2px solid {{ o.radio }};display:flex;align-items:center;justify-content:center;box-sizing:border-box;flex:none"><div style="width:10px;height:10px;border-radius:50%;background:{{ o.dot }}"></div></div>
+                </div>
+              </sc-for>
+            </div>
+            <sc-if value="{{ dec.showSched }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:12px;animation:lrFade 160ms">
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:13px;font-weight:700">{{ t.hcRemind }}</div>
+                  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px"><sc-for list="{{ decDays }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+                  <div style="font-size:12px;color:var(--gray-500);display:flex;align-items:center;gap:6px"><x-import component-from-global-scope="LetReportDesignSystem_c26832.Icon" name="bell-ring" size="14px" color="var(--gray-500)" hint-size="14px,14px"></x-import>{{ dec.dueText }}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="font-size:13px;font-weight:700">{{ t.hcWho }}</div>
+                  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px"><sc-for list="{{ decOwners }}" as="o" hint-placeholder-count="3">
+                  <div onClick="{{ o.pick }}" style="height:36px;padding:0 12px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;cursor:pointer;background:{{ o.bg }};color:{{ o.fg }};border:1.5px solid {{ o.bd }}">{{ o.label }}</div>
+                </sc-for></div>
+                </div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ dec.showText }}" hint-placeholder-val="{{ false }}">
+              <textarea value="{{ dec.text }}" onChange="{{ onDecText }}" placeholder="{{ t.decOtherPh }}" rows="3" style="border-radius:12px;border:1.5px solid var(--blue-200);padding:12px 14px;font-size:14px;color:var(--navy-900);background:#fff;outline:none;resize:none;line-height:1.45"></textarea>
+            </sc-if>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="primary" size="sm" full-width="{{ true }}" disabled="{{ dec.disabled }}" onClick="{{ confirmDecision }}" hint-size="100%,40px">{{ t.decConfirm }}</x-import>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ sheet.verify }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;gap:14px">
+            <div style="font-weight:800;font-size:20px;letter-spacing:-0.01em">{{ t.verifyQ }}</div>
+            <div style="font-size:14px;line-height:1.5;color:var(--gray-700)">{{ t.verifySub }}</div>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="success" size="sm" icon="circle-check" full-width="{{ true }}" onClick="{{ verifyYes }}" hint-size="100%,40px">{{ t.verifyYes }}</x-import>
+            <x-import component-from-global-scope="LetReportDesignSystem_c26832.Button" variant="secondary" size="sm" icon="rotate-ccw" full-width="{{ true }}" onClick="{{ verifyNo }}" hint-size="100%,40px">{{ t.verifyNo }}</x-import>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;reportFlow&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A · Camera + overlay chips&quot;,&quot;B · Camera + step cards&quot;,&quot;C · Camera + one sheet&quot;],&quot;default&quot;:&quot;A · Camera + overlay chips&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Report flow&quot;},&quot;startRole&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Food handler&quot;,&quot;Shift supervisor&quot;,&quot;QA manager&quot;],&quot;default&quot;:&quot;Food handler&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;App&quot;},&quot;language&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;English&quot;,&quot;Khmer&quot;],&quot;default&quot;:&quot;English&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;App&quot;}}">
+const EN = {
+  greet:'Good morning', site:'Main kitchen', spotted:'Spotted a problem?', spottedSub:'Snap a photo and send it in two taps. Add details later.',
+  reportIssue:'Report an issue', needs:'Needs attention', seeAll:'See all', home:'Home', reports:'Reports', tasks:'Tasks', alerts:'Alerts',
+  open:'Open', criticalN:'Critical open', closedWk:'Closed this week', all:'All', closedF:'Closed', empty:'No reports here.',
+  tasksSub:'Reports waiting on you.', noTasks:'Nothing waiting on you.', openReport:'Open report', reportedBy:'Reported by',
+  capa:'Corrective action', rootCause:'Root cause', activity:'Activity', addDetails:'Add details', addDetailsSub:'Location, batch, what you saw, voice note.',
+  where:'Where?', batch:'Product or batch', whatSaw:'Trouble', whatDid:'What did you do right away?', voice:'Voice note', save:'Save details',
+  sent:'Report sent', sentSub:'The QA team can see it now. You can add details any time.', alerted:'Critical issue. Vina (QA manager) got an urgent alert.',
+  later:'Later, back to home', pointAt:'Point at the problem', skip:'No photo', retake:'Retake', whatType:'What is the problem?', howSerious:'How serious?',
+  signSend:'Sign and send', signHere:'Sign here', clear:'Clear', send:'Send report', willAlert:'Vina (QA manager) will get an urgent alert.',
+  detailsLater:'Location is set from your shift. Add more details later.', critAlert:'Critical issue reported', switchRole:'View the app as',
+  assign:'Assign corrective action', whatToDo:'What needs to be done?', owner:'Who does it?', due:'Due', assignBtn:'Assign action',
+  verifyQ:'Did the action fix the problem?', verifySub:'Check the area or product yourself before closing the report.', verifyYes:'Yes, close report', verifyNo:'No, send back',
+  youMove:'Your move', record:'Record voice note', recording:'Recording… tap to stop', recorded:'Voice note · 0:12',
+  step1:'What is the problem?', step2:'How serious?', customPh:'Describe the problem', next:'Next', reporter:'Signed by',
+  ptype:'Product type', pname:'Product name', lot:'Lot number', qty:'Quantity affected', hold:'Put product on hold', holdSub:'Stops use or dispatch until QA checks it.', holdB:'On hold',
+  troublePh:'e.g. Leaking cartons after sealing', actionPh:'e.g. Stopped the filler, moved output to hold area', suggestion:'Suggestion', suggestionPh:'How can we stop this happening again?',
+  urgent:'Urgent', urgentSub:'Needs a response right now.', urgentB:'Urgent', support:'Need support from', other:'Other',
+  hcType:'What to check', hcRemind:'Remind in', hcWho:'Who checks', hcTitle:'Hold check', hcDue:'Check date', hcDemo:'Demo: jump to check day',
+  hcWaitOther:'Waiting for check by', hcDueHead:'Hold check due today', hcSt:{scheduled:'Scheduled',due:'Due today',passed:'Released',failed:'Rejected',decision:'QA decision',decided:'Decided'},
+  hcTypes:{swollen:'Swollen check',leak:'Leak check',lab:'Lab test'}, hcPass:{swollen:'No swelling · release',leak:'No leaks · release',lab:'Test passed · release'}, hcFail:{swollen:'Swollen found · reject',leak:'Leaks found · reject',lab:'Test failed · reject'},
+  days:'days', day:'day', hcFoundMsg:'Problem found at check. Decide what happens to the held product.', hcFoundWait:'Problem found. Waiting for QA decision.',
+  decBtn:'Make QA decision', decTitle:'QA decision', decNote:'QA decision', hcHistory:'Check history', decConfirm:'Confirm decision', decOtherPh:'e.g. Release 20 cartons that passed, destroy the rest',
+  dec:{keep:['Keep on hold, check again','Schedule another check and reminder.'],lab:['Send for lab test','Hold until lab results come back.'],reject:['Reject and destroy','Product is not safe to release.'],other:['Other decision','Write what should happen.']},
+  linesNow:'Lines now', pal:'pallets', lnSt:{running:'Running',stopped:'Stopped',cleaning:'Cleaning (CIP)'}, oneIssue:'open issue', manyIssues:'open issues', noIssues:'No open issues',
+  searchPh:'Search ID, product, lot…', filters:'Filters', reset:'Reset', clearAll:'Clear all', fDate:'Date', fLine:'Line / area', fProduct:'Product', fSev:'Severity',
+  dates:{any:'Any time',today:'Today',week:'Last 7 days'}, showN:'Show', resultsW:'results', resultW:'result',
+  checkN:'Check', resOk:'No problem found', resBad:'Problem found', remindOn:'Reminder on', qcTeam:'QC team',
+  rowType:'Product type', rowName:'Product', rowLot:'Lot number', rowQty:'Quantity', rowHold:'On hold', rowSug:'Suggestion', rowSup:'Support from', yes:'Yes', no:'No',
+  rowLoc:'Location', rowBatch:'Product / batch', rowSaw:'What they saw', rowDid:'Immediate action', rowVoice:'Voice note', rowSig:'Signed', missing:'Not added yet',
+  st:['Open','Action','Verify','Closed'], sev:['Low','Medium','High','Critical'],
+  sevHint:['Small issue, no risk to food','Fix today, low risk','Could affect food safety','Food at risk. Stop and alert QA'],
+  cats:['Temperature','Hygiene','Foreign object','Pest','Equipment','Allergen','Labelling','Cleaning','Custom'],
+  ptypes:['UHT milk','SCM','Yogurt'], units:['pcs','cartons','kg'], supports:['QA','Supervisor','Maintenance'], troubleL:'Trouble',
+  roots:['People','Equipment','Process','Supplier','Environment'], dues:['Today','Tomorrow','This week'],
+  roles:{handler:'Food handler',supervisor:'Shift supervisor',manager:'QA manager'},
+  can:{handler:'reports issues',supervisor:'assigns actions',manager:'verifies & closes'},
+  bar:{assign:'Assign corrective action',done:'Mark action as done',verify:'Verify and close',waitAssign:'Waiting for supervisor',waitAction:'Waiting on corrective action',waitVerify:'Waiting for QA check'},
+  task:{assign:'Assign a corrective action',done:'Do the corrective action',verify:'Check and close'},
+  tl:{reported:'Report sent',assigned:'Corrective action assigned to',done:'Corrective action done',verified:'Verified and closed',reopened:'Not fixed. Sent back',details:'Details added',hcSet:'Hold check scheduled',hcRem:'Reminder sent: hold check due',hcOk:'Checked, no problem. Product released',hcBad:'Product rejected',hcFound:'Problem found at hold check',hcKeep:'QA: keep on hold, check again',hcLab:'QA: sent for lab test',hcOther:'QA decision recorded',alert:'Urgent alert sent to Vina'}
+};
+const KM = {
+  greet:'អរុណសួស្តី', site:'ផ្ទះបាយធំ', spotted:'ឃើញបញ្ហាមែនទេ?', spottedSub:'ថតរូប ហើយផ្ញើក្នុងពីរដងចុច។ បន្ថែមព័ត៌មានពេលក្រោយ។',
+  reportIssue:'រាយការណ៍បញ្ហា', needs:'ត្រូវយកចិត្តទុកដាក់', seeAll:'មើលទាំងអស់', home:'ទំព័រដើម', reports:'របាយការណ៍', tasks:'ការងារ', alerts:'ដំណឹង',
+  open:'កំពុងបើក', criticalN:'ធ្ងន់ធ្ងរ', closedWk:'បិទសប្តាហ៍នេះ', all:'ទាំងអស់', closedF:'បានបិទ', empty:'មិនមានរបាយការណ៍ទេ។',
+  tasksSub:'របាយការណ៍ដែលរង់ចាំអ្នក។', noTasks:'គ្មានអ្វីរង់ចាំអ្នកទេ។', openReport:'បើករបាយការណ៍', reportedBy:'រាយការណ៍ដោយ',
+  capa:'វិធានការកែតម្រូវ', rootCause:'មូលហេតុ', activity:'សកម្មភាព', addDetails:'បន្ថែមព័ត៌មាន', addDetailsSub:'ទីតាំង ផលិតផល អ្វីដែលឃើញ សារជាសំឡេង។',
+  where:'នៅឯណា?', batch:'ផលិតផល ឬឡូត៍', whatSaw:'បញ្ហា', whatDid:'តើអ្នកបានធ្វើអ្វីភ្លាមៗ?', voice:'សារជាសំឡេង', save:'រក្សាទុក',
+  sent:'បានផ្ញើរបាយការណ៍', sentSub:'ក្រុម QA អាចមើលឃើញហើយ។ អ្នកអាចបន្ថែមព័ត៌មានពេលណាក៏បាន។', alerted:'បញ្ហាធ្ងន់ធ្ងរ។ Vina (អ្នកគ្រប់គ្រង QA) បានទទួលដំណឹងបន្ទាន់។',
+  later:'ពេលក្រោយ ត្រឡប់ទៅដើម', pointAt:'តម្រង់ទៅបញ្ហា', skip:'គ្មានរូប', retake:'ថតម្តងទៀត', whatType:'តើជាបញ្ហាអ្វី?', howSerious:'ធ្ងន់ធ្ងរប៉ុណ្ណា?',
+  signSend:'ចុះហត្ថលេខា និងផ្ញើ', signHere:'ចុះហត្ថលេខានៅទីនេះ', clear:'លុប', send:'ផ្ញើរបាយការណ៍', willAlert:'Vina (អ្នកគ្រប់គ្រង QA) នឹងទទួលដំណឹងបន្ទាន់។',
+  detailsLater:'ទីតាំងកំណត់តាមវេនរបស់អ្នក។ បន្ថែមព័ត៌មានពេលក្រោយ។', critAlert:'បញ្ហាធ្ងន់ធ្ងរត្រូវបានរាយការណ៍', switchRole:'មើលកម្មវិធីជា',
+  assign:'ចាត់តាំងវិធានការកែតម្រូវ', whatToDo:'តើត្រូវធ្វើអ្វី?', owner:'អ្នកណាធ្វើ?', due:'កាលកំណត់', assignBtn:'ចាត់តាំង',
+  verifyQ:'តើវិធានការនេះដោះស្រាយបញ្ហាបានទេ?', verifySub:'ពិនិត្យកន្លែង ឬផលិតផលដោយខ្លួនឯង មុនពេលបិទ។', verifyYes:'បាទ/ចាស បិទរបាយការណ៍', verifyNo:'ទេ ផ្ញើត្រឡប់',
+  youMove:'វេនអ្នក', record:'ថតសំឡេង', recording:'កំពុងថត… ចុចដើម្បីឈប់', recorded:'សារជាសំឡេង · 0:12',
+  step1:'តើជាបញ្ហាអ្វី?', step2:'ធ្ងន់ធ្ងរប៉ុណ្ណា?', customPh:'ពិពណ៌នាបញ្ហា', next:'បន្ទាប់', reporter:'ចុះហត្ថលេខាដោយ',
+  ptype:'ប្រភេទផលិតផល', pname:'ឈ្មោះផលិតផល', lot:'លេខឡូត៍', qty:'បរិមាណមានបញ្ហា', hold:'ផ្អាកផលិតផល', holdSub:'ឈប់ប្រើ ឬដឹកចេញ រហូតដល់ QA ពិនិត្យ។', holdB:'កំពុងផ្អាក',
+  troublePh:'ឧ. ប្រអប់លេចធ្លាយក្រោយបិទ', actionPh:'ឧ. បញ្ឈប់ម៉ាស៊ីន ហើយផ្លាស់ទៅកន្លែងផ្អាក', suggestion:'សំណូមពរ', suggestionPh:'តើយើងអាចការពារកុំឱ្យកើតម្តងទៀតដោយរបៀបណា?',
+  urgent:'បន្ទាន់', urgentSub:'ត្រូវការឆ្លើយតបភ្លាមៗ។', urgentB:'បន្ទាន់', support:'ត្រូវការជំនួយពី', other:'ផ្សេងៗ',
+  hcType:'ត្រូវពិនិត្យអ្វី', hcRemind:'រំលឹកក្នុងរយៈ', hcWho:'អ្នកពិនិត្យ', hcTitle:'ការពិនិត្យផលិតផលផ្អាក', hcDue:'ថ្ងៃពិនិត្យ', hcDemo:'សាកល្បង៖ លោតទៅថ្ងៃពិនិត្យ',
+  hcWaitOther:'រង់ចាំការពិនិត្យដោយ', hcDueHead:'ត្រូវពិនិត្យផលិតផលផ្អាកថ្ងៃនេះ', hcSt:{scheduled:'បានកំណត់',due:'ដល់ថ្ងៃ',passed:'បានបញ្ចេញ',failed:'បានបដិសេធ',decision:'រង់ចាំ QA',decided:'បានសម្រេច'},
+  hcTypes:{swollen:'ពិនិត្យការហើម',leak:'ពិនិត្យការលេចធ្លាយ',lab:'តេស្តមន្ទីរពិសោធន៍'}, hcPass:{swollen:'មិនហើម · បញ្ចេញ',leak:'មិនលេច · បញ្ចេញ',lab:'ជាប់តេស្ត · បញ្ចេញ'}, hcFail:{swollen:'ឃើញហើម · បដិសេធ',leak:'ឃើញលេច · បដិសេធ',lab:'មិនជាប់ · បដិសេធ'},
+  days:'ថ្ងៃ', day:'ថ្ងៃ', hcFoundMsg:'ឃើញបញ្ហាពេលពិនិត្យ។ សម្រេចថាត្រូវធ្វើអ្វីជាមួយផលិតផលផ្អាក។', hcFoundWait:'ឃើញបញ្ហា។ រង់ចាំការសម្រេចពី QA។',
+  decBtn:'ធ្វើការសម្រេច QA', decTitle:'ការសម្រេច QA', decNote:'ការសម្រេច QA', hcHistory:'ប្រវត្តិពិនិត្យ', decConfirm:'បញ្ជាក់ការសម្រេច', decOtherPh:'ឧ. បញ្ចេញ 20 កេសដែលល្អ បំផ្លាញនៅសល់',
+  dec:{keep:['បន្តផ្អាក ពិនិត្យម្តងទៀត','កំណត់ការពិនិត្យ និងការរំលឹកម្តងទៀត។'],lab:['ផ្ញើទៅតេស្តមន្ទីរពិសោធន៍','ផ្អាករហូតដល់មានលទ្ធផល។'],reject:['បដិសេធ និងបំផ្លាញ','ផលិតផលមិនមានសុវត្ថិភាព។'],other:['ការសម្រេចផ្សេង','សរសេរអ្វីដែលត្រូវធ្វើ។']},
+  linesNow:'ខ្សែផលិតកម្មឥឡូវ', pal:'ប៉ាឡែត', lnSt:{running:'កំពុងដំណើរការ',stopped:'បានឈប់',cleaning:'កំពុងសម្អាត (CIP)'}, oneIssue:'បញ្ហាបើក', manyIssues:'បញ្ហាបើក', noIssues:'គ្មានបញ្ហាបើក',
+  searchPh:'ស្វែងរក លេខ ផលិតផល ឡូត៍…', filters:'តម្រង', reset:'កំណត់ឡើងវិញ', clearAll:'លុបទាំងអស់', fDate:'កាលបរិច្ឆេទ', fLine:'ខ្សែ / តំបន់', fProduct:'ផលិតផល', fSev:'កម្រិតធ្ងន់ធ្ងរ',
+  dates:{any:'គ្រប់ពេល',today:'ថ្ងៃនេះ',week:'7 ថ្ងៃចុងក្រោយ'}, showN:'បង្ហាញ', resultsW:'លទ្ធផល', resultW:'លទ្ធផល',
+  checkN:'ពិនិត្យ', resOk:'គ្មានបញ្ហា', resBad:'ឃើញបញ្ហា', remindOn:'រំលឹកនៅ', qcTeam:'ក្រុម QC',
+  rowType:'ប្រភេទ', rowName:'ផលិតផល', rowLot:'លេខឡូត៍', rowQty:'បរិមាណ', rowHold:'ផ្អាក', rowSug:'សំណូមពរ', rowSup:'ជំនួយពី', yes:'បាទ/ចាស', no:'ទេ',
+  rowLoc:'ទីតាំង', rowBatch:'ផលិតផល', rowSaw:'អ្វីដែលឃើញ', rowDid:'វិធានការភ្លាមៗ', rowVoice:'សំឡេង', rowSig:'ហត្ថលេខា', missing:'មិនទាន់បន្ថែម',
+  st:['បើក','កែតម្រូវ','ផ្ទៀងផ្ទាត់','បានបិទ'], sev:['ទាប','មធ្យម','ខ្ពស់','ធ្ងន់ធ្ងរ'],
+  sevHint:['បញ្ហាតូច គ្មានហានិភ័យ','ជួសជុលថ្ងៃនេះ','អាចប៉ះពាល់សុវត្ថិភាពចំណីអាហារ','អាហារមានហានិភ័យ។ ឈប់ ហើយជូនដំណឹង QA'],
+  cats:['សីតុណ្ហភាព','អនាម័យ','វត្ថុបរទេស','សត្វល្អិត','ឧបករណ៍','អាឡែហ្ស៊ី','ស្លាក','ការសម្អាត','ផ្សេងៗ'],
+  ptypes:['ទឹកដោះគោ UHT','SCM','យ៉ាអ៊ួ'], units:['ដុំ','កេស','គីឡូ'], supports:['QA','អ្នកត្រួតពិនិត្យ','ជួសជុល'], troubleL:'បញ្ហា',
+  roots:['មនុស្ស','ឧបករណ៍','ដំណើរការ','អ្នកផ្គត់ផ្គង់','បរិស្ថាន'], dues:['ថ្ងៃនេះ','ថ្ងៃស្អែក','សប្តាហ៍នេះ'],
+  roles:{handler:'អ្នកកាន់អាហារ',supervisor:'អ្នកត្រួតពិនិត្យវេន',manager:'អ្នកគ្រប់គ្រង QA'},
+  can:{handler:'រាយការណ៍បញ្ហា',supervisor:'ចាត់តាំងការងារ',manager:'ផ្ទៀងផ្ទាត់ និងបិទ'},
+  bar:{assign:'ចាត់តាំងវិធានការកែតម្រូវ',done:'សម្គាល់ថាបានធ្វើរួច',verify:'ផ្ទៀងផ្ទាត់ និងបិទ',waitAssign:'រង់ចាំអ្នកត្រួតពិនិត្យ',waitAction:'រង់ចាំវិធានការកែតម្រូវ',waitVerify:'រង់ចាំ QA ពិនិត្យ'},
+  task:{assign:'ចាត់តាំងវិធានការកែតម្រូវ',done:'ធ្វើវិធានការកែតម្រូវ',verify:'ពិនិត្យ និងបិទ'},
+  tl:{reported:'បានផ្ញើរបាយការណ៍',assigned:'បានចាត់តាំងវិធានការទៅ',done:'វិធានការបានធ្វើរួច',verified:'បានផ្ទៀងផ្ទាត់ និងបិទ',reopened:'មិនទាន់ដោះស្រាយ។ ផ្ញើត្រឡប់',details:'បានបន្ថែមព័ត៌មាន',hcSet:'បានកំណត់ការពិនិត្យ',hcRem:'បានផ្ញើការរំលឹក',hcOk:'ពិនិត្យរួច គ្មានបញ្ហា។ បានបញ្ចេញ',hcBad:'បានបដិសេធផលិតផល',hcFound:'ឃើញបញ្ហាពេលពិនិត្យ',hcKeep:'QA៖ បន្តផ្អាក ពិនិត្យម្តងទៀត',hcLab:'QA៖ ផ្ញើទៅតេស្ត',hcOther:'បានកត់ត្រាការសម្រេច QA',alert:'បានផ្ញើដំណឹងបន្ទាន់ទៅ Vina'}
+};
+const CATS = [['temperature','thermometer'],['hygiene','hand'],['foreign','nut'],['pest','bug'],['equipment','wrench'],['allergen','wheat'],['labelling','tag'],['cleaning','spray-can'],['custom','pencil-line']];
+const PTYPES=['UHT milk','SCM','Yogurt'];
+const PNAMES={'UHT milk':['ADCaMg 100ml','Bestcows'],'SCM':['Commander'],'Yogurt':['Yogurt Plain','Yogurt Sweet']};
+const HC_TYPES=['swollen','leak','lab']; const HC_DAYS=[1,3,7]; const HC_OWNERS=['QC team','Sokha','Dara','Vina'];
+const TODAY=new Date(2026,8,26);
+const dueLabel=d=>{const x=new Date(TODAY); x.setDate(x.getDate()+d); return x.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});};
+const UNITS=['pcs','cartons','kg']; const SUPPORTS=['QA','Supervisor','Maintenance'];
+const SEV = [{bg:'var(--gray-100)',fg:'var(--gray-700)',bar:'var(--gray-300)'},{bg:'var(--blue-100)',fg:'var(--blue-700)',bar:'var(--blue-500)'},{bg:'var(--amber-100)',fg:'var(--amber-700)',bar:'var(--amber-500)'},{bg:'var(--red-100)',fg:'var(--red-700)',bar:'var(--red-500)'}];
+const ST = {open:{i:0,bg:'var(--blue-100)',fg:'var(--blue-700)'},action:{i:1,bg:'var(--amber-100)',fg:'var(--amber-700)'},verify:{i:2,bg:'var(--blue-100)',fg:'var(--navy-900)'},closed:{i:3,bg:'var(--green-100)',fg:'var(--green-700)'}};
+const PEOPLE = {handler:{name:'Sokha',avatar:'assets/sokha-portrait.png'},supervisor:{name:'Dara',avatar:'assets/dara-portrait.png'},manager:{name:'Vina',avatar:'assets/vina-portrait.png'}};
+const AV = {Sokha:'assets/sokha-portrait.png',Dara:'assets/dara-portrait.png',Vina:'assets/vina-portrait.png'};
+const LOCS = ['SCM line 1','UHT line 2','Yogurt line 3','UHT line 4','Packing','Receiving'];
+const LINES = [
+  {name:'SCM line 1',type:'SCM',product:'Commander',qty:80,target:120,status:'running'},
+  {name:'UHT line 2',type:'UHT',product:'ADCaMg 100ml',qty:42,target:100,status:'stopped'},
+  {name:'Yogurt line 3',type:'Yogurt',product:'Yogurt Sweet',qty:35,target:60,status:'running'},
+  {name:'UHT line 4',type:'UHT',product:'Bestcows',qty:0,target:90,status:'cleaning'}];
+const TITLES = {temperature:'Temperature out of range',hygiene:'Hygiene problem',foreign:'Foreign object found',pest:'Pest seen',equipment:'Equipment fault',allergen:'Allergen control issue',labelling:'Labelling error',cleaning:'Cleaning not done',custom:'Other problem'};
+const draftOf = r => ({loc:r.loc,ptype:r.ptype||'',pname:r.pname||'',pnameText:'',lot:r.lot||'',qty:r.qty||'',unit:r.unit||'pcs',hold:!!r.hold,hcType:(r.holdCheck&&r.holdCheck.type)||'swollen',hcDays:(r.holdCheck&&r.holdCheck.days)||3,hcOwner:(r.holdCheck&&r.holdCheck.owner)||'QC team',desc:r.desc||'',action:r.action||'',suggestion:r.suggestion||'',urgent:!!r.urgent,support:r.support||[],voice:!!r.voice});
+const SEED = [
+  {id:'TR-1042',title:'Sterilizer temp below 137°C',cat:'temperature',sev:3,loc:'UHT line 2',status:'action',by:'Sokha',time:'09:12',photo:'IMG_0418.jpg',ptype:'UHT milk',pname:'ADCaMg 100ml',lot:'U260926-02',qty:'120',unit:'cartons',hold:true,holdCheck:{type:'swollen',days:3,owner:'Dara',status:'scheduled',due:dueLabel(3)},urgent:true,support:['QA','Maintenance'],
+    desc:'Chart showed 134°C for about 4 minutes at 09:05.',action:'Stopped the filler and moved output to the hold area.',suggestion:'Check the steam valve before every restart.',voice:false,
+    capa:{root:'Equipment',text:'Repair steam valve, re-sterilize line, test held cartons before release.',owner:'Sokha',due:'Today 12:00'},
+    tl:[['reported','Sokha','09:12'],['alert','System','09:12'],['hcSet','Vina','09:15'],['assigned','Dara','09:20',' Sokha']]},
+  {id:'TR-1041',title:'Metal fragment found at filler',cat:'foreign',sev:2,loc:'SCM line 1',status:'verify',by:'Dara',time:'Wed',photo:'IMG_0402.jpg',ptype:'SCM',pname:'Commander',lot:'S260925-11',qty:'40',unit:'cartons',hold:true,holdCheck:{type:'swollen',days:3,owner:'Sokha',status:'due',due:'Today'},urgent:false,support:['QA'],
+    desc:'Small metal piece found in a can at the filling station.',action:'Held the lot and stopped the line.',suggestion:'Add a metal detector check every hour.',voice:true,
+    capa:{root:'Equipment',text:'Inspect filler nozzle, run metal detector test, re-check held lot.',owner:'Dara',due:'Wed 17:00'},
+    tl:[['reported','Dara','Wed 14:05'],['hcSet','Vina','Wed 14:20'],['assigned','Vina','Wed 14:30',' Dara'],['done','Dara','Wed 16:40'],['hcRem','System','Today 07:00']]},
+  {id:'TR-1039',title:'No soap at hand-wash sink',cat:'hygiene',sev:1,loc:'Yogurt line 3',status:'open',by:'Sokha',time:'08:40',photo:'IMG_0415.jpg',ptype:'',pname:'',lot:'',qty:'',unit:'pcs',hold:false,urgent:false,support:['Supervisor'],
+    desc:'Dispenser empty since start of shift.',action:'Used the sink at the entrance.',suggestion:'',voice:false,capa:null,tl:[['reported','Sokha','08:40']]},
+  {id:'TR-1037',title:'Wrong expiry date on cups',cat:'labelling',sev:2,loc:'Packing',status:'open',by:'Sokha',time:'07:55',photo:'IMG_0411.jpg',ptype:'Yogurt',pname:'Yogurt Sweet',lot:'',qty:'',unit:'pcs',hold:false,urgent:false,support:[],
+    desc:'',action:'',suggestion:'',voice:false,capa:null,tl:[['reported','Sokha','07:55']]},
+  {id:'TR-1036',title:'Fly near dock door',cat:'pest',sev:0,loc:'Receiving',status:'closed',by:'Sokha',time:'Mon',photo:'IMG_0390.jpg',ptype:'',pname:'',lot:'',qty:'',unit:'pcs',hold:false,urgent:false,support:[],
+    desc:'One fly seen at the air curtain.',action:'Closed the door.',suggestion:'',voice:false,
+    capa:{root:'Environment',text:'Check the air curtain and call pest control for a routine visit.',owner:'Dara',due:'Tue'},
+    tl:[['reported','Sokha','Mon 10:02'],['assigned','Vina','Mon 10:30',' Dara'],['done','Dara','Tue 09:00'],['verified','Vina','Tue 11:15']]}
+];
+const NOTES = [
+  {id:'TR-1041',icon:'bell-ring',tone:'amber',text:'Reminder: day-3 swollen check due today for Commander, lot S260925-11 (40 cartons on hold)',t:'07:00',roles:['handler','manager','supervisor']},
+  {id:'TR-1042',icon:'siren',tone:'red',text:'Critical: Sterilizer temp below 137°C',t:'09:12',roles:['supervisor','manager']},
+  {id:'TR-1042',icon:'clipboard-check',tone:'blue',text:'You were assigned: Sterilizer temp below 137°C',t:'09:20',roles:['handler']},
+  {id:'TR-1041',icon:'circle-check',tone:'green',text:'Dara finished the action on TR-1041. Ready to verify.',t:'Wed',roles:['manager','supervisor']},
+  {id:'TR-1039',icon:'triangle-alert',tone:'amber',text:'New report: No soap at hand-wash sink',t:'08:40',roles:['supervisor','manager']},
+  {id:'TR-1036',icon:'circle-check',tone:'green',text:'Your report TR-1036 was closed. Thank you!',t:'Tue',roles:['handler']}
+];
+const TONE = {red:['var(--red-100)','var(--red-700)'],blue:['var(--blue-100)','var(--blue-700)'],green:['var(--green-100)','var(--green-700)'],amber:['var(--amber-100)','var(--amber-700)']};
+
+class Component extends DCLogic {
+  state = { screen:'home', prev:'home', role:null, lang:null, filter:'all', selId:null, reports:SEED, notes:NOTES, read:{}, lastId:null, lastCritical:false,
+    cap:{stage:'camera', cat:null, sev:null, photo:false, customText:''}, signed:false, draft:{}, recording:false, sheet:null, asg:{}, toast:null, nextId:1043, lineQty:LINES.map(l=>l.qty) };
+  componentDidMount(){ this._lt=setInterval(()=>this.setState(s=>({lineQty:s.lineQty.map((q,i)=>LINES[i].status==='running'&&q<LINES[i].target?q+1:q)})),6000); }
+  scrollRef = React.createRef();
+
+  role(){ return this.state.role || ({'Food handler':'handler','Shift supervisor':'supervisor','QA manager':'manager'})[this.props.startRole] || 'handler'; }
+  lang(){ return this.state.lang || (this.props.language === 'Khmer' ? 'km' : 'en'); }
+  flow(){ const f = this.props.reportFlow || 'A'; return f[0]; }
+  T(){ return this.lang()==='km' ? KM : EN; }
+  go(screen, extra){ this.setState(s=>({prev:s.screen, screen, ...(extra||{})})); }
+  componentDidUpdate(pp, ps){ if(ps.screen!==this.state.screen && this.scrollRef.current) this.scrollRef.current.scrollTop = 0; }
+  componentWillUnmount(){ clearTimeout(this._tt); clearInterval(this._lt); }
+
+  canAct(r){ const role=this.role(), me=PEOPLE[role].name;
+    if(r.status==='open') return role!=='handler' ? 'assign' : null;
+    if(r.status==='action') return (r.capa && r.capa.owner===me) || role==='manager' ? 'done' : null;
+    if(r.status==='verify') return role==='manager' ? 'verify' : null;
+    return null; }
+
+  canCheck(r){ const hc=r.holdCheck, role=this.role(), me=PEOPLE[role].name; if(!hc||hc.status!=='due') return false;
+    return hc.owner===me || role==='manager' || (hc.owner==='QC team' && role!=='handler'); }
+  deco(r){ const T=this.T(), st=ST[r.status], sv=SEV[r.sev], ci=CATS.findIndex(c=>c[0]===r.cat); const act=this.canAct(r);
+    return {...r, icon:CATS[ci][1], catLabel:T.cats[ci], sev:T.sev[r.sev], sevBg:sv.bg, sevFg:sv.fg, stLabel:T.st[st.i], stBg:st.bg, stFg:st.fg,
+      mine:!!act||this.canCheck(r)||(r.holdCheck&&r.holdCheck.status==='decision'&&this.role()==='manager'), moveLabel:T.youMove, open:()=>this.go('detail',{selId:r.id}) }; }
+
+  hcView(r,T,me){ const hc=r.holdCheck; if(!hc) return {}; const st=hc.status;
+    const tone={scheduled:['var(--blue-100)','var(--blue-700)','clock','var(--blue-200)'],due:['var(--amber-100)','var(--amber-700)','bell-ring','var(--amber-500)'],passed:['var(--green-100)','var(--green-700)','circle-check','var(--green-300)'],failed:['var(--red-100)','var(--red-700)','circle-x','var(--red-500)'],decision:['var(--red-100)','var(--red-700)','triangle-alert','var(--red-500)'],decided:['var(--blue-100)','var(--navy-900)','gavel','var(--blue-200)']}[st];
+    const can=this.canCheck(r); const ownerL=hc.owner==='QC team'?T.qcTeam:hc.owner;
+    const finish=(ok)=>()=>{ const t=this.now(); const hist=[...(hc.history||[]),{ok,t:'Today '+t,by:me.name}];
+      if(ok) this.update(r.id,x=>({...x,hold:false,holdCheck:{...x.holdCheck,history:hist,status:'passed',due:'Today'},tl:[...x.tl,['hcOk',me.name,t]]}));
+      else { this.update(r.id,x=>({...x,holdCheck:{...x.holdCheck,history:hist,status:'decision'},tl:[...x.tl,['hcFound',me.name,t]]}));
+        if(this.role()==='manager') this.openDecide(r); else this.setState(s=>({notes:[{id:r.id,icon:'triangle-alert',tone:'red',text:'QA decision needed: problem found at hold check for '+(r.pname||r.title)+(r.lot?', lot '+r.lot:''),t,roles:['manager']},...s.notes]})); } };
+    const history=(hc.history||[]).map((x,i)=>({n:i+1,res:(x.ok?T.resOk:T.resBad)+' · '+x.by,t:x.t,fg:x.ok?'var(--green-700)':'var(--red-700)'}));
+    return {typeLabel:T.hcTypes[hc.type]+((hc.history||[]).length&&st!=='decision'&&st!=='passed'&&st!=='failed'?' · '+T.checkN+' '+((hc.history||[]).length+1):''),sub:(r.qty?r.qty+' '+r.unit+' · ':'')+(r.pname||'')+(r.lot?' · '+r.lot:''),due:hc.due,owner:ownerL,
+      stLabel:T.hcSt[st],stBg:tone[0],stFg:tone[1],icon:tone[2],icBg:tone[0],icFg:tone[1],bd:tone[3],
+      canCheck:can,waiting:st==='due'&&!can,needDecision:st==='decision'&&this.role()==='manager',waitDecision:st==='decision'&&this.role()!=='manager',decide:()=>this.openDecide(r),
+      hasNote:!!hc.note,note:hc.note||'',history,hasHistory:history.length>0,scheduled:st==='scheduled',passLabel:T.hcPass[hc.type],failLabel:T.hcFail[hc.type],pass:finish(true),fail:finish(false),
+      skip:()=>{ this.update(r.id,x=>({...x,holdCheck:{...x.holdCheck,status:'due',due:'Today'},tl:[...x.tl,['hcRem','System',this.now()]]}));
+        this.setState(s=>({notes:[{id:r.id,icon:'bell-ring',tone:'amber',text:'Reminder: '+T.hcTypes[hc.type].toLowerCase()+' due today for '+(r.pname||r.title)+(r.lot?', lot '+r.lot:''),t:this.now(),roles:['handler','supervisor','manager']},...s.notes]})); }};
+  }
+  openDecide(r){ const hc=r.holdCheck||{}; this.setState({sheet:'decide',dec:{choice:'keep',days:3,owner:hc.owner||'QC team',text:''}}); }
+  update(id, fn){ this.setState(s=>({reports:s.reports.map(r=>r.id===id?fn(r):r)})); }
+  now(){ const d=new Date(); return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0'); }
+
+  setupSig = el => {
+    if(!el || el===this._sig) return; this._sig=el; const ctx=el.getContext('2d'); ctx.lineWidth=5; ctx.lineCap='round'; ctx.lineJoin='round'; ctx.strokeStyle='#0F2D58';
+    let down=false; const pos=e=>{const b=el.getBoundingClientRect(); return [(e.clientX-b.left)*el.width/b.width,(e.clientY-b.top)*el.height/b.height];};
+    el.onpointerdown=e=>{down=true; el.setPointerCapture(e.pointerId); const [x,y]=pos(e); ctx.beginPath(); ctx.moveTo(x,y);};
+    el.onpointermove=e=>{ if(!down) return; const [x,y]=pos(e); ctx.lineTo(x,y); ctx.stroke(); if(!this.state.signed) this.setState({signed:true}); };
+    el.onpointerup=()=>{down=false;};
+  };
+
+  send = () => {
+    const {cap, nextId} = this.state; const role=this.role(), me=PEOPLE[role].name; const id='TR-'+nextId; const t=this.now();
+    const tl=[['reported',me,t]]; if(cap.sev===3) tl.push(['alert','System',t]);
+    const title=cap.cat==='custom'?(cap.customText||'').trim():TITLES[cap.cat];
+    const r={id,title,cat:cap.cat,sev:cap.sev,loc:LOCS[0],status:'open',by:me,time:t,photo:cap.photo?'IMG_0423.jpg':'No photo',ptype:'',pname:'',lot:'',qty:'',unit:'pcs',hold:false,urgent:cap.sev===3,support:[],desc:'',action:'',suggestion:'',voice:false,capa:null,tl,signedAt:t};
+    const notes = cap.sev===3 ? [{id,icon:'siren',tone:'red',text:'Critical: '+r.title,t,roles:['supervisor','manager']},...this.state.notes] : [{id,icon:'triangle-alert',tone:'amber',text:'New report: '+r.title,t,roles:['supervisor','manager']},...this.state.notes];
+    this._sig=null;
+    this.setState(s=>({reports:[r,...s.reports], notes, nextId:nextId+1, lastId:id, lastCritical:cap.sev===3, selId:id, prev:s.screen, screen:'done', signed:false}));
+  };
+
+  renderVals(){
+    const s=this.state, T=this.T(), role=this.role(), flow=this.flow(), me={...PEOPLE[role], role, roleLabel:T.roles[role]};
+    const is={home:s.screen==='home',list:s.screen==='list',tasks:s.screen==='tasks',alerts:s.screen==='alerts',detail:s.screen==='detail',details:s.screen==='details',done:s.screen==='done',capture:s.screen==='capture'};
+    const all=s.reports.map(r=>this.deco(r));
+    const active=all.filter(r=>r.status!=='closed');
+    const startCap = ()=>{ this._sig=null; this.go('capture',{cap:{stage:'camera',cat:null,sev:null,photo:false,customText:''},signed:false}); };
+    const nav={home:()=>this.go('home'),list:()=>this.go('list'),tasks:()=>this.go('tasks'),alerts:()=>this.go('alerts'),capture:startCap,
+      detail:()=>this.go('detail'),details:()=>{ const r=s.reports.find(x=>x.id===s.selId); this.go('details',{draft:draftOf(r),recording:false}); }};
+
+    const stats=[{n:active.length,label:T.open,fg:'var(--blue-600)',onClick:()=>this.go('list',{filter:'open'})},
+      {n:active.filter(r=>r.sev===T.sev[3]).length,label:T.criticalN,fg:'var(--red-700)',onClick:()=>this.go('list',{filter:'open'})},
+      {n:all.filter(r=>r.status==='closed').length+11,label:T.closedWk,fg:'var(--green-600)',onClick:()=>this.go('list',{filter:'closed'})}];
+    const LST={running:['var(--green-700)','var(--green-500)','lrPulse 1.6s infinite','var(--green-500)'],stopped:['var(--red-700)','var(--red-500)','none','var(--red-500)'],cleaning:['var(--blue-700)','var(--blue-500)','none','var(--blue-300)']};
+    const lines=LINES.map((l,i)=>{const n=s.reports.filter(r=>r.loc===l.name&&r.status!=='closed').length; const q=s.lineQty[i]; const c=LST[l.status];
+      return {name:l.name,type:l.type,product:l.product,qty:q,target:l.target,pct:Math.round(q/l.target*100)+'%',stLabel:T.lnSt[l.status],stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
+        bd:n&&l.status==='stopped'?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
+        open:()=>this.go('list',{filter:'all',f:{date:'any',lines:[l.name],products:[],sevs:[]},q:''})};});
+    const attention=[...active].sort((a,b)=>(b.mine-a.mine)||(s.reports.find(x=>x.id===b.id).sev-s.reports.find(x=>x.id===a.id).sev)).slice(0,3);
+
+    
+    const pill=(on)=>({bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'});
+    const F=s.f||{date:'any',lines:[],products:[],sevs:[]}; const q=(s.q||'').trim().toLowerCase();
+    const dayAgo=r=>/^\d/.test(r.time)||r.time==='Today'?0:({Fri:1,Thu:2,Wed:3,Tue:4,Mon:5,Sun:6})[r.time]??9;
+    const pass=r=>(!q||[r.id,r.title,r.pname,r.lot,r.loc,r.ptype].join(' ').toLowerCase().includes(q))
+      &&(F.date==='any'||(F.date==='today'?dayAgo(r)===0:dayAgo(r)<=7))
+      &&(!F.lines.length||F.lines.includes(r.loc))&&(!F.products.length||F.products.includes(r.pname))&&(!F.sevs.length||F.sevs.includes(r.sev));
+    const base=s.reports.filter(pass);
+    const counts={all:base.length,open:base.filter(r=>r.status!=='closed').length,closed:base.filter(r=>r.status==='closed').length};
+    const listItems=base.filter(r=>s.filter==='all'||(s.filter==='open'?r.status!=='closed':r.status==='closed')).map(r=>this.deco(r));
+    const setF=p=>this.setState(st=>({f:{...(st.f||{date:'any',lines:[],products:[],sevs:[]}),...p}}));
+    const tog=(arr,v)=>arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
+    const fDates=['any','today','week'].map(k=>({label:T.dates[k],...pill(F.date===k),pick:()=>setF({date:k})}));
+    const fLines=LOCS.map(l=>({label:l,...pill(F.lines.includes(l)),pick:()=>setF({lines:tog(F.lines,l)})}));
+    const fProducts=[].concat(...Object.values(PNAMES)).map(p=>({label:p,...pill(F.products.includes(p)),pick:()=>setF({products:tog(F.products,p)})}));
+    const fSevs=T.sev.map((l,i)=>({label:l,...pill(F.sevs.includes(i)),pick:()=>setF({sevs:tog(F.sevs,i)})}));
+    const activeF=[].concat(F.date!=='any'?[{label:T.dates[F.date],remove:()=>setF({date:'any'})}]:[],
+      F.lines.map(l=>({label:l,remove:()=>setF({lines:tog(F.lines,l)})})),F.products.map(p=>({label:p,remove:()=>setF({products:tog(F.products,p)})})),
+      F.sevs.map(i=>({label:T.sev[i],remove:()=>setF({sevs:tog(F.sevs,i)})})));
+    const nRes=listItems.length;
+    const filters=[['all',T.all],['open',T.open],['closed',T.closedF]].map(([k,l])=>{const on=s.filter===k; return {label:l,n:counts[k],bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)',onClick:()=>this.setState({filter:k})};});
+
+    const taskItems=[];
+    all.filter(r=>r.mine).forEach(r=>{const rr=s.reports.find(x=>x.id===r.id); if(rr.holdCheck&&rr.holdCheck.status==='decision'&&role==='manager') taskItems.push({...r,taskLabel:T.decBtn,taskIcon:'gavel'});
+      if(this.canCheck(rr)) taskItems.push({...r,taskLabel:T.hcTypes[rr.holdCheck.type]+' · '+T.hcSt.due,taskIcon:'bell-ring'}); const a=this.canAct(rr); if(a) taskItems.push({...r,taskLabel:T.task[a],taskIcon:a==='assign'?'user-plus':a==='done'?'wrench':'shield-check'});});
+    const dueChecks=s.reports.filter(r=>this.canCheck(r)).map(r=>({head:T.hcDueHead,sub:T.hcTypes[r.holdCheck.type]+' · '+r.pname+(r.lot?' · '+r.lot:'')+(r.qty?' · '+r.qty+' '+r.unit:''),open:()=>this.go('detail',{selId:r.id})}));
+    const myNotes=s.notes.map((n,i)=>({...n,key:i})).filter(n=>n.roles.includes(role));
+    const unread=myNotes.filter(n=>!s.read[n.key+role]).length;
+    const alertItems=myNotes.map((n,i)=>({text:n.text,t:n.t,icon:n.icon,icBg:TONE[n.tone][0],icFg:TONE[n.tone][1],unread:!s.read[n.key+role],bd:i?'var(--gray-100)':'transparent',bg:s.read[n.key+role]?'#fff':'var(--blue-50)',
+      open:()=>this.setState(st=>({read:{...st.read,[n.key+role]:true}}),()=>this.go('detail',{selId:n.id}))}));
+
+    const tabDef=[['home','house',T.home],['list','clipboard-list',T.reports],['tasks','list-checks',T.tasks],['alerts','bell',T.alerts]];
+    const tabs=tabDef.map(([k,ic,l])=>({icon:ic,label:l,fg:s.screen===k?'var(--blue-600)':'var(--navy-300)',go:()=>this.go(k),
+      hasBadge:(k==='alerts'&&unread>0)||(k==='tasks'&&taskItems.length>0),badge:k==='alerts'?unread:taskItems.length}));
+
+    // detail
+    let sel={}, detailBar={show:false};
+    const raw=s.reports.find(r=>r.id===s.selId);
+    if(raw){ const d=this.deco(raw), si=ST[raw.status].i;
+      const steps=T.st.map((l,i)=>({label:l,done:i<si||raw.status==='closed',dotBg:i<si||raw.status==='closed'?'var(--green-600)':i===si?'#fff':'#fff',dotBd:i<=si?(i<si||raw.status==='closed'?'var(--green-600)':'var(--blue-600)'):'var(--gray-200)',
+        ring:i===si&&raw.status!=='closed'?'0 0 0 4px var(--blue-100)':'none',fg:i<=si?'var(--navy-900)':'var(--gray-500)',lineBg:i<=si?'var(--green-500)':'var(--gray-200)',lineOp:i===0?0:1}));
+      const pti=PTYPES.indexOf(raw.ptype), sup=(raw.support||[]).map(x=>T.supports[SUPPORTS.indexOf(x)]).join(', '), ui=UNITS.indexOf(raw.unit);
+      const rows=[[T.rowLoc,raw.loc],[T.rowType,pti>=0?T.ptypes[pti]:''],[T.rowName,raw.pname],[T.rowLot,raw.lot],[T.rowQty,raw.qty?raw.qty+' '+T.units[ui<0?0:ui]:''],[T.rowHold,raw.hold?T.yes:T.no],
+        [T.troubleL,raw.desc],[T.rowDid,raw.action],[T.rowSug,raw.suggestion],[T.rowSup,sup]].concat(raw.voice?[[T.rowVoice,T.recorded]]:[]).concat([[T.reporter,raw.by+' · '+(raw.signedAt||raw.tl[0][2])]]).map(([k,v],i)=>({k,v:v||T.missing,fg:v?'var(--navy-900)':'var(--gray-500)',bd:i?'var(--gray-100)':'transparent'}));
+      const tl=raw.tl.map((e,i)=>({text:T.tl[e[0]]+(e[3]||''),who:e[1],t:e[2],dot:e[0]==='alert'?'var(--red-500)':e[0]==='verified'?'var(--green-600)':e[0]==='reopened'?'var(--amber-500)':'var(--blue-500)',lineOp:i===raw.tl.length-1?0:1}));
+      sel={...d,steps,rows,tl,hasCapa:!!raw.capa,capa:raw.capa?{...raw.capa,avatar:AV[raw.capa.owner]}:{},hasHc:!!raw.holdCheck, hc:this.hcView(raw,T,me), needsDetails:!raw.desc&&raw.by===me.name&&raw.status!=='closed', urgent:!!raw.urgent, hold:!!raw.hold};
+      const act=this.canAct(raw);
+      if(raw.status!=='closed'){
+        const actions={assign:{icon:'user-plus',variant:'primary',onClick:()=>{const ci=CATS.findIndex(c=>c[0]===raw.cat); this.setState({sheet:'assign',asg:{root:null,owner:null,due:0,text:''}});}},
+          done:{icon:'circle-check',variant:'success',onClick:()=>this.update(raw.id,r=>({...r,status:'verify',tl:[...r.tl,['done',me.name,this.now()]]}))},
+          verify:{icon:'shield-check',variant:'success',onClick:()=>this.setState({sheet:'verify'})}};
+        const wait={open:T.bar.waitAssign,action:T.bar.waitAction,verify:T.bar.waitVerify}[raw.status];
+        detailBar= act ? {show:is.detail,canAct:true,waiting:false,label:T.bar[act],...actions[act]} : {show:is.detail,canAct:false,waiting:true,label:wait};
+      }
+    }
+
+    // capture
+    const c=s.cap;
+    const pickCat=k=>()=>this.setState(st=>({cap:{...st.cap,cat:k,stage:flow==='B'&&k!=='custom'?'sev':st.cap.stage}}));
+    const pickSev=i=>()=>this.setState(st=>({cap:{...st.cap,sev:i,stage:flow==='C'?st.cap.stage:'sign'}}));
+    const cats=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',ic:on?'#fff':'var(--blue-600)',bd:on?'var(--blue-600)':'var(--blue-200)'};});
+    const catsDark=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),bg:on?'#fff':'rgba(255,255,255,.12)',fg:on?'var(--navy-900)':'#fff'};});
+    const sevs=T.sev.map((l,i)=>{const on=c.sev===i; return {label:l,pick:pickSev(i),bg:on?SEV[i].fg:SEV[i].bg,fg:on?'#fff':SEV[i].fg,bd:on?SEV[i].fg:'transparent'};});
+    const sevsDark=T.sev.map((l,i)=>({label:l,pick:pickSev(i),bg:SEV[i].bg,fg:SEV[i].fg}));
+    const sevCards=T.sev.map((l,i)=>({label:l,hint:T.sevHint[i],pick:pickSev(i),bar:SEV[i].bar,fg:SEV[i].fg}));
+    const ci=CATS.findIndex(x=>x[0]===c.cat);
+    const stepIdx=c.stage==='sev'?1:c.stage==='sign'?2:0;
+    const capV={
+      showCamera:c.stage==='camera',
+      showOverlay:flow==='A'&&c.stage==='pick',
+      showSteps:flow==='B'&&(c.stage==='pick'||c.stage==='sev'),
+      showSheet:flow==='C'&&c.stage==='pick',
+      showSign:flow!=='C'&&c.stage==='sign',
+      subCat:c.stage==='pick', subSev:c.stage==='sev', stepTitle:c.stage==='sev'?T.step2:T.step1,
+      bars:[0,1,2].map(i=>({bg:i<=stepIdx?'var(--blue-600)':'var(--blue-200)'})),
+      sevOp:c.cat?1:.35, sevPe:c.cat?'auto':'none',
+      catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:LOCS[0],
+      critical:c.sev===3, isCustom:c.cat==='custom', customText:c.customText||'', customEmpty:!(c.customText||'').trim(),
+      sendDisabled:!(c.cat&&c.sev!=null&&s.signed&&(c.cat!=='custom'||(c.customText||'').trim()))
+    };
+    const shoot=()=>this.setState(st=>({cap:{...st.cap,photo:true,stage:'pick'}}));
+
+    // details draft
+    const dr=s.draft;
+    const locs=LOCS.map(l=>{const on=dr.loc===l; return {label:l,pick:()=>this.setState(st=>({draft:{...st.draft,loc:l}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
+    const setD=patch=>this.setState(st=>({draft:{...st.draft,...patch}}));
+    const ptypes=PTYPES.map((p,i)=>({label:T.ptypes[i],...pill(dr.ptype===p),pick:()=>setD({ptype:p,pname:''})}));
+    const pnames=(PNAMES[dr.ptype]||[]).concat(['__other']).map(n=>({label:n==='__other'?T.other:n,...pill(dr.pname===n),pick:()=>setD({pname:n})}));
+    const units=UNITS.map((u,i)=>({label:T.units[i],...pill(dr.unit===u),pick:()=>setD({unit:u})}));
+    const supports=SUPPORTS.map((x,i)=>{const on=(dr.support||[]).includes(x); return {label:T.supports[i],bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--blue-600)':'var(--blue-200)',
+      pick:()=>setD({support:on?dr.support.filter(y=>y!==x):[...(dr.support||[]),x]})};});
+    const tg=(on,tone)=>({bg:on?tone[0]:'#fff',bd:on?tone[1]:'var(--blue-200)',ic:on?tone[2]:'var(--navy-500)',track:on?tone[2]:'var(--gray-300)',knob:on?'21px':'3px'});
+    const holdT={...tg(dr.hold,['var(--blue-50)','var(--navy-900)','var(--navy-900)']),toggle:()=>setD({hold:!dr.hold})};
+    const urgentT={...tg(dr.urgent,['var(--red-100)','var(--red-500)','var(--red-700)']),toggle:()=>setD({urgent:!dr.urgent})};
+    const hcTypes=HC_TYPES.map(k=>({label:T.hcTypes[k],...pill(dr.hcType===k),pick:()=>setD({hcType:k})}));
+    const hcDaysL=HC_DAYS.map(d=>({label:d+' '+(d===1?T.day:T.days),...pill(dr.hcDays===d),pick:()=>setD({hcDays:d})}));
+    const hcOwners=HC_OWNERS.map(o=>({label:o==='QC team'?T.qcTeam:o,...pill(dr.hcOwner===o),pick:()=>setD({hcOwner:o})}));
+    const dc=s.dec||{}; const setDec=p=>this.setState(st=>({dec:{...st.dec,...p}}));
+    const decTone={keep:['clock','var(--blue-100)','var(--blue-700)'],lab:['flask-conical','var(--blue-100)','var(--blue-700)'],reject:['trash-2','var(--red-100)','var(--red-700)'],other:['pencil-line','var(--gray-100)','var(--gray-700)']};
+    const decOpts=['keep','lab','reject','other'].map(k=>{const on=dc.choice===k; return {label:T.dec[k][0],sub:T.dec[k][1],icon:decTone[k][0],icBg:decTone[k][1],icFg:decTone[k][2],
+      bg:on?'var(--blue-50)':'#fff',bd:on?'var(--blue-600)':'var(--blue-200)',radio:on?'var(--blue-600)':'var(--gray-300)',dot:on?'var(--blue-600)':'transparent',pick:()=>setDec({choice:k})};});
+    const decDays=HC_DAYS.map(d=>({label:d+' '+(d===1?T.day:T.days),...pill(dc.days===d),pick:()=>setDec({days:d})}));
+    const decOwners=HC_OWNERS.map(o=>({label:o==='QC team'?T.qcTeam:o,...pill(dc.owner===o),pick:()=>setDec({owner:o})}));
+    const selR=s.reports.find(x=>x.id===s.selId);
+    const decSub=selR?(selR.pname||selR.title)+(selR.lot?' · '+selR.lot:'')+(selR.qty?' · '+selR.qty+' '+selR.unit:''):'';
+    const confirmDecision=()=>{ const t=this.now(); const c=dc.choice;
+      this.update(s.selId,x=>{ const hc=x.holdCheck;
+        if(c==='keep') return {...x,hold:true,holdCheck:{...hc,status:'scheduled',days:dc.days,owner:dc.owner,due:dueLabel(dc.days),note:''},tl:[...x.tl,['hcKeep',me.name,t],['hcSet',me.name,t]]};
+        if(c==='lab') return {...x,hold:true,holdCheck:{...hc,type:'lab',status:'scheduled',days:dc.days,owner:dc.owner,due:dueLabel(dc.days),note:''},tl:[...x.tl,['hcLab',me.name,t]]};
+        if(c==='reject') return {...x,hold:false,holdCheck:{...hc,status:'failed'},tl:[...x.tl,['hcBad',me.name,t]]};
+        return {...x,holdCheck:{...hc,status:'decided',note:dc.text},tl:[...x.tl,['hcOther',me.name,t]]}; });
+      this.setState({sheet:null}); };
+    const voice=s.recording?{bg:'var(--red-100)',bd:'var(--red-500)',btn:'var(--red-500)',icon:'square',fg:'var(--red-700)',label:T.recording,anim:'lrPulse 1s infinite'}
+      : dr.voice?{bg:'var(--green-50)',bd:'var(--green-300)',btn:'var(--green-600)',icon:'play',fg:'var(--green-700)',label:T.recorded,anim:'none'}
+      : {bg:'#fff',bd:'var(--blue-200)',btn:'var(--blue-600)',icon:'mic',fg:'var(--navy-900)',label:T.record,anim:'none'};
+
+    // assign sheet
+    const a=s.asg||{};
+    const roots=T.roots.map((l,i)=>{const on=a.root===i; return {label:l,pick:()=>this.setState(st=>({asg:{...st.asg,root:i}})),bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--blue-600)':'var(--blue-200)'};});
+    const owners=['Sokha','Dara','Vina'].map(n=>{const on=a.owner===n; return {name:n,avatar:AV[n],pick:()=>this.setState(st=>({asg:{...st.asg,owner:n}})),bg:on?'var(--blue-50)':'#fff',bd:on?'var(--blue-600)':'var(--blue-200)'};});
+    const dues=T.dues.map((l,i)=>{const on=a.due===i; return {label:l,pick:()=>this.setState(st=>({asg:{...st.asg,due:i}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
+
+    const roleList=['handler','supervisor','manager'].map(k=>({...PEOPLE[k],roleLabel:T.roles[k],can:T.can[k],active:k===role,bg:k===role?'var(--blue-50)':'#fff',bd:k===role?'var(--blue-600)':'var(--blue-200)',
+      pick:()=>this.setState({role:k,sheet:null,screen:'home'})}));
+
+    const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=this.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>this.setState({lang:k})};});
+
+    return {
+      t:T, me, is, nav, stats, attention, lines, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
+      tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts'].includes(s.screen),
+      sel, detailBar, back:()=>this.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
+      darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:this.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
+      langs, openRoles:()=>this.setState({sheet:'roles'}), roleList,
+      cap:capV, cats, catsDark, sevs, sevsDark, sevCards, shoot, skipPhoto:()=>this.setState(st=>({cap:{...st.cap,photo:false,stage:'pick'}})),
+      retake:()=>this.setState(st=>({cap:{...st.cap,stage:'camera'}})),
+      stepBack:()=>{ this._sig=null; this.setState(st=>{const cp=st.cap; const stage=cp.stage==='sign'?(flow==='B'?'sev':'pick'):cp.stage==='sev'?'pick':'camera'; return {cap:{...cp,stage},signed:false};}); },
+      sigRef:this.setupSig, clearSig:()=>{ if(this._sig){const x=this._sig.getContext('2d'); x.clearRect(0,0,this._sig.width,this._sig.height);} this.setState({signed:false}); },
+      send:this.send, lastId:s.lastId, lastCritical:s.lastCritical,
+      addDetailsNow:()=>{ const r=s.reports.find(x=>x.id===s.lastId); this.setState({selId:s.lastId}); this.go('details',{draft:draftOf(r),recording:false}); },
+      draft:dr, locs, voice, q:s.q||'', hasQ:!!(s.q||''), onQ:e=>this.setState({q:e.target.value}), clearQ:()=>this.setState({q:''}),
+      fDates, fLines, fProducts, fSevs, activeF, openFilters:()=>this.setState({sheet:'filters'}), resetF:()=>this.setState({f:{date:'any',lines:[],products:[],sevs:[]}}),
+      fBtn:{has:activeF.length>0,n:activeF.length,bg:activeF.length?'var(--navy-900)':'#fff',bd:activeF.length?'var(--navy-900)':'var(--blue-200)',fg:activeF.length?'#fff':'var(--navy-900)'},
+      resultText:nRes+' '+(nRes===1?T.resultW:T.resultsW), showResults:T.showN+' '+nRes+' '+(nRes===1?T.resultW:T.resultsW), decOpts, decDays, decOwners, decSub, confirmDecision,
+      dec:{showSched:dc.choice==='keep'||dc.choice==='lab',showText:dc.choice==='other',text:dc.text||'',dueText:T.remindOn+' '+dueLabel(dc.days||3),disabled:dc.choice==='other'&&!(dc.text||'').trim()},
+      onDecText:e=>setDec({text:e.target.value}), hcTypes, hcDaysL, hcOwners, hcDueText:T.remindOn+' '+dueLabel(dr.hcDays||3), dueChecks, ptypes, pnames, units, supports, holdT, urgentT, hasPtype:!!dr.ptype, pnameOther:dr.pname==='__other',
+      onPnameText:e=>setD({pnameText:e.target.value}), onLot:e=>setD({lot:e.target.value}), onQty:e=>setD({qty:e.target.value.replace(/[^0-9.]/g,'')}), onSuggestion:e=>setD({suggestion:e.target.value}),
+      onCustom:e=>{const v=e.target.value; this.setState(st=>({cap:{...st.cap,customText:v}}));}, customNext:()=>this.setState(st=>({cap:{...st.cap,stage:'sev'}})),
+      nowLabel:'Today '+this.now(),
+      onBatch:e=>{const v=e.target.value; this.setState(st=>({draft:{...st.draft,batch:v}}));},
+      onDesc:e=>{const v=e.target.value; this.setState(st=>({draft:{...st.draft,desc:v}}));},
+      onAction:e=>{const v=e.target.value; this.setState(st=>({draft:{...st.draft,action:v}}));},
+      toggleVoice:()=>this.setState(st=>st.recording?{recording:false,draft:{...st.draft,voice:true}}:{recording:true}),
+      saveDetails:()=>{ const d=s.draft; this.update(s.selId,r=>({...r,loc:d.loc,ptype:d.ptype,pname:d.pname==='__other'?d.pnameText:d.pname,lot:d.lot,qty:d.qty,unit:d.unit,hold:d.hold,desc:d.desc,action:d.action,suggestion:d.suggestion,urgent:d.urgent,support:d.support,voice:!!d.voice,
+        holdCheck:d.hold?(r.holdCheck&&r.holdCheck.status!=='scheduled'&&r.holdCheck.type===d.hcType?r.holdCheck:{type:d.hcType,days:d.hcDays,owner:d.hcOwner,status:'scheduled',due:dueLabel(d.hcDays)}):null,
+        tl:[...r.tl,['details',me.name,this.now()]].concat(d.hold&&!(r.holdCheck)?[['hcSet',me.name,this.now()]]:[])})); this.setState({prev:'list',screen:'detail'}); },
+      sheet:{show:!!s.sheet,filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>this.setState({sheet:null}),
+      asg:a, roots, owners, dues, asgDisabled:!(a.root!=null&&a.owner&&(a.text||'').trim()),
+      onAsgText:e=>{const v=e.target.value; this.setState(st=>({asg:{...st.asg,text:v}}));},
+      doAssign:()=>{ const due=T.dues[a.due]; this.update(s.selId,r=>({...r,status:'action',capa:{root:T.roots[a.root],text:a.text,owner:a.owner,due},tl:[...r.tl,['assigned',me.name,this.now(),' '+a.owner]]})); this.setState({sheet:null}); },
+      verifyYes:()=>{ this.update(s.selId,r=>({...r,status:'closed',tl:[...r.tl,['verified',me.name,this.now()]]})); this.setState({sheet:null}); },
+      verifyNo:()=>{ this.update(s.selId,r=>({...r,status:'action',tl:[...r.tl,['reopened',me.name,this.now()]]})); this.setState({sheet:null}); },
+      toast:{show:false}
+    };
+  }
+}
+</script>
+</body>
+</html>

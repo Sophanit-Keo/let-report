@@ -1,0 +1,2 @@
+// Turns a report into the editable "Add details" form values.
+export const draftOf = r => ({loc:r.loc,ptype:r.ptype||'',pname:r.pname||'',pnameText:'',lot:r.lot||'',qty:r.qty||'',unit:r.unit||'pcs',hold:!!r.hold,hcType:(r.holdCheck&&r.holdCheck.type)||'swollen',hcDays:(r.holdCheck&&r.holdCheck.days)||3,hcOwner:(r.holdCheck&&r.holdCheck.owner)||'QC team',desc:r.desc||'',action:r.action||'',suggestion:r.suggestion||'',urgent:!!r.urgent,support:r.support||[],voice:!!r.voice});
