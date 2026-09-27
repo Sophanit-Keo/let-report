@@ -52,7 +52,7 @@ export const repo = {
     return {
       profiles,
       reports: reports.map(rowToReport),
-      notes: notes.map(n => ({ key: n.id, id: n.report_id, icon: n.icon, tone: n.tone, text: n.text, t: n.created_at, roles: n.roles })),
+      notes: notes.map(n => ({ key: n.id, id: n.report_id, icon: n.icon, tone: n.tone, text: n.text, t: n.created_at, roles: n.roles || [], userIds: n.user_ids || [], by: n.created_by })),
       readIds: reads.map(r => r.notification_id),
       ticks: ticks.map(t => t.item),
       lines: lines.map(rowToLine),
@@ -74,7 +74,7 @@ export const repo = {
   async deleteReports(ids) { return db.remove('reports', { id: 'in.(' + ids.join(',') + ')' }); },
 
   addNote(note) {
-    return db.insert('notifications', { report_id: note.id || null, icon: note.icon, tone: note.tone, text: note.text, roles: note.roles }, { returning: false });
+    return db.insert('notifications', { report_id: note.id || null, icon: note.icon, tone: note.tone, text: note.text, roles: note.roles || [], user_ids: note.userIds || [] }, { returning: false });
   },
   markRead(noteId) { return db.upsert('notification_reads', { notification_id: noteId }); },
 
@@ -103,6 +103,31 @@ export const repo = {
   deleteUser: id => functions.invoke('admin-users', { action: 'delete', id }),
   setPassword: (id, password) => functions.invoke('admin-users', { action: 'password', id, password }),
 
+  // ───── Chat ─────
+  // Newest messages in my rooms (the database only returns rooms I'm in). `since` = only newer ones.
+  async loadMessages(since) {
+    const rows = await db.select('messages', { order: 'created_at.desc', limit: 400, ...(since ? { created_at: 'gt.' + since } : {}) });
+    return rows.map(rowToMessage).reverse();
+  },
+  async sendMessage(room, body, photoPath) {
+    const [row] = await db.insert('messages', { room, body: body || '', photo_path: photoPath || null });
+    return rowToMessage(row);
+  },
+  deleteMessage(id) { return db.remove('messages', { id: 'eq.' + id }); },
+  async loadChatReads() { const rows = await db.select('chat_reads'); const out = {}; rows.forEach(r => { out[r.room] = r.read_at; }); return out; },
+  markRoomRead(room, at) { return db.upsert('chat_reads', { room, read_at: at }); },
+
+  // ───── Discussion comments on a trouble ─────
+  async loadComments(since) {
+    const rows = await db.select('report_comments', { order: 'created_at.desc', limit: 1000, ...(since ? { created_at: 'gt.' + since } : {}) });
+    return rows.map(rowToComment).reverse();
+  },
+  async addComment(reportId, body, photoPath) {
+    const [row] = await db.insert('report_comments', { report_id: reportId, body: body || '', photo_path: photoPath || null });
+    return rowToComment(row);
+  },
+  deleteComment(id) { return db.remove('report_comments', { id: 'eq.' + id }); },
+
   async uploadImage(dataUrl, folder) {
     const blob = await (await fetch(dataUrl)).blob();
     const ext = blob.type === 'image/png' ? 'png' : 'jpg';
@@ -111,6 +136,9 @@ export const repo = {
   },
   photoUrls(paths) { return storage.signedUrls(PHOTO_BUCKET, paths, 60 * 60 * 6); },
 };
+
+export function rowToMessage(r) { return { id: r.id, room: r.room, senderId: r.sender_id, body: r.body || '', photoPath: r.photo_path, t: r.created_at }; }
+export function rowToComment(r) { return { id: r.id, reportId: r.report_id, authorId: r.author_id, body: r.body || '', photoPath: r.photo_path, t: r.created_at }; }
 
 // ───── Production lines ─────
 export function rowToLine(r) {

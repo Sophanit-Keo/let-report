@@ -1,5 +1,6 @@
 // Report detail: status steps, escalation ladder, photo, details, hold check, corrective action, activity.
 import { Avatar, Button, Icon, TopBar } from '../../components/index.js';
+import { Discussion } from './Discussion.jsx';
 import { tap } from '../../utils/tap.js';
 import { chip } from '../../styles/inline.js';
 
@@ -188,6 +189,7 @@ export function ReportDetailScreen({ v }) {
         </div>
         <div className="detail-col detail-pad">
           {holdCheck}{capa}{activity}
+          <Discussion v={v} h2={h2} />
         </div>
       </div>
     </div>

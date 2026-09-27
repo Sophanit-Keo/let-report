@@ -13,6 +13,7 @@ import { toSmallJpeg } from '../utils/image.js';
 import { dueLabel } from '../data/constants.js';
 import { loadPrefs, savePrefs } from './storage.js';
 import { buildViewModel } from './viewModel.js';
+import { chatState, chatMethods } from './chat.js';
 
 const REFRESH_MS = 15000;
 const AVATARS = { Sokha: 'images/avatars/sokha.png', Vina: 'images/avatars/vina.png', Dara: 'images/avatars/dara.png', Chanthy: MGR_AV };
@@ -42,6 +43,8 @@ export class AppController extends React.Component {
     screen: 'home', prev: 'home', lang: loadPrefs().lang || null, filter: 'all', selId: null, lastId: null, lastCritical: false,
     cap: { stage: 'camera', cat: null, sev: null, photo: false, customText: '' }, signed: false, draft: {}, recording: false,
     sheet: null, asg: {}, trendBy: 'line', esc: {}, lines: [], lineId: null, lineForm: {}, lineConfirm: false, lineNote: null,
+    // chat + comments (./chat.js)
+    ...chatState,
   };
   scrollRef = React.createRef();
 
@@ -51,8 +54,14 @@ export class AppController extends React.Component {
     window.addEventListener('keydown', this._onKey);
     document.addEventListener('visibilitychange', this._onFocus);
     window.addEventListener('online', this._onFocus);
-    this._offAuth = auth.onChange(session => { this.setState({ session }); if (!session) this.setState({ profiles: [], reports: [], notes: [], screen: 'home', sheet: null }); });
-    this._poll = setInterval(() => { if (document.visibilityState !== 'hidden') this.refresh(); }, REFRESH_MS);
+    this._offAuth = auth.onChange(session => {
+      const who = session && session.user && session.user.id;
+      if (this._chatFor && this._chatFor !== who) this.stopLive();   // signed out, or someone else signed in
+      this.setState({ session }); if (!session) this.setState({ profiles: [], reports: [], notes: [], screen: 'home', sheet: null });
+    });
+    // With the live connection up, a full reload every minute is enough; otherwise every 15 s.
+    this._tick = 0;
+    this._poll = setInterval(() => { this._tick += 1; if (document.visibilityState !== 'hidden' && (!this.state.live || this._tick % 4 === 0)) this.refresh(); }, REFRESH_MS);
     document.documentElement.lang = this.lang();
     if (this.state.session) this.refresh(true); else this.setState({ booting: false });
   }
@@ -60,6 +69,7 @@ export class AppController extends React.Component {
     clearInterval(this._poll); clearTimeout(this._tt);
     window.removeEventListener('keydown', this._onKey); document.removeEventListener('visibilitychange', this._onFocus); window.removeEventListener('online', this._onFocus);
     if (this._offAuth) this._offAuth();
+    if (this._rt) this._rt.close(); clearTimeout(this._liveRefresh);
   }
   componentDidUpdate(pp, ps) {
     if (ps.screen !== this.state.screen && this.scrollRef.current) this.scrollRef.current.scrollTop = 0;
@@ -83,6 +93,7 @@ export class AppController extends React.Component {
       const lines = d.lines.map(l => (pl[l.id] ? { ...l, ...pl[l.id] } : l));
       this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, booting: false, loadError: null });
       this.loadPhotos(reports);
+      this.syncChat();
     } catch (e) {
       this.setState({ booting: false, loadError: first ? e.message : null });
       if (!first && e.code !== 'offline') this.toast(e.message);
@@ -396,3 +407,6 @@ export class AppController extends React.Component {
   viewModel() { return buildViewModel(this); }
   isConfigured() { return isConfigured(); }
 }
+
+// Chat and comment actions live in ./chat.js.
+Object.assign(AppController.prototype, chatMethods);

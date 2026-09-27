@@ -3,13 +3,14 @@
 import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE } from '../data/constants.js';
 import { timeLabel, stampLabel, daysAgo, addDaysIso } from '../utils/time.js';
 import { draftOf } from './draft.js';
+import { buildChatView, buildDiscussion } from './chatView.js';
 
 const PW_WORDS=['mango','lotus','river','tiger','mekong','jasmine','rice','palm','amber','cloud'];
 const WORDS_PW=()=>PW_WORDS[Math.floor(Math.random()*PW_WORDS.length)]+'-'+String(Math.floor(1000+Math.random()*9000));
 
 export function buildViewModel(app) {
     const s=app.state, T=app.T(), role=app.role(), flow=app.flow(), PEOPLE=app.people(), AV=app.avatarOf, HC_OWNERS=['QC team',...app.staffNames()], me={...app.me(), role, roleLabel:T.roles[role]};
-    const is={home:s.screen==='home',list:s.screen==='list',tasks:s.screen==='tasks',alerts:s.screen==='alerts',detail:s.screen==='detail',details:s.screen==='details',done:s.screen==='done',team:s.screen==='team'&&role==='manager',capture:s.screen==='capture'};
+    const is={home:s.screen==='home',list:s.screen==='list',tasks:s.screen==='tasks',alerts:s.screen==='alerts',detail:s.screen==='detail',details:s.screen==='details',done:s.screen==='done',team:s.screen==='team'&&role==='manager',chat:s.screen==='chat',capture:s.screen==='capture'};
     const all=s.reports.map(r=>app.deco(r));
     const active=all.filter(r=>r.status!=='closed');
     const startCap = ()=>{ app._sig=null; app.go('capture',{cap:{stage:'camera',cat:null,sev:null,photo:false,customText:''},signed:false}); };
@@ -103,14 +104,17 @@ export function buildViewModel(app) {
 
     const taskItems=tasksOf(role).map(({r,k})=>({...app.deco(r),taskLabel:app.taskLabel(r,k,T),taskIcon:TICON[k]}));
     const dueChecks=s.reports.filter(r=>app.canCheck(r)).map(r=>({head:T.hcDueHead,sub:T.hcTypes[r.holdCheck.type]+' · '+r.pname+(r.lot?' · '+r.lot:'')+(r.qty?' · '+r.qty+' '+r.unit:''),open:()=>app.go('detail',{selId:r.id})}));
-    const myNotes=s.notes.filter(n=>n.roles.includes(role));
+    const myId=app.myId();
+    // alerts for my role or for me by name (not the comment alerts I sent myself)
+    const myNotes=s.notes.filter(n=>(n.roles.includes(role)||(n.userIds||[]).includes(myId))&&!(n.icon==='message-circle'&&n.by&&n.by===myId));
     const unread=myNotes.filter(n=>!s.read[n.key]).length;
     const alertItems=myNotes.map((n,i)=>({text:n.text,t:timeLabel(n.t),icon:n.icon,icBg:TONE[n.tone][0],icFg:TONE[n.tone][1],unread:!s.read[n.key],bd:i?'var(--gray-100)':'transparent',bg:s.read[n.key]?'#fff':'var(--blue-50)',
       open:()=>{ app.markRead(n.key); if(n.id) app.go('detail',{selId:n.id}); }}));
 
-    const tabDef=[['home','house',T.home],['list','clipboard-list',T.reports],['tasks','list-checks',T.tasks],['alerts','bell',T.alerts]];
+    const chatUnread=app.chatUnread();
+    const tabDef=[['home','house',T.home],['list','clipboard-list',T.reports],['chat','message-circle',T.chat.tab],['tasks','list-checks',T.tasks],['alerts','bell',T.alerts]];
     const tabs=tabDef.map(([k,ic,l])=>({icon:ic,label:l,fg:s.screen===k?'var(--blue-600)':'var(--navy-300)',go:()=>app.go(k),
-      hasBadge:(k==='alerts'&&unread>0)||(k==='tasks'&&taskItems.length>0),badge:k==='alerts'?unread:taskItems.length}));
+      hasBadge:(k==='alerts'&&unread>0)||(k==='tasks'&&taskItems.length>0)||(k==='chat'&&chatUnread>0),badge:k==='alerts'?unread:k==='chat'?(chatUnread>99?'99+':chatUnread):taskItems.length}));
 
     // detail
     let sel={}, detailBar={show:false};
@@ -126,6 +130,7 @@ export function buildViewModel(app) {
       const lvI=ORDER.indexOf(raw.level||'qa');
       sel.ladder=ORDER.map((k,i)=>({short:T.short[k],avatar:PEOPLE[k].avatar,arrow:i>0,bg:i===lvI&&raw.status!=='closed'?'var(--blue-50)':'#fff',bd:i===lvI&&raw.status!=='closed'?'var(--blue-600)':i<lvI?'var(--green-300)':'var(--gray-200)',
         fg:i<=lvI?'var(--navy-900)':'var(--gray-500)',op:i<=lvI?1:.4}));
+      sel.discussion=buildDiscussion(app,T,raw.id);
       sel.levelNote=raw.status==='closed'?T.st[3]:T.nowWith+' '+PEOPLE[raw.level||'qa'].name;
       const act=app.canAct(raw), canE=app.canEsc(raw), nextL=ORDER[lvI+1];
       if(raw.status!=='closed'){
@@ -247,7 +252,7 @@ export function buildViewModel(app) {
 
     return {
       t:T, me, is, nav, stats, attention, lines, linesHead, lineSheet, lineForm, home, kpis, homeSections, checklist, team, trendRows, trendTabs, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
-      tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts','team'].includes(s.screen),
+      tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts','team','chat'].includes(s.screen), chatHideTabs:is.chat&&!!s.chatRoom, chat:is.chat?buildChatView(app,T):null,
       sel, detailBar, back:()=>app.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
       darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:app.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
       langs, openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),

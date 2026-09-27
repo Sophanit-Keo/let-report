@@ -11,7 +11,7 @@ export function TabBar({ v }) {
     </div>
   );
   return (
-    <nav className="tabbar">
+    <nav className={'tabbar' + (v.chatHideTabs ? ' phone-hide' : '')}>
       {v.tabsL.map((tb, i) => <Tab key={i} tb={tb} />)}
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <div {...tap(v.nav.capture, 'fab')} aria-label={v.t.reportIssue}><Icon name="camera" size={26} color="#fff" /></div>

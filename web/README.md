@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0004`), then deploy the function in `supabase/functions/admin-users` (`supabase functions deploy admin-users`). This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0005`), then deploy the function in `supabase/functions/admin-users` (`supabase functions deploy admin-users`). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -42,6 +42,8 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | Work on reports (assign, fix, verify, escalate) | ✓ | ✓ | ✓ | ✓ |
 | Close a trouble at any stage, with a note (critical ones need manager approval) | ✓ | ✓ | ✓ | approves |
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
+| Team room chat; private chat with any one person (only the two of them can read it) | ✓ | ✓ | ✓ | ✓ |
+| Comment on any trouble; delete their own comments and messages | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
 | Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
 | Remove production lines | | | | ✓ |
@@ -87,19 +89,23 @@ web/
 │   ├── data/                  constants.js (categories, lines, people, colours), seed.js (demo reports)
 │   ├── api/
 │   │   ├── supabase.js        small Supabase client: login, database, storage
+│   │   ├── realtime.js        live updates over one WebSocket (new messages, comments, changes; who's online)
 │   │   └── repo.js            reports/alerts ⇄ database rows
 │   ├── state/
 │   │   ├── AppController.js   state and actions (sign-in, send, assign, escalate, verify, hold checks); saves to Supabase
 │   │   ├── viewModel.js       turns state into what each screen shows
+│   │   ├── chat.js            chat + comment actions (mixed into AppController)
+│   │   ├── chatView.js        what the Chat screen and a trouble's Discussion show
 │   │   ├── draft.js           "Add details" form values
 │   │   └── storage.js         language preference (this browser)
 │   ├── components/            shared UI: Button, Icon, Pill, Field, Avatar, ReportCard, TopBar, Toggle…
 │   ├── layout/                Sidebar (computer), TabBar (phone/tablet)
 │   ├── screens/               one folder per screen
 │   │   ├── team/              team management (managers)
+│   │   ├── chat/              team room + 1-to-1 chat
 │   │   ├── auth/              sign in, create account, loading
 │   │   ├── home/  reports/  tasks/  alerts/
-│   │   ├── report-detail/     detail + bottom action bar
+│   │   ├── report-detail/     detail, discussion (comments) + bottom action bar
 │   │   ├── add-details/       form + save bar
 │   │   ├── report-sent/
 │   │   └── capture/           camera, flows A/B/C, sign step, shared parts
@@ -108,6 +114,7 @@ web/
 │   │   ├── tokens/            design-system tokens (colours, type, spacing, effects)
 │   │   ├── base.css           fonts, resets, animations, focus states
 │   │   ├── layout.css         responsive shell: phone, tablet ≥768px, computer ≥1024px
+│   │   ├── chat.css           chat screen, message bubbles, composer, discussion
 │   │   ├── index.css          imports everything above
 │   │   └── inline.js          shared inline styles (chips, inputs)
 │   └── utils/
@@ -135,6 +142,8 @@ web/
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
 - **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Anyone can add a line with **+ Add line**; only managers remove lines.
 - **Install on phones and tablets:** the app suggests installing itself (Android: an Install button; iPhone/iPad: Share → Add to Home Screen steps). "Not now" hides it for 7 days. A small service worker (`public/sw.js`) makes this possible and opens the app faster; data from Supabase is never cached.
+- **Live chat:** a team room for everyone plus private 1-to-1 chats, with text and photos, unread badges, a green dot for who is online, and a pop-up when a message arrives on another screen. Messages appear instantly (Supabase Realtime); if the live connection drops, the app catches up on its own. People can delete their own messages.
+- **Discussion on each trouble:** comments with text and photos at the bottom of a report. The reporter, everyone who commented before, and the role the trouble is with now get an alert.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 

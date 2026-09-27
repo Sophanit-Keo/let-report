@@ -13,6 +13,7 @@ import { AddDetailsScreen } from './screens/add-details/AddDetailsScreen.jsx';
 import { SaveDetailsBar } from './screens/add-details/SaveDetailsBar.jsx';
 import { ReportSentScreen } from './screens/report-sent/ReportSentScreen.jsx';
 import { TeamScreen } from './screens/team/TeamScreen.jsx';
+import { ChatScreen } from './screens/chat/ChatScreen.jsx';
 import { CaptureFlow } from './screens/capture/CaptureFlow.jsx';
 import { SheetHost } from './sheets/SheetHost.jsx';
 import { AuthScreen, LoadingScreen, LoadErrorScreen, NotConfiguredScreen, TurnedOffScreen } from './screens/auth/AuthScreen.jsx';
@@ -35,7 +36,9 @@ export class App extends AppController {
       <div className={'app' + km}>
         <Sidebar v={v} />
         <main className="main">
-          <div className="scroll" ref={v.scrollRef}>
+          {/* chat keeps its own scrolling (messages scroll, the composer stays put) */}
+          {is.chat ? <ChatScreen v={v} /> : null}
+          <div className="scroll" ref={v.scrollRef} hidden={is.chat}>
             {is.home ? <HomeScreen v={v} /> : null}
             {is.list ? <ReportsScreen v={v} /> : null}
             {is.tasks ? <TasksScreen v={v} /> : null}
@@ -53,7 +56,7 @@ export class App extends AppController {
         <SheetHost v={v} />
         <Toast v={v} />
         {/* not over screens that have their own bottom action bar */}
-        {!is.capture && !is.detail && !is.details && !v.sheet.show ?<InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
+        {!is.capture && !is.detail && !is.details && !is.chat && !v.sheet.show ? <InstallPrompt t={v.t} aboveTabs={v.showTabs} /> : null}
       </div>
     );
   }
