@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from '../../components/index.js';
 import { tap } from '../../utils/tap.js';
-import { toSmallJpeg } from './photo.js';
+import { toSmallJpeg } from '../../utils/image.js';
 
 export function CameraStep({ v }) {
   const t = v.t;

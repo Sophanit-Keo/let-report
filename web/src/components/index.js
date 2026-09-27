@@ -6,6 +6,7 @@ export { Icon } from './Icon.jsx';
 export { LangToggle } from './LangToggle.jsx';
 export { MeButton } from './MeButton.jsx';
 export { Pill } from './Pill.jsx';
+export { PhotoPicker } from './PhotoPicker.jsx';
 export { ReportCard } from './ReportCard.jsx';
 export { Toggle } from './Toggle.jsx';
 export { TopBar } from './TopBar.jsx';

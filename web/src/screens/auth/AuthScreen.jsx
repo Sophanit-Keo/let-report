@@ -104,3 +104,15 @@ export function NotConfiguredScreen({ v }) {
     </Shell>
   );
 }
+
+export function TurnedOffScreen({ v, app }) {
+  return (
+    <Shell>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <h1 style={{ margin: 0, fontWeight: 800, fontSize: 22 }}>{v.t.people.offTitle}</h1>
+        <div style={{ fontSize: 14, color: 'var(--gray-700)', lineHeight: 1.5 }}>{v.t.people.offSub}</div>
+      </div>
+      <Button variant="secondary" fullWidth onClick={app.signOut}>{v.t.signOut}</Button>
+    </Shell>
+  );
+}

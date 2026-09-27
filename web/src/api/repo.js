@@ -1,5 +1,5 @@
 // Data access for Let Report: turns database rows into the app's report objects and back.
-import { db, storage } from './supabase.js';
+import { db, storage, functions } from './supabase.js';
 
 const PHOTO_BUCKET = 'photos';
 
@@ -87,8 +87,21 @@ export const repo = {
   async updateLine(id, patch) { const rows = await db.update('production_lines', { id: 'eq.' + id }, lineToRow(patch)); return rows && rows[0] ? rowToLine(rows[0]) : null; },
   async addLine(line) { const [row] = await db.insert('production_lines', lineToRow(line)); return rowToLine(row); },
   removeLine(id) { return db.remove('production_lines', { id: 'eq.' + id }); },
+  // Reports store the line name as their location; keep them in step when a line is renamed.
+  renameLoc(from, to) { return db.update('reports', { loc: 'eq.' + from }, { loc: to }); },
 
   updateProfile(id, patch) { return db.update('profiles', { id: 'eq.' + id }, patch); },
+  // Profile picture: stored in the public "avatars" bucket, in the person's own folder.
+  async uploadAvatar(userId, dataUrl) {
+    const blob = await (await fetch(dataUrl)).blob();
+    const path = userId + '/' + randomId() + '.jpg';
+    await storage.upload('avatars', path, blob);
+    return storage.publicUrl('avatars', path);
+  },
+  // Manager-only account actions (server-side function "admin-users").
+  createUser: form => functions.invoke('admin-users', { action: 'create', ...form }),
+  deleteUser: id => functions.invoke('admin-users', { action: 'delete', id }),
+  setPassword: (id, password) => functions.invoke('admin-users', { action: 'password', id, password }),
 
   async uploadImage(dataUrl, folder) {
     const blob = await (await fetch(dataUrl)).blob();

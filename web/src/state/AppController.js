@@ -9,6 +9,7 @@ import { SEED, NOTES } from '../data/seed.js';
 import { auth, isConfigured } from '../api/supabase.js';
 import { repo } from '../api/repo.js';
 import { nowIso, isDue, addDaysIso, stampLabel } from '../utils/time.js';
+import { toSmallJpeg } from '../utils/image.js';
 import { dueLabel } from '../data/constants.js';
 import { loadPrefs, savePrefs } from './storage.js';
 import { buildViewModel } from './viewModel.js';
@@ -26,6 +27,10 @@ function initialsAvatar(name) {
 }
 
 // A scheduled hold check whose date has come becomes "due".
+// Easy-to-read temporary password, e.g. "mango-4821".
+const WORDS = ['mango', 'lotus', 'river', 'tiger', 'mekong', 'jasmine', 'rice', 'palm', 'amber', 'cloud'];
+function makePassword() { return WORDS[Math.floor(Math.random() * WORDS.length)] + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
+
 const withDue = r => (r.holdCheck && r.holdCheck.status === 'scheduled' && isDue(r.holdCheck.dueAt) ? { ...r, holdCheck: { ...r.holdCheck, status: 'due', due: 'Today' } } : r);
 
 export class AppController extends React.Component {
@@ -63,7 +68,9 @@ export class AppController extends React.Component {
 
   // ───── Loading ─────
   async refresh(first) {
-    if (!this.state.session || this._loading) return;
+    // Use the live session (state may not have caught up right after signing in).
+    if (!auth.session()) { if (first) this.setState({ booting: false }); return; }
+    if (this._loading) { if (first) this._again = true; return; }
     this._loading = true;
     try {
       const d = await repo.loadAll();
@@ -79,7 +86,10 @@ export class AppController extends React.Component {
     } catch (e) {
       this.setState({ booting: false, loadError: first ? e.message : null });
       if (!first && e.code !== 'offline') this.toast(e.message);
-    } finally { this._loading = false; }
+    } finally {
+      this._loading = false;
+      if (this._again) { this._again = false; this.refresh(true); }
+    }
   }
   async loadPhotos(reports) {
     const have = this.state.photoUrls;
@@ -107,17 +117,67 @@ export class AppController extends React.Component {
   profile() { const s = this.state.session; const id = s && s.user && s.user.id; return this.state.profiles.find(p => p.id === id) || null; }
   me() { const p = this.profile(); const name = (p && p.name) || this.email().split('@')[0] || 'Me'; return { id: p && p.id, name, avatar: this.avatarOf(name, p) }; }
   avatarOf = (name, p) => { const prof = p || this.state.profiles.find(x => x.name === name); return (prof && prof.avatar_url) || AVATARS[name] || initialsAvatar(name); };
-  staffNames() { const names = this.state.profiles.map(p => p.name).filter(Boolean); return names.length ? names : [this.me().name]; }
+  activeProfiles() { return this.state.profiles.filter(p => p.active !== false); }
+  staffNames() { const names = this.activeProfiles().map(p => p.name).filter(Boolean); return names.length ? names : [this.me().name]; }
   // The person shown for each level of the escalation ladder: the first staff member with that role.
   people() {
     const T = this.T(), out = {};
-    ORDER.forEach(k => { const p = this.state.profiles.find(x => x.role === k); const name = p ? p.name : T.short[k]; out[k] = { name, avatar: p ? this.avatarOf(p.name, p) : initialsAvatar(T.short[k]) }; });
+    ORDER.forEach(k => { const p = this.activeProfiles().find(x => x.role === k); const name = p ? p.name : T.short[k]; out[k] = { name, avatar: p ? this.avatarOf(p.name, p) : initialsAvatar(T.short[k]) }; });
     return out;
   }
+  isTurnedOff() { const p = this.profile(); return !!(p && p.active === false); }
+
+  // ───── Team (plant managers) + profile pictures (everyone) ─────
+  patchProfile = async (id, patch, okText) => {
+    const before = this.state.profiles;
+    this.setState({ profiles: before.map(p => (p.id === id ? { ...p, ...patch } : p)) });
+    try { await repo.updateProfile(id, patch); if (okText) this.toast(okText); return true; }
+    catch (e) { this.setState({ profiles: before }); this.toast(/manager/i.test(e.message) ? 'Keep at least one active plant manager.' : e.message); return false; }
+  };
+  // Pick a photo file → shrink it → upload → save on the profile.
+  changePhoto = async (id, file) => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    try {
+      const small = await toSmallJpeg(url, 320);
+      if (!small) throw new Error('That file is not a photo.');
+      this.setState({ busy: true });
+      const avatar = await repo.uploadAvatar(id, small);
+      await this.patchProfile(id, { avatar_url: avatar }, this.T().people.photoSaved);
+    } catch (e) { this.toast(e.message); }
+    finally { URL.revokeObjectURL(url); this.setState({ busy: false }); }
+  };
+  openPerson = id => this.setState({ sheet: 'person', personId: id, personName: null, personPw: '', personConfirm: false });
+  openAddPerson = () => this.setState({ sheet: 'addPerson', newPerson: { name: '', email: '', password: makePassword(), role: 'qc' } });
+  addPerson = async () => {
+    const f = this.state.newPerson;
+    this.setState({ busy: true });
+    try {
+      await repo.createUser({ name: f.name.trim(), email: f.email.trim(), password: f.password, role: f.role });
+      this.setState({ busy: false, sheet: null });
+      this.toast(f.name.trim() + ' ' + this.T().people.added);
+      this.refresh();
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  removePerson = async id => {
+    const p = this.state.profiles.find(x => x.id === id);
+    this.setState({ busy: true });
+    try {
+      await repo.deleteUser(id);
+      this.setState(s => ({ busy: false, sheet: null, profiles: s.profiles.filter(x => x.id !== id) }));
+      this.toast((p ? p.name : '') + ' ' + this.T().people.removed);
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  setPersonPassword = async id => {
+    this.setState({ busy: true });
+    try { await repo.setPassword(id, this.state.personPw); this.setState({ busy: false, personPw: '' }); this.toast(this.T().people.pwSet); }
+    catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+
   setRole = async (id, role) => {
     const before = this.state.profiles;
     this.setState({ profiles: before.map(p => (p.id === id ? { ...p, role } : p)) });
-    try { await repo.updateProfile(id, { role }); } catch (e) { this.setState({ profiles: before }); this.toast(e.message); }
+    try { await repo.updateProfile(id, { role }); } catch (e) { this.setState({ profiles: before }); this.toast(/manager/i.test(e.message) ? 'Keep at least one active plant manager.' : e.message); }
   };
 
   // Start options can be set in the URL: ?lang=km&flow=B
@@ -306,7 +366,12 @@ export class AppController extends React.Component {
     const data = { name: f.name.trim(), type: f.type, product: f.product.trim(), target: Math.max(1, parseInt(f.target, 10) || 100) };
     this.setState({ busy: true });
     try {
-      if (id) { await repo.updateLine(id, { ...data, updatedBy: this.me().name }); }
+      if (id) {
+        const old = this.state.lines.find(l => l.id === id);
+        await repo.updateLine(id, { ...data, updatedBy: this.me().name });
+        // Renamed: move its reports to the new name so filters and "See open reports" still work.
+        if (old && old.name !== data.name) await repo.renameLoc(old.name, data.name);
+      }
       else { const sort = Math.max(0, ...this.state.lines.map(l => l.sort || 0)) + 1; await repo.addLine({ ...data, sort, status: 'idle', qty: 0, updatedBy: this.me().name }); }
       this.setState({ busy: false, sheet: null });
       this.toast((id ? '' : '+ ') + data.name);

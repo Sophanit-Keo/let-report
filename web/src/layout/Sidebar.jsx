@@ -24,6 +24,12 @@ export function Sidebar({ v }) {
             </div>
           );
         })}
+        {v.teamNav ? (
+          <div {...tap(v.teamNav.go, 'nav-item' + (v.teamNav.on ? ' on' : ''))} aria-current={v.teamNav.on ? 'page' : undefined}>
+            <Icon name="users" size={20} />
+            <span>{v.teamNav.label}</span>
+          </div>
+        ) : null}
       </nav>
       <div style={{ flex: 1 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 16, borderTop: '1.5px solid var(--blue-100)' }}>

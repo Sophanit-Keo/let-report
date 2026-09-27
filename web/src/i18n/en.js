@@ -60,4 +60,11 @@ export const EN = {
   line:{add:'Add line', edit:'Edit line info', remove:'Remove line', removeQ:'Remove this line?', removeSub:'Reports that mention it keep their location.', cancel:'Cancel',
     status:'Status', output:'Output today', target:'Target (pallets)', name:'Line name', type:'Type', product:'Product', note:'Note for the next shift', notePh:'e.g. Waiting for steam valve repair',
     reset:'Reset to 0', seeIssues:'See open reports', updated:'Updated by', since:'since', save:'Save', create:'Add line', saveNote:'Save note', noLines:'No production lines yet.', other:'Other'},
+  people:{title:'Team', sub:'Everyone who can sign in to Let Report.', add:'Add person', addTitle:'Add a person', name:'Name', email:'Email',
+    tempPw:'Temporary password', tempPwSub:'Give this to them. They can sign in straight away and change it later.', generate:'Make a password',
+    role:'Role', active:'Can sign in', activeSub:'Turn off to block this account without deleting it.', off:'Turned off',
+    setPw:'Set a new password', setPwBtn:'Set password', pwSet:'Password changed.', remove:'Remove account', removeQ:'Remove this account for good?',
+    removeSub:'Their reports stay in the app. They can no longer sign in.', cancel:'Cancel', save:'Save', manage:'Manage team',
+    changePhoto:'Change photo', photoSaved:'Photo updated.', saved:'Saved.', added:'added.', removed:'removed.', count:'people',
+    offTitle:'Your account is turned off', offSub:'Ask your plant manager to turn it back on.', edit:'Edit person', yourName:'Your name'},
 };

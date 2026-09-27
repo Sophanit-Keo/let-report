@@ -108,12 +108,18 @@ export const db = {
   remove: (table, match) => request('/rest/v1/' + table + '?' + qs(match), { method: 'DELETE' }),
 };
 
+// ───── Edge Functions (server-side code on Supabase) ─────
+export const functions = {
+  invoke: (name, body) => request('/functions/v1/' + name, { method: 'POST', body }),
+};
+
 // ───── Storage ─────
 export const storage = {
   async upload(bucket, path, blob) {
     await request('/storage/v1/object/' + bucket + '/' + path, { method: 'POST', body: blob, isBlob: true, headers: { 'Content-Type': blob.type || 'application/octet-stream', 'x-upsert': 'true' } });
     return path;
   },
+  publicUrl: (bucket, path) => SUPABASE_URL + '/storage/v1/object/public/' + bucket + '/' + path,
   // Temporary links for private files. Returns { path: url }.
   async signedUrls(bucket, paths, expiresIn = 3600) {
     if (!paths.length) return {};

@@ -12,9 +12,10 @@ import { DetailActionBar } from './screens/report-detail/DetailActionBar.jsx';
 import { AddDetailsScreen } from './screens/add-details/AddDetailsScreen.jsx';
 import { SaveDetailsBar } from './screens/add-details/SaveDetailsBar.jsx';
 import { ReportSentScreen } from './screens/report-sent/ReportSentScreen.jsx';
+import { TeamScreen } from './screens/team/TeamScreen.jsx';
 import { CaptureFlow } from './screens/capture/CaptureFlow.jsx';
 import { SheetHost } from './sheets/SheetHost.jsx';
-import { AuthScreen, LoadingScreen, LoadErrorScreen, NotConfiguredScreen } from './screens/auth/AuthScreen.jsx';
+import { AuthScreen, LoadingScreen, LoadErrorScreen, NotConfiguredScreen, TurnedOffScreen } from './screens/auth/AuthScreen.jsx';
 import { Toast } from './components/Toast.jsx';
 
 export class App extends AppController {
@@ -26,7 +27,8 @@ export class App extends AppController {
     const gate = !this.isConfigured() ? <NotConfiguredScreen v={v} />
       : !this.state.session ? <AuthScreen v={v} app={this} />
       : this.state.loadError ? <LoadErrorScreen v={v} app={this} />
-      : this.state.booting ? <LoadingScreen v={v} /> : null;
+      : this.state.booting ? <LoadingScreen v={v} />
+      : v.turnedOff ? <TurnedOffScreen v={v} app={this} /> : null;
     if (gate) return <div className={'app' + km}>{gate}<Toast v={v} /></div>;
     return (
       <div className={'app' + km}>
@@ -40,6 +42,7 @@ export class App extends AppController {
             {is.detail ? <ReportDetailScreen v={v} /> : null}
             {is.details ? <AddDetailsScreen v={v} /> : null}
             {is.done ? <ReportSentScreen v={v} /> : null}
+            {is.team ? <TeamScreen v={v} /> : null}
           </div>
           <DetailActionBar v={v} />
           {is.details ? <SaveDetailsBar v={v} /> : null}

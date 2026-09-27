@@ -4,7 +4,7 @@ import {
   LuCircleCheck, LuSearch, LuX, LuSlidersHorizontal, LuArrowRight, LuPencilLine, LuClock, LuCircleX, LuGavel,
   LuFastForward, LuImage, LuRotateCcw, LuSend, LuSiren, LuCirclePause, LuMic, LuSquare, LuPlay, LuHourglass,
   LuArrowUpRight, LuHouse, LuClipboardList, LuBell, LuThermometer, LuHand, LuNut, LuBug, LuWrench, LuWheat,
-  LuTag, LuSprayCan, LuUserPlus, LuShieldCheck, LuStamp, LuFlaskConical, LuTrash2, LuRefreshCcw,
+  LuTag, LuSprayCan, LuUserPlus, LuShieldCheck, LuStamp, LuFlaskConical, LuTrash2, LuRefreshCcw, LuUsers, LuKeyRound,
 } from 'react-icons/lu';
 
 const ICONS = {
@@ -17,7 +17,7 @@ const ICONS = {
   'arrow-up-right': LuArrowUpRight, house: LuHouse, 'clipboard-list': LuClipboardList, bell: LuBell,
   thermometer: LuThermometer, hand: LuHand, nut: LuNut, bug: LuBug, wrench: LuWrench, wheat: LuWheat, tag: LuTag,
   'spray-can': LuSprayCan, 'user-plus': LuUserPlus, 'shield-check': LuShieldCheck, stamp: LuStamp,
-  'flask-conical': LuFlaskConical, 'trash-2': LuTrash2, 'refresh-ccw': LuRefreshCcw,
+  'flask-conical': LuFlaskConical, 'trash-2': LuTrash2, 'refresh-ccw': LuRefreshCcw, users: LuUsers, 'key-round': LuKeyRound,
 };
 
 const ALIAS = { arrow: 'arrow-right', correct: 'circle-check', incorrect: 'circle-x', warning: 'triangle-alert', chevron: 'chevron-right' };

@@ -4,9 +4,12 @@ import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV
 import { timeLabel, stampLabel, daysAgo, addDaysIso } from '../utils/time.js';
 import { draftOf } from './draft.js';
 
+const PW_WORDS=['mango','lotus','river','tiger','mekong','jasmine','rice','palm','amber','cloud'];
+const WORDS_PW=()=>PW_WORDS[Math.floor(Math.random()*PW_WORDS.length)]+'-'+String(Math.floor(1000+Math.random()*9000));
+
 export function buildViewModel(app) {
     const s=app.state, T=app.T(), role=app.role(), flow=app.flow(), PEOPLE=app.people(), AV=app.avatarOf, HC_OWNERS=['QC team',...app.staffNames()], me={...app.me(), role, roleLabel:T.roles[role]};
-    const is={home:s.screen==='home',list:s.screen==='list',tasks:s.screen==='tasks',alerts:s.screen==='alerts',detail:s.screen==='detail',details:s.screen==='details',done:s.screen==='done',capture:s.screen==='capture'};
+    const is={home:s.screen==='home',list:s.screen==='list',tasks:s.screen==='tasks',alerts:s.screen==='alerts',detail:s.screen==='detail',details:s.screen==='details',done:s.screen==='done',team:s.screen==='team'&&role==='manager',capture:s.screen==='capture'};
     const all=s.reports.map(r=>app.deco(r));
     const active=all.filter(r=>r.status!=='closed');
     const startCap = ()=>{ app._sig=null; app.go('capture',{cap:{stage:'camera',cat:null,sev:null,photo:false,customText:''},signed:false}); };
@@ -206,20 +209,46 @@ export function buildViewModel(app) {
     const owners=app.staffNames().map(n=>{const on=a.owner===n; return {name:n,avatar:AV[n],pick:()=>app.setState(st=>({asg:{...st.asg,owner:n}})),bg:on?'var(--blue-50)':'#fff',bd:on?'var(--blue-600)':'var(--blue-200)'};});
     const dues=T.dues.map((l,i)=>{const on=a.due===i; return {label:l,pick:()=>app.setState(st=>({asg:{...st.asg,due:i}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
 
-    // Account sheet: who is signed in, sign out; managers also set everyone's role.
+    // Account sheet: your photo and name, sign out; managers get "Manage team".
+    const myProfile=app.profile()||{};
+    const myNameDraft=s.myName!=null?s.myName:(myProfile.name||'');
     const account={name:me.name,email:app.email(),avatar:me.avatar,roleLabel:T.roles[role],can:T.can[role],isManager:role==='manager',
-      signOut:app.signOut,canLoadSample:role==='manager'&&!s.reports.length,loadSample:app.loadSample,busy:!!s.busy};
-    const teamList=(s.profiles||[]).map(p=>({id:p.id,name:p.name||'—',avatar:app.avatarOf(p.name),isMe:p.id===me.id,
+      signOut:app.signOut,canLoadSample:role==='manager'&&!s.reports.length,loadSample:app.loadSample,busy:!!s.busy,
+      onPhoto:e=>{const f=e.target.files&&e.target.files[0]; e.target.value=''; if(myProfile.id) app.changePhoto(myProfile.id,f);},
+      nameDraft:myNameDraft,onName:e=>app.setState({myName:e.target.value}),nameDirty:s.myName!=null&&s.myName.trim()&&s.myName.trim()!==(myProfile.name||''),
+      saveName:()=>{app.patchProfile(myProfile.id,{name:s.myName.trim()},T.people.saved); app.setState({myName:null});},
+      manageTeam:()=>app.setState({sheet:null},()=>app.go('team'))};
+    // Team screen (managers): everyone who can sign in.
+    const roleChip={qc:['var(--blue-100)','var(--blue-700)'],qa:['var(--green-100)','var(--green-700)'],supervisor:['var(--amber-100)','var(--amber-700)'],manager:['var(--navy-900)','#fff']};
+    const teamList=(s.profiles||[]).map(p=>({id:p.id,name:p.name||'—',email:p.email||'',avatar:app.avatarOf(p.name,p),isMe:p.id===me.id,active:p.active!==false,
+      roleLabel:T.roles[p.role]||p.role,roleBg:(roleChip[p.role]||roleChip.qc)[0],roleFg:(roleChip[p.role]||roleChip.qc)[1],open:()=>app.openPerson(p.id),
       roles:ORDER.map(k=>({label:T.short[k],...pill(p.role===k),pick:()=>app.setRole(p.id,k)}))}));
+    const teamHead={count:teamList.length+' '+T.people.count,add:app.openAddPerson};
+    // Person sheet (manager edits one person)
+    const pp=(s.profiles||[]).find(x=>x.id===s.personId);
+    const person=pp?{id:pp.id,name:pp.name,email:pp.email,avatar:app.avatarOf(pp.name,pp),isMe:pp.id===me.id,active:pp.active!==false,
+      nameDraft:s.personName!=null?s.personName:pp.name,onName:e=>app.setState({personName:e.target.value}),nameDirty:s.personName!=null&&s.personName.trim()&&s.personName.trim()!==pp.name,
+      saveName:()=>{app.patchProfile(pp.id,{name:s.personName.trim()},T.people.saved); app.setState({personName:null});},
+      onPhoto:e=>{const f=e.target.files&&e.target.files[0]; e.target.value=''; app.changePhoto(pp.id,f);},
+      roles:ORDER.map(k=>({label:T.short[k],...pill(pp.role===k),pick:()=>app.setRole(pp.id,k)})),
+      activeT:{bg:pp.active!==false?'var(--green-50)':'#fff',bd:pp.active!==false?'var(--green-300)':'var(--blue-200)',ic:pp.active!==false?'var(--green-700)':'var(--navy-500)',track:pp.active!==false?'var(--green-600)':'var(--gray-300)',knob:pp.active!==false?'21px':'3px',
+        toggle:()=>app.patchProfile(pp.id,{active:pp.active===false},T.people.saved)},
+      pw:s.personPw||'',onPw:e=>app.setState({personPw:e.target.value}),pwDisabled:!!s.busy||(s.personPw||'').length<6,setPw:()=>app.setPersonPassword(pp.id),
+      confirm:!!s.personConfirm,askRemove:()=>app.setState({personConfirm:true}),cancelRemove:()=>app.setState({personConfirm:false}),remove:()=>app.removePerson(pp.id),busy:!!s.busy}:null;
+    // Add person sheet
+    const np=s.newPerson||{}; const setNP=p=>app.setState(st=>({newPerson:{...st.newPerson,...p}}));
+    const addPerson={name:np.name||'',email:np.email||'',password:np.password||'',onName:e=>setNP({name:e.target.value}),onEmail:e=>setNP({email:e.target.value}),onPassword:e=>setNP({password:e.target.value}),
+      generate:()=>setNP({password:WORDS_PW()}),roles:ORDER.map(k=>({label:T.short[k],...pill(np.role===k),pick:()=>setNP({role:k})})),
+      disabled:!!s.busy||!(np.name||'').trim()||!/.+@.+\..+/.test(np.email||'')||(np.password||'').length<6,save:app.addPerson,busy:!!s.busy};
 
     const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>app.setState({lang:k})};});
 
     return {
       t:T, me, is, nav, stats, attention, lines, linesHead, lineSheet, lineForm, home, kpis, homeSections, checklist, team, trendRows, trendTabs, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
-      tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts'].includes(s.screen),
+      tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts','team'].includes(s.screen),
       sel, detailBar, back:()=>app.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
       darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:app.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
-      langs, openRoles:()=>app.setState({sheet:'roles'}), account, teamList,
+      langs, openRoles:()=>app.setState({sheet:'roles',myName:null}), teamNav:role==='manager'?{label:T.people.title,on:s.screen==='team',go:()=>app.go('team')}:null, account, teamList, teamHead, person, addPerson, turnedOff:app.isTurnedOff(),
       cap:capV, cats, catsDark, sevs, sevsDark, sevCards, shoot, skipPhoto:()=>app.setState(st=>({cap:{...st.cap,photo:false,stage:'pick'}})),
       retake:()=>app.setState(st=>({cap:{...st.cap,stage:'camera'}})),
       stepBack:()=>{ app._sig=null; app.setState(st=>{const cp=st.cap; const stage=cp.stage==='sign'?(flow==='B'?'sev':'pick'):cp.stage==='sev'?'pick':'camera'; return {cap:{...cp,stage},signed:false};}); },
@@ -242,7 +271,7 @@ export function buildViewModel(app) {
       saveDetails:()=>{ const d=s.draft; app.update(s.selId,r=>({...r,loc:d.loc,ptype:d.ptype,pname:d.pname==='__other'?d.pnameText:d.pname,lot:d.lot,qty:d.qty,unit:d.unit,hold:d.hold,desc:d.desc,action:d.action,suggestion:d.suggestion,urgent:d.urgent,support:d.support,voice:!!d.voice,
         holdCheck:d.hold?(r.holdCheck&&r.holdCheck.status!=='scheduled'&&r.holdCheck.type===d.hcType?r.holdCheck:{type:d.hcType,days:d.hcDays,owner:d.hcOwner,status:'scheduled',dueAt:addDaysIso(d.hcDays),due:dueLabel(d.hcDays)}):null,
         tl:[...r.tl,['details',me.name,app.now()]].concat(d.hold&&!(r.holdCheck)?[['hcSet',me.name,app.now()]]:[])})); app.setState({prev:'list',screen:'detail'}); },
-      sheet:{show:!!s.sheet,line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
+      sheet:{show:!!s.sheet,person:s.sheet==='person'&&!!pp,addPerson:s.sheet==='addPerson',line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
       asg:a, roots, owners, dues, asgDisabled:!(a.root!=null&&a.owner&&(a.text||'').trim()),
       onAsgText:e=>{const v=e.target.value; app.setState(st=>({asg:{...st.asg,text:v}}));},
       doAssign:()=>{ const due=T.dues[a.due]; app.update(s.selId,r=>({...r,status:'action',capa:{root:T.roots[a.root],text:a.text,owner:a.owner,due},tl:[...r.tl,['assigned',me.name,app.now(),' '+a.owner]]})); app.setState({sheet:null}); },

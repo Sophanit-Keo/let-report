@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001_init.sql`, then `0002_production_lines.sql`). This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0004`), then deploy the function in `supabase/functions/admin-users` (`supabase functions deploy admin-users`). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -42,9 +42,11 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | Work on reports (assign, fix, verify, escalate) | ✓ | ✓ | ✓ | ✓ |
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
-| Edit a line's name, type, product and target | ✓ | ✓ | ✓ | ✓ |
-| Add or remove production lines | | | | ✓ |
-| Change people's roles, delete reports | | | | ✓ |
+| Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
+| Remove production lines | | | | ✓ |
+| Change own name and profile photo | ✓ | ✓ | ✓ | ✓ |
+| Team screen: add people, change name/photo/role, turn accounts off, set a new password, remove accounts | | | | ✓ |
+| Delete reports | | | | ✓ |
 
 Photos and signatures are stored in a **private** bucket, and the app shows them through links that expire after 6 hours. Data refreshes every 15 seconds and whenever you come back to the app.
 
@@ -93,6 +95,7 @@ web/
 │   ├── components/            shared UI: Button, Icon, Pill, Field, Avatar, ReportCard, TopBar, Toggle…
 │   ├── layout/                Sidebar (computer), TabBar (phone/tablet)
 │   ├── screens/               one folder per screen
+│   │   ├── team/              team management (managers)
 │   │   ├── auth/              sign in, create account, loading
 │   │   ├── home/  reports/  tasks/  alerts/
 │   │   ├── report-detail/     detail + bottom action bar
@@ -121,13 +124,15 @@ web/
 
 ## Features
 
-- **Accounts and roles:** email and password sign-in. QC inspector, QA officer, line supervisor and plant manager each get their own home screen and tasks. The manager assigns roles.
+- **Accounts and roles:** email and password sign-in. QC inspector, QA officer, line supervisor and plant manager each get their own home screen and tasks.
+- **Team (managers):** add a person with a temporary password, change anyone's name, photo or role, turn an account off (it can't see anything until turned back on), set a new password, or remove the account. There is always at least one active plant manager.
+- **Profile photo:** everyone can change their own photo and name from the account menu (tap your avatar).
 - **Two-tap report:** photo, then problem type, then severity, then sign and send. The camera is real: a live preview where the browser allows it, otherwise the phone camera or a photo picker. Critical reports alert QA and the manager.
 - **Add details:** location, product type and name, lot, quantity, product hold with a scheduled hold check, trouble, immediate action, suggestion, urgent, support needed, voice note.
 - **Workflow:** fix on the spot, assign corrective action, mark done, verify and close, manager approval, escalation ladder (QC → QA → Supervisor → Manager).
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
-- **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Managers add and remove lines.
+- **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Anyone can add a line with **+ Add line**; only managers remove lines.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 
