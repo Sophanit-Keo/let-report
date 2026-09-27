@@ -141,10 +141,18 @@ export function HomeScreen({ v }) {
           ) : null}
 
           <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <h2 style={{ ...secHead, margin: 0 }}>{t.linesNow}</h2>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <h2 style={{ ...secHead, margin: 0 }}>{t.linesNow}</h2>
+              {v.linesHead.canAdd ? (
+                <div {...tap(v.linesHead.add, 'pill-tap')} style={{ height: 30, padding: '0 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, background: '#fff', color: 'var(--blue-700)', border: '1.5px solid var(--blue-200)' }}>
+                  + {t.line.add}
+                </div>
+              ) : null}
+            </div>
+            {v.linesHead.empty ? <div style={{ fontSize: 13, color: 'var(--gray-500)', padding: '12px 14px', border: '1.5px dashed var(--blue-200)', borderRadius: 14 }}>{t.line.noLines}</div> : null}
             <div className="card-grid two">
               {v.lines.map((ln, i) => (
-                <div key={i} {...tap(ln.open, 'card-tap')} style={{ background: '#fff', border: '1.5px solid ' + ln.bd, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div key={ln.id || i} {...tap(ln.open, 'card-tap')} style={{ background: '#fff', border: '1.5px solid ' + ln.bd, borderRadius: 18, padding: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
                       <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6, background: 'var(--navy-900)', color: '#fff' }}>{ln.type}</span>
@@ -161,6 +169,7 @@ export function HomeScreen({ v }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: ln.isFg }}>
                     <Icon name={ln.isIcon} size={14} color={ln.isFg} />{ln.issues}
                   </div>
+                  {ln.note ? <div style={{ fontSize: 12, color: 'var(--gray-700)', lineHeight: 1.4, background: 'var(--blue-50)', borderRadius: 8, padding: '6px 8px' }}>{ln.note}</div> : null}
                 </div>
               ))}
             </div>

@@ -1,6 +1,6 @@
 // Builds the view model: every label, colour, list and click handler the screens need,
 // derived from the AppController state. Screens stay simple and only read from it.
-import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, LOCS, LINES, TONE } from '../data/constants.js';
+import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE } from '../data/constants.js';
 import { timeLabel, stampLabel, daysAgo, addDaysIso } from '../utils/time.js';
 import { draftOf } from './draft.js';
 
@@ -16,11 +16,36 @@ export function buildViewModel(app) {
     const stats=[{n:active.length,label:T.open,fg:'var(--blue-600)',onClick:()=>app.go('list',{filter:'open'})},
       {n:active.filter(r=>r.sev===T.sev[3]).length,label:T.criticalN,fg:'var(--red-700)',onClick:()=>app.go('list',{filter:'open'})},
       {n:all.filter(r=>r.status==='closed'&&daysAgo(r.updatedAt)<7).length,label:T.closedWk,fg:'var(--green-600)',onClick:()=>app.go('list',{filter:'closed'})}];
-    const LST={running:['var(--green-700)','var(--green-500)','lrPulse 1.6s infinite','var(--green-500)'],stopped:['var(--red-700)','var(--red-500)','none','var(--red-500)'],cleaning:['var(--blue-700)','var(--blue-500)','none','var(--blue-300)']};
-    const lines=LINES.map((l,i)=>{const n=s.reports.filter(r=>r.loc===l.name&&r.status!=='closed').length; const q=s.lineQty[i]; const c=LST[l.status];
-      return {name:l.name,type:l.type,product:l.product,qty:q,target:l.target,pct:Math.round(q/l.target*100)+'%',stLabel:T.lnSt[l.status],stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
+    const pill=(on)=>({bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'});
+    // Production lines: [text colour, dot, dot animation, progress bar, pill background]
+    const LST={running:['var(--green-700)','var(--green-500)','lrPulse 1.6s infinite','var(--green-500)','var(--green-100)'],stopped:['var(--red-700)','var(--red-500)','none','var(--red-500)','var(--red-100)'],
+      cleaning:['var(--blue-700)','var(--blue-500)','none','var(--blue-300)','var(--blue-100)'],changeover:['var(--amber-700)','var(--amber-500)','none','var(--amber-500)','var(--amber-100)'],
+      maintenance:['var(--navy-900)','var(--navy-500)','none','var(--navy-300)','var(--gray-100)'],idle:['var(--gray-500)','var(--gray-300)','none','var(--gray-300)','var(--gray-100)']};
+    const LSTATES=['running','stopped','cleaning','changeover','maintenance','idle'];
+    const stLabelOf=k=>T.lnSt[k]||T.lnStX[k]||k;
+    const issuesOn=name=>s.reports.filter(r=>r.loc===name&&r.status!=='closed').length;
+    const lines=(s.lines||[]).map(l=>{const n=issuesOn(l.name); const c=LST[l.status]||LST.idle;
+      return {id:l.id,name:l.name,type:l.type,product:l.product||'—',note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
         bd:n&&l.status==='stopped'?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
-        open:()=>app.go('list',{filter:'all',f:{date:'any',lines:[l.name],products:[],sevs:[]},q:''})};});
+        open:()=>app.openLine(l.id)};});
+    const linesHead={canAdd:app.canManageLines(),add:()=>app.openLineForm(null),empty:!lines.length};
+    // Line control sheet
+    const selLine=(s.lines||[]).find(l=>l.id===s.lineId);
+    const lineSheet=selLine?(()=>{const l=selLine, n=issuesOn(l.name), setQty=q=>app.updateLine(l.id,{qty:Math.max(0,Math.round(q)||0)});
+      return {name:l.name,type:l.type,product:l.product||'—',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',bar:(LST[l.status]||LST.idle)[3],
+        updated:(l.updatedBy?T.line.updated+' '+l.updatedBy+' · ':'')+stLabelOf(l.status)+' '+T.line.since+' '+stampLabel(l.statusSince),
+        states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],on,bg:on?c[4]:'#fff',fg:on?c[0]:'var(--navy-900)',bd:on?c[1]:'var(--blue-200)',pick:()=>app.updateLine(l.id,{status:k})};}),
+        steps:[-10,-1,1,10].map(d=>({label:(d>0?'+':'−')+Math.abs(d),pick:()=>setQty(l.qty+d)})), onQty:e=>setQty(parseInt(e.target.value.replace(/[^0-9]/g,''),10)||0), reset:()=>setQty(0),
+        note:s.lineNote!=null?s.lineNote:(l.note||''), onNote:e=>app.setState({lineNote:e.target.value}), noteDirty:s.lineNote!=null&&s.lineNote!==(l.note||''),
+        saveNote:()=>{app.updateLine(l.id,{note:(s.lineNote||'').trim()}); app.setState({lineNote:null});},
+        issues:n, seeIssues:()=>app.setState({sheet:null},()=>app.go('list',{filter:'open',f:{date:'any',lines:[l.name],products:[],sevs:[]},q:''})),
+        canManage:app.canManageLines(), edit:()=>app.openLineForm(l), confirm:!!s.lineConfirm, askRemove:()=>app.setState({lineConfirm:true}), cancelRemove:()=>app.setState({lineConfirm:false}), remove:()=>app.removeLine(l.id)};})():null;
+    // Add / edit line form
+    const lf=s.lineForm||{}; const setLF=p=>app.setState(st=>({lineForm:{...st.lineForm,...p}}));
+    const lineForm={isNew:!s.lineId,name:lf.name||'',product:lf.product||'',target:lf.target||'',onName:e=>setLF({name:e.target.value}),onProduct:e=>setLF({product:e.target.value}),onTarget:e=>setLF({target:e.target.value.replace(/[^0-9]/g,'')}),
+      types:['UHT','SCM','Yogurt','Other'].map(k=>({label:k==='Other'?T.line.other:k,...pill(lf.type===k),pick:()=>setLF({type:k})})),
+      products:(PNAMES[lf.type==='UHT'?'UHT milk':lf.type]||[]).map(n=>({label:n,...pill(lf.product===n),pick:()=>setLF({product:n})})),
+      disabled:!!s.busy||!(lf.name||'').trim()||!(parseInt(lf.target,10)>0), save:app.saveLineForm};
     const TICON={decide:'gavel',check:'bell-ring',fix:'hand',assign:'user-plus',done:'wrench',verify:'shield-check',approve:'stamp'};
     const tasksOf=rl=>{const out=[]; s.reports.forEach(rr=>app.tasksFor(rr,rl).forEach(k=>out.push({r:rr,k}))); return out;};
     const hintOf=r=>{ if(r.capa&&r.capa.overdue&&r.status==='action') return {hint:T.hintOver+' '+r.capa.due,hintIcon:'clock',hintFg:'var(--red-700)'};
@@ -53,7 +78,6 @@ export function buildViewModel(app) {
     const attention=[...active].sort((a,b)=>(b.mine-a.mine)||(s.reports.find(x=>x.id===b.id).sev-s.reports.find(x=>x.id===a.id).sev)).slice(0,3);
 
     
-    const pill=(on)=>({bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'});
     const F=s.f||{date:'any',lines:[],products:[],sevs:[]}; const q=(s.q||'').trim().toLowerCase();
     const dayAgo=r=>daysAgo(r.createdAt);
     const pass=r=>(!q||[r.id,r.title,r.pname,r.lot,r.loc,r.ptype].join(' ').toLowerCase().includes(q))
@@ -65,7 +89,7 @@ export function buildViewModel(app) {
     const setF=p=>app.setState(st=>({f:{...(st.f||{date:'any',lines:[],products:[],sevs:[]}),...p}}));
     const tog=(arr,v)=>arr.includes(v)?arr.filter(x=>x!==v):[...arr,v];
     const fDates=['any','today','week'].map(k=>({label:T.dates[k],...pill(F.date===k),pick:()=>setF({date:k})}));
-    const fLines=LOCS.map(l=>({label:l,...pill(F.lines.includes(l)),pick:()=>setF({lines:tog(F.lines,l)})}));
+    const fLines=app.locs().map(l=>({label:l,...pill(F.lines.includes(l)),pick:()=>setF({lines:tog(F.lines,l)})}));
     const fProducts=[].concat(...Object.values(PNAMES)).map(p=>({label:p,...pill(F.products.includes(p)),pick:()=>setF({products:tog(F.products,p)})}));
     const fSevs=T.sev.map((l,i)=>({label:l,...pill(F.sevs.includes(i)),pick:()=>setF({sevs:tog(F.sevs,i)})}));
     const activeF=[].concat(F.date!=='any'?[{label:T.dates[F.date],remove:()=>setF({date:'any'})}]:[],
@@ -133,7 +157,7 @@ export function buildViewModel(app) {
       subCat:c.stage==='pick', subSev:c.stage==='sev', stepTitle:c.stage==='sev'?T.step2:T.step1,
       bars:[0,1,2].map(i=>({bg:i<=stepIdx?'var(--blue-600)':'var(--blue-200)'})),
       sevOp:c.cat?1:.35, sevPe:c.cat?'auto':'none',
-      catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:LOCS[0],
+      catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:app.locs()[0],
       critical:c.sev===3, isCustom:c.cat==='custom', customText:c.customText||'', customEmpty:!(c.customText||'').trim(),
       photoUrl:c.photoUrl||null, photoName:c.photoName||'IMG_0423.jpg',
       sendDisabled:!!s.busy||!(c.cat&&c.sev!=null&&s.signed&&(c.cat!=='custom'||(c.customText||'').trim()))
@@ -143,7 +167,7 @@ export function buildViewModel(app) {
 
     // details draft
     const dr=s.draft;
-    const locs=LOCS.map(l=>{const on=dr.loc===l; return {label:l,pick:()=>app.setState(st=>({draft:{...st.draft,loc:l}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
+    const locs=app.locs().map(l=>{const on=dr.loc===l; return {label:l,pick:()=>app.setState(st=>({draft:{...st.draft,loc:l}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
     const setD=patch=>app.setState(st=>({draft:{...st.draft,...patch}}));
     const ptypes=PTYPES.map((p,i)=>({label:T.ptypes[i],...pill(dr.ptype===p),pick:()=>setD({ptype:p,pname:''})}));
     const pnames=(PNAMES[dr.ptype]||[]).concat(['__other']).map(n=>({label:n==='__other'?T.other:n,...pill(dr.pname===n),pick:()=>setD({pname:n})}));
@@ -191,7 +215,7 @@ export function buildViewModel(app) {
     const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>app.setState({lang:k})};});
 
     return {
-      t:T, me, is, nav, stats, attention, lines, home, kpis, homeSections, checklist, team, trendRows, trendTabs, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
+      t:T, me, is, nav, stats, attention, lines, linesHead, lineSheet, lineForm, home, kpis, homeSections, checklist, team, trendRows, trendTabs, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
       tabsL:tabs.slice(0,2), tabsR:tabs.slice(2), showTabs:['home','list','tasks','alerts'].includes(s.screen),
       sel, detailBar, back:()=>app.go(s.prev==='detail'||s.prev==='details'||s.prev==='done'||s.prev==='capture'?'list':s.prev),
       darkFrame:is.capture&&(c.stage==='camera'||(c.stage==='pick'&&flow!=='B')), font:app.lang()==='km'?"'Plus Jakarta Sans','Noto Sans Khmer',system-ui,sans-serif":"'Plus Jakarta Sans',system-ui,sans-serif",
@@ -218,7 +242,7 @@ export function buildViewModel(app) {
       saveDetails:()=>{ const d=s.draft; app.update(s.selId,r=>({...r,loc:d.loc,ptype:d.ptype,pname:d.pname==='__other'?d.pnameText:d.pname,lot:d.lot,qty:d.qty,unit:d.unit,hold:d.hold,desc:d.desc,action:d.action,suggestion:d.suggestion,urgent:d.urgent,support:d.support,voice:!!d.voice,
         holdCheck:d.hold?(r.holdCheck&&r.holdCheck.status!=='scheduled'&&r.holdCheck.type===d.hcType?r.holdCheck:{type:d.hcType,days:d.hcDays,owner:d.hcOwner,status:'scheduled',dueAt:addDaysIso(d.hcDays),due:dueLabel(d.hcDays)}):null,
         tl:[...r.tl,['details',me.name,app.now()]].concat(d.hold&&!(r.holdCheck)?[['hcSet',me.name,app.now()]]:[])})); app.setState({prev:'list',screen:'detail'}); },
-      sheet:{show:!!s.sheet,escalate:s.sheet==='escalate',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
+      sheet:{show:!!s.sheet,line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
       asg:a, roots, owners, dues, asgDisabled:!(a.root!=null&&a.owner&&(a.text||'').trim()),
       onAsgText:e=>{const v=e.target.value; app.setState(st=>({asg:{...st.asg,text:v}}));},
       doAssign:()=>{ const due=T.dues[a.due]; app.update(s.selId,r=>({...r,status:'action',capa:{root:T.roots[a.root],text:a.text,owner:a.owner,due},tl:[...r.tl,['assigned',me.name,app.now(),' '+a.owner]]})); app.setState({sheet:null}); },

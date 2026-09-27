@@ -4,7 +4,7 @@
 // Screens get their data from ./viewModel.js, which reads this state.
 import React from 'react';
 import { strings } from '../i18n/index.js';
-import { CATS, SEV, ST, ORDER, LINES, LOCS, TITLES, MGR_AV } from '../data/constants.js';
+import { CATS, SEV, ST, ORDER, TITLES, MGR_AV } from '../data/constants.js';
 import { SEED, NOTES } from '../data/seed.js';
 import { auth, isConfigured } from '../api/supabase.js';
 import { repo } from '../api/repo.js';
@@ -36,12 +36,11 @@ export class AppController extends React.Component {
     // ui
     screen: 'home', prev: 'home', lang: loadPrefs().lang || null, filter: 'all', selId: null, lastId: null, lastCritical: false,
     cap: { stage: 'camera', cat: null, sev: null, photo: false, customText: '' }, signed: false, draft: {}, recording: false,
-    sheet: null, asg: {}, trendBy: 'line', esc: {}, lineQty: LINES.map(l => l.qty),
+    sheet: null, asg: {}, trendBy: 'line', esc: {}, lines: [], lineId: null, lineForm: {}, lineConfirm: false, lineNote: null,
   };
   scrollRef = React.createRef();
 
   componentDidMount() {
-    this._lt = setInterval(() => this.setState(s => ({ lineQty: s.lineQty.map((q, i) => LINES[i].status === 'running' && q < LINES[i].target ? q + 1 : q) })), 6000);
     this._onKey = e => { if (e.key === 'Escape') { if (this.state.sheet) this.setState({ sheet: null }); else if (this.state.screen === 'capture') this.go('home'); } };
     this._onFocus = () => { if (document.visibilityState !== 'hidden') this.refresh(); };
     window.addEventListener('keydown', this._onKey);
@@ -53,7 +52,7 @@ export class AppController extends React.Component {
     if (this.state.session) this.refresh(true); else this.setState({ booting: false });
   }
   componentWillUnmount() {
-    clearInterval(this._lt); clearInterval(this._poll); clearTimeout(this._tt);
+    clearInterval(this._poll); clearTimeout(this._tt);
     window.removeEventListener('keydown', this._onKey); document.removeEventListener('visibilitychange', this._onFocus); window.removeEventListener('online', this._onFocus);
     if (this._offAuth) this._offAuth();
   }
@@ -73,7 +72,9 @@ export class AppController extends React.Component {
       // keep optimistic changes that are still being saved
       const pending = this._pending || {};
       const reports = d.reports.map(r => withDue(pending[r.id] || r));
-      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, booting: false, loadError: null });
+      const pl = this._pendingLines || {};
+      const lines = d.lines.map(l => (pl[l.id] ? { ...l, ...pl[l.id] } : l));
+      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, booting: false, loadError: null });
       this.loadPhotos(reports);
     } catch (e) {
       this.setState({ booting: false, loadError: first ? e.message : null });
@@ -239,7 +240,7 @@ export class AppController extends React.Component {
     try {
       const photoPath = cap.photoUrl ? await repo.uploadImage(cap.photoUrl, 'reports') : null;
       const signaturePath = signature ? await repo.uploadImage(signature, 'signatures') : null;
-      const saved = await repo.createReport({ level, title, cat: cap.cat, sev: cap.sev, loc: LOCS[0], status: 'open', by: me, photoPath, signaturePath, signedAt: t,
+      const saved = await repo.createReport({ level, title, cat: cap.cat, sev: cap.sev, loc: this.locs()[0], status: 'open', by: me, photoPath, signaturePath, signedAt: t,
         ptype: '', pname: '', lot: '', qty: '', unit: 'pcs', hold: false, urgent: cap.sev === 3, support: [], desc: '', action: '', suggestion: '', voice: false, capa: null, tl });
       if (cap.photoUrl && photoPath) this.setState(s => ({ photoUrls: { ...s.photoUrls, [photoPath]: cap.photoUrl } }));
       const id = saved.id;
@@ -275,6 +276,50 @@ export class AppController extends React.Component {
       this.toast(me + ': ' + saved.length + ' sample reports added.');
       this.refresh();
     } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+
+  // ───── Production lines ─────
+  // Where a problem can be: every production line, plus the non-line areas.
+  locs() { return [...this.state.lines.map(l => l.name), 'Packing', 'Receiving']; }
+  canManageLines() { return this.role() === 'manager'; }
+  openLine = id => this.setState({ sheet: 'line', lineId: id, lineConfirm: false, lineNote: null });
+  // Change a line right away, then save it (status, output, note).
+  updateLine = (id, patch) => {
+    const before = this.state.lines.find(l => l.id === id); if (!before) return;
+    const full = { ...patch, updatedBy: this.me().name };
+    if (patch.status && patch.status !== before.status) full.statusSince = nowIso();
+    this._pendingLines = { ...(this._pendingLines || {}), [id]: { ...((this._pendingLines || {})[id] || {}), ...full } };
+    this.setState(s => ({ lines: s.lines.map(l => (l.id === id ? { ...l, ...full, updatedAt: nowIso() } : l)) }));
+    clearTimeout((this._lineTimers || (this._lineTimers = {}))[id]);
+    // quick taps on +1/−1 are sent together
+    this._lineTimers[id] = setTimeout(() => {
+      const send = (this._pendingLines || {})[id]; if (!send) return;
+      repo.updateLine(id, send)
+        .then(saved => { if (this._pendingLines && this._pendingLines[id] === send) delete this._pendingLines[id]; if (saved) this.setState(s => ({ lines: s.lines.map(l => (l.id === id ? { ...l, ...saved } : l)) })); })
+        .catch(e => { if (this._pendingLines) delete this._pendingLines[id]; this.toast(e.message); this.refresh(); });
+    }, 600);
+  };
+  openLineForm = line => this.setState({ sheet: 'lineForm', lineId: line ? line.id : null,
+    lineForm: line ? { name: line.name, type: line.type, product: line.product, target: String(line.target) } : { name: '', type: 'UHT', product: '', target: '100' } });
+  saveLineForm = async () => {
+    const f = this.state.lineForm, id = this.state.lineId;
+    const data = { name: f.name.trim(), type: f.type, product: f.product.trim(), target: Math.max(1, parseInt(f.target, 10) || 100) };
+    this.setState({ busy: true });
+    try {
+      if (id) { await repo.updateLine(id, { ...data, updatedBy: this.me().name }); }
+      else { const sort = Math.max(0, ...this.state.lines.map(l => l.sort || 0)) + 1; await repo.addLine({ ...data, sort, status: 'idle', qty: 0, updatedBy: this.me().name }); }
+      this.setState({ busy: false, sheet: null });
+      this.toast((id ? '' : '+ ') + data.name);
+      this.refresh();
+    } catch (e) {
+      this.setState({ busy: false });
+      this.toast(/duplicate|unique/i.test(e.message) ? '"' + data.name + '" already exists.' : e.message);
+    }
+  };
+  removeLine = async id => {
+    const line = this.state.lines.find(l => l.id === id);
+    this.setState(s => ({ sheet: null, lines: s.lines.filter(l => l.id !== id) }));
+    try { await repo.removeLine(id); this.toast('− ' + (line ? line.name : '')); } catch (e) { this.toast(e.message); this.refresh(); }
   };
 
   // Everything the screens display, recomputed on each render.

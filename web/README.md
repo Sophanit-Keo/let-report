@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor**, paste all of `supabase/migrations/0001_init.sql` and click **Run**. This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001_init.sql`, then `0002_production_lines.sql`). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -41,6 +41,8 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | See all reports, create reports as themselves | ✓ | ✓ | ✓ | ✓ |
 | Work on reports (assign, fix, verify, escalate) | ✓ | ✓ | ✓ | ✓ |
 | See alerts meant for their role | ✓ | ✓ | ✓ | ✓ |
+| Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
+| Add, edit or remove production lines | | | | ✓ |
 | Change people's roles, delete reports | | | | ✓ |
 
 Photos and signatures are stored in a **private** bucket, and the app shows them through links that expire after 6 hours. Data refreshes every 15 seconds and whenever you come back to the app.
@@ -96,7 +98,7 @@ web/
 │   │   ├── add-details/       form + save bar
 │   │   ├── report-sent/
 │   │   └── capture/           camera, flows A/B/C, sign step, shared parts
-│   ├── sheets/                SheetHost + one file per sheet (role, assign, escalate, filters, decision, verify)
+│   ├── sheets/                SheetHost + one file per sheet (account, line, line form, assign, escalate, filters, decision, verify)
 │   ├── styles/
 │   │   ├── tokens/            design-system tokens (colours, type, spacing, effects)
 │   │   ├── base.css           fonts, resets, animations, focus states
@@ -124,6 +126,7 @@ web/
 - **Workflow:** fix on the spot, assign corrective action, mark done, verify and close, manager approval, escalation ladder (QC → QA → Supervisor → Manager).
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
+- **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output and leave a note for the next shift. Managers add, edit and remove lines.
 - **English and Khmer** switch at the top.
 - Everything is saved in the Supabase database and shared between all devices.
 
@@ -134,4 +137,4 @@ web/
 
 ### Still simulated
 
-The voice note and the "Lines now" production numbers are still demo data. Hold-check reminders appear when the app is opened on or after the due day, and no push notifications are sent yet.
+The voice note is still simulated. Hold-check reminders appear when the app is opened on or after the due day, and no push notifications are sent yet.

@@ -56,4 +56,8 @@ export const KM = {
   teamRoles:'ក្រុម និងតួនាទី', teamSub:'ជ្រើសរើសអ្វីដែលម្នាក់ៗអាចធ្វើបាន។ អ្នកថ្មីចាប់ផ្តើមជា QC។', you:'អ្នក',
   loadSample:'ផ្ទុករបាយការណ៍គំរូ', sampleSub:'បន្ថែមរបាយការណ៍គំរូពីការរចនា ដើម្បីសាកល្បងគ្រប់ជំហាន។',
   notConfigured:'មិនទាន់ភ្ជាប់ទៅមូលដ្ឋានទិន្នន័យ', notConfiguredSub:'បន្ថែម SUPABASE_URL និង SUPABASE_ANON_KEY (មើល README) ហើយ build ម្តងទៀត។', sending:'កំពុងផ្ញើ…',
+  lnStX:{changeover:'ប្តូរផលិតផល',maintenance:'ជួសជុល',idle:'ទំនេរ'},
+  line:{add:'បន្ថែមខ្សែ', edit:'កែព័ត៌មានខ្សែ', remove:'លុបខ្សែ', removeQ:'លុបខ្សែនេះ?', removeSub:'របាយការណ៍ដែលពាក់ព័ន្ធនៅរក្សាទីតាំងដដែល។', cancel:'បោះបង់',
+    status:'ស្ថានភាព', output:'ផលិតថ្ងៃនេះ', target:'គោលដៅ (ប៉ាឡែត)', name:'ឈ្មោះខ្សែ', type:'ប្រភេទ', product:'ផលិតផល', note:'កំណត់ចំណាំសម្រាប់វេនបន្ទាប់', notePh:'ឧ. រង់ចាំជួសជុលវ៉ាល់ចំហាយ',
+    reset:'កំណត់ទៅ 0', seeIssues:'មើលរបាយការណ៍បើក', updated:'កែដោយ', since:'ចាប់ពី', save:'រក្សាទុក', create:'បន្ថែមខ្សែ', saveNote:'រក្សាកំណត់ចំណាំ', noLines:'មិនទាន់មានខ្សែផលិតកម្ម។', other:'ផ្សេងៗ'},
 };

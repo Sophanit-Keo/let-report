@@ -41,12 +41,13 @@ export function diffReport(before, after) {
 
 export const repo = {
   async loadAll() {
-    const [profiles, reports, notes, reads, ticks] = await Promise.all([
+    const [profiles, reports, notes, reads, ticks, lines] = await Promise.all([
       db.select('profiles', { order: 'created_at.asc' }),
       db.select('reports', { order: 'created_at.desc', limit: 500 }),
       db.select('notifications', { order: 'created_at.desc', limit: 200 }),
       db.select('notification_reads', { select: 'notification_id' }),
       db.select('checklist_ticks', { day: 'eq.' + today() }),
+      db.select('production_lines', { order: 'sort.asc,created_at.asc' }),
     ]);
     return {
       profiles,
@@ -54,6 +55,7 @@ export const repo = {
       notes: notes.map(n => ({ key: n.id, id: n.report_id, icon: n.icon, tone: n.tone, text: n.text, t: n.created_at, roles: n.roles })),
       readIds: reads.map(r => r.notification_id),
       ticks: ticks.map(t => t.item),
+      lines: lines.map(rowToLine),
     };
   },
 
@@ -81,6 +83,11 @@ export const repo = {
       : db.remove('checklist_ticks', { item: 'eq.' + item, day: 'eq.' + today() });
   },
 
+  // ───── Production lines ─────
+  async updateLine(id, patch) { const rows = await db.update('production_lines', { id: 'eq.' + id }, lineToRow(patch)); return rows && rows[0] ? rowToLine(rows[0]) : null; },
+  async addLine(line) { const [row] = await db.insert('production_lines', lineToRow(line)); return rowToLine(row); },
+  removeLine(id) { return db.remove('production_lines', { id: 'eq.' + id }); },
+
   updateProfile(id, patch) { return db.update('profiles', { id: 'eq.' + id }, patch); },
 
   async uploadImage(dataUrl, folder) {
@@ -91,6 +98,16 @@ export const repo = {
   },
   photoUrls(paths) { return storage.signedUrls(PHOTO_BUCKET, paths, 60 * 60 * 6); },
 };
+
+// ───── Production lines ─────
+export function rowToLine(r) {
+  return { id: r.id, name: r.name, type: r.type, product: r.product, qty: r.qty, target: r.target, status: r.status, note: r.note,
+    sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at };
+}
+function lineToRow(l) {
+  const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name' };
+  const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
+}
 
 function today() {
   const d = new Date();

@@ -56,4 +56,8 @@ export const EN = {
   teamRoles:'Team and roles', teamSub:'Choose what each person can do. New people start as QC.', you:'you',
   loadSample:'Load sample reports', sampleSub:'Adds the example reports from the design so you can try every step.',
   notConfigured:'Not connected to a database yet', notConfiguredSub:'Add SUPABASE_URL and SUPABASE_ANON_KEY (see README), then build again.', sending:'Sending…',
+  lnStX:{changeover:'Changeover',maintenance:'Maintenance',idle:'Idle'},
+  line:{add:'Add line', edit:'Edit line info', remove:'Remove line', removeQ:'Remove this line?', removeSub:'Reports that mention it keep their location.', cancel:'Cancel',
+    status:'Status', output:'Output today', target:'Target (pallets)', name:'Line name', type:'Type', product:'Product', note:'Note for the next shift', notePh:'e.g. Waiting for steam valve repair',
+    reset:'Reset to 0', seeIssues:'See open reports', updated:'Updated by', since:'since', save:'Save', create:'Add line', saveNote:'Save note', noLines:'No production lines yet.', other:'Other'},
 };
