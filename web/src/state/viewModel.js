@@ -1,6 +1,7 @@
 // Builds the view model: every label, colour, list and click handler the screens need,
 // derived from the AppController state. Screens stay simple and only read from it.
-import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE, CIP_CHOICES, CIP_REASONS, RUN_MAX_HOURS, RUN_CHOICES, FILL_CIP_CHOICES } from '../data/constants.js';
+import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE, CIP_REASONS } from '../data/constants.js';
+import { buildLotView, buildPlanView } from './lotView.js';
 import { timeLabel, stampLabel, daysAgo, addDaysIso, durLabel, hoursLabel, fromLocalInput } from '../utils/time.js';
 import { draftOf } from './draft.js';
 import { buildChatView, buildDiscussion } from './chatView.js';
@@ -33,7 +34,8 @@ export function buildViewModel(app) {
     const issuesOn=name=>s.reports.filter(r=>r.loc===name&&r.status!=='closed').length;
     // What the line is doing now: the lot it runs (and for how long), or the CIP countdown after a lot.
     const now=s.clock||Date.now(), ms=v=>Date.parse(v)||0;
-    const H=3600000, isoAt=t=>new Date(t).toISOString();
+    const H=3600000, isoAt=t=>new Date(t).toISOString(), PLAN=app.plan();
+    const uniq=a=>[...new Set(a)].sort((x,y)=>x-y);
     // Start time check: empty or in the future is not allowed (5 min of clock difference is fine)
     const startBad=v=>{ const t=fromLocalInput(v); return !t?T.lot.startMissing:Date.parse(t)>Date.now()+5*60000?T.lot.startFuture:''; };
     const toLocalNow=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); };
@@ -46,7 +48,7 @@ export function buildViewModel(app) {
     // How long the lot has run against its plan (24 / 28 / 32 / 36 h) and the line's maximum (36 h),
     // and for lines like UHT line 1 when the next CIP filling is due (every 24 h of filling).
     const runOf=l=>{ if(!l.lot||!l.lotStartedAt) return null;
-      const start=ms(l.lotStartedAt), ran=now-start, max=l.maxRunHours||RUN_MAX_HOURS, plan=l.planHours||max, left=plan*H-ran;
+      const start=ms(l.lotStartedAt), ran=now-start, max=l.maxRunHours||PLAN.runMax, plan=l.planHours||max, left=plan*H-ran;
       const over=ran>max*H, overPlan=ran>plan*H, soon=!overPlan&&left<=2*H;
       const fill=l.fillEvery&&l.status==='running'?(()=>{const since=ms(l.fillSince)||start, fl=l.fillEvery*H-(now-since);
         return {every:l.fillEvery,due:fl<=0,soon:fl>0&&fl<=2*H,label:hoursLabel(Math.abs(fl)),at:stampLabel(isoAt(since+l.fillEvery*H)),count:l.fillCips||0};})():null;
@@ -75,32 +77,33 @@ export function buildViewModel(app) {
       return {id:l.id,name:l.name,type:l.type,product:l.product||'—',note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
         bd:(n&&l.status==='stopped')||(nw&&nw.fg==='var(--red-700)')?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
         now:nw, open:()=>app.openLine(l.id)};});
-    const linesHead={canAdd:true,add:()=>app.openLineForm(null),empty:!lines.length};
+    const linesHead={canAdd:true,add:()=>app.openLineForm(null),empty:!lines.length,openPlan:app.openPlan};
     // Line control sheet
     const selLine=(s.lines||[]).find(l=>l.id===s.lineId);
     const lineSheet=selLine?(()=>{const l=selLine, n=issuesOn(l.name), setQty=q=>app.updateLine(l.id,{qty:Math.max(0,Math.round(q)||0)});
       return {name:l.name,type:l.type,product:l.product||'—',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',bar:(LST[l.status]||LST.idle)[3],
         updated:(l.updatedBy?T.line.updated+' '+l.updatedBy+' · ':'')+stLabelOf(l.status)+' '+T.line.since+' '+stampLabel(l.statusSince),
         // Picking CIP while a lot is running opens "Finish lot", so the lot's end gets recorded.
-        states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],on,bg:on?c[4]:'#fff',fg:on?c[0]:'var(--navy-900)',bd:on?c[1]:'var(--blue-200)',pick:()=>(k==='cleaning'&&l.lot&&l.status==='running'?app.openFinishLot():app.updateLine(l.id,{status:k}))};}),
+        states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],on,bg:on?c[4]:'#fff',fg:on?c[0]:'var(--navy-900)',bd:on?c[1]:'var(--blue-200)',pick:()=>(k==='cleaning'&&l.lot&&l.status==='running'?app.openFinishLot():app.setLineStatus(l.id,k))};}),
         // Lot now, CIP now, the two forms, and this line's lot history
-        lotsReady:s.lotsReady!==false, maxRun:l.maxRunHours||RUN_MAX_HOURS, fillEvery:l.fillEvery||null,
+        lotsReady:s.lotsReady!==false, maxRun:l.maxRunHours||PLAN.runMax, fillEvery:l.fillEvery||null,
         lot:lotOf(l), cip:cipOf(l), run:runOf(l), idleLot:l.lot&&l.status!=='running'&&!(l.status==='cleaning'&&l.cipReason==='filling')?l.lot:'', canFinish:!!l.lot,
         startLabel:cipOf(l)||(s.lots||[]).some(x=>x.lineId===l.id)?T.lot.startNext:T.lot.start,
         openStart:app.openStartLot, openFinish:app.openFinishLot, extend:h=>app.extendCip(h),
         // CIP filling in the middle of the lot (lines with a filling limit, e.g. UHT line 1 every 24 h)
         canFill:!!(l.fillEvery&&l.lot&&l.status==='running'), openFill:app.openFillCip,
+        openDetails:s.planReady&&l.currentLotId?()=>app.openLot(l.currentLotId,l.id):null,
         startEdit:s.lineStart!=null&&l.lot?{value:s.lineStart,onChange:e=>app.setState({lineStart:e.target.value}),bad:startBad(s.lineStart),save:app.saveStartEdit,cancel:()=>app.setState({lineStart:null})}:null,
         openStartEdit:l.lot?app.openStartEdit:null,
         filling:l.status==='cleaning'&&l.cipReason==='filling'&&l.lot?{lot:l.lot,count:l.fillCips||0,cont:app.continueLot}:null,
         fillForm:s.lineFill?(()=>{const f=s.lineFill, h=parseFloat(f.hours), setF=p=>app.setState(st=>({lineFill:{...st.lineFill,...p}}));
-          return {lot:l.lot||'—',hours:FILL_CIP_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n)})})),hoursText:f.hours||'',onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
+          return {lot:l.lot||'—',hours:uniq([1,2,3,4,PLAN.fillCipHours]).map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n)})})),hoursText:f.hours||'',onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
             disabled:!(h>0),save:app.startFillCip,cancel:()=>app.setState({lineFill:null})};})():null,
-        startForm:s.lineLot?(()=>{const f=s.lineLot, setF=p=>app.setState(st=>({lineLot:{...st.lineLot,...p}})), max=l.maxRunHours||RUN_MAX_HOURS, plan=parseFloat(f.plan);
+        startForm:s.lineLot?(()=>{const f=s.lineLot, setF=p=>app.setState(st=>({lineLot:{...st.lineLot,...p}})), max=l.maxRunHours||PLAN.runMax, plan=parseFloat(f.plan);
           return {lot:f.lot||'',product:f.product||'',onLot:e=>setF({lot:e.target.value.toUpperCase()}),onProduct:e=>setF({product:e.target.value}),
             products:(PNAMES[l.type==='UHT'?'UHT milk':l.type]||[]).map(nm=>({label:nm,...pill(f.product===nm),pick:()=>setF({product:nm})})),
-            plans:RUN_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(plan===n),pick:()=>setF({plan:String(n)})})), planText:f.plan||'',onPlan:e=>setF({plan:e.target.value.replace(/[^0-9.]/g,'')}),
-            planNote:plan>max?T.lot.special.replace('{max}',max):T.lot.planSub.replace('{max}',max), special:plan>max,
+            plans:PLAN.runChoices.map(n=>({label:n+' '+T.lot.hoursShort,...pill(plan===n),pick:()=>setF({plan:String(n)})})), planText:f.plan||'',onPlan:e=>setF({plan:e.target.value.replace(/[^0-9.]/g,'')}),
+            planNote:plan>max?T.lot.special.replace('{max}',max):T.lot.planSub.replace('{choices}',PLAN.runChoices.length>1?PLAN.runChoices.slice(0,-1).join(', ')+' '+T.lot.or+' '+PLAN.runChoices[PLAN.runChoices.length-1]:PLAN.runChoices.join('')).replace('{max}',max), special:plan>max,
             fillNote:l.fillEvery?T.lot.fillRule.replace('{h}',l.fillEvery):'',
             start:f.start||'', onStart:e=>setF({start:e.target.value}), startNow:()=>setF({start:toLocalNow()}), startBad:startBad(f.start),
             disabled:!(f.lot||'').trim()||!(plan>0)||!!startBad(f.start),save:app.startLot,cancel:()=>app.setState({lineLot:null})};})():null,
@@ -115,14 +118,15 @@ export function buildViewModel(app) {
             plan:r?T.lot.planOf.replace('{plan}',r.plan):'', fills:l.fillCips?l.fillCips+' × '+T.lot.fillCip:'',
             needWhy, whyLabel:r?T.lot.overWhy.replace('{max}',r.max):'', overNote:f.overNote||'', onOverNote:e=>setF({overNote:e.target.value}),
             qty:f.qty,onQty:e=>setF({qty:e.target.value.replace(/[^0-9]/g,'')}),
-            hours:CIP_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n),reason:n===4&&f.reason==='other'?'standard':f.reason})})), hoursText:f.hours, onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
-            reasons:CIP_REASONS.map(k=>({label:T.lot.reasons[k],...pill(f.reason===k),pick:()=>setF({reason:k,hours:k==='standard'?'4':(h>4?f.hours:'6')})})),
+            hours:uniq([PLAN.cipHours,6,8,12]).map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n),reason:n===PLAN.cipHours&&f.reason==='other'?'standard':f.reason})})), hoursText:f.hours, onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
+            reasons:CIP_REASONS.map(k=>({label:T.lot.reasons[k],...pill(f.reason===k),pick:()=>setF({reason:k,hours:k==='standard'?String(PLAN.cipHours):(h>PLAN.cipHours?f.hours:String(Math.max(6,PLAN.cipHours+2)))})})),
             note:f.note||'',onNote:e=>setF({note:e.target.value}),disabled:!!s.busy||!(h>=0)||!!endBad||(needWhy&&!(f.overNote||'').trim()),save:app.finishLot,cancel:()=>app.setState({lineEnd:null})};})():null,
         history:(s.lots||[]).filter(x=>x.lineId===l.id||(!x.lineId&&x.lineName===l.name)).slice(0,8).map(x=>({id:x.id,lot:x.lot,product:x.product||'—',
-          when:(x.startedAt?stampLabel(x.startedAt)+' '+T.lot.fromTo+' ':'')+stampLabel(x.endedAt), ran:x.startedAt?hoursLabel(ms(x.endedAt)-ms(x.startedAt)):'', qty:x.qty+' / '+(x.target||'—')+' '+T.lot.pal,
-          cip:T.lot.cipShort+' '+x.cipHours+' '+T.lot.hoursShort+(x.cipReason&&x.cipReason!=='standard'?' · '+T.lot.reasons[x.cipReason]:''), by:x.endedByName, note:x.note,
+          when:(x.startedAt?stampLabel(x.startedAt)+' '+T.lot.fromTo+' ':'')+(x.endedAt?stampLabel(x.endedAt):T.lotd.now), ran:x.startedAt?hoursLabel((x.endedAt?ms(x.endedAt):now)-ms(x.startedAt)):'', qty:x.qty+' / '+(x.target||'—')+' '+T.lot.pal,
+          cip:x.endedAt?T.lot.cipShort+' '+x.cipHours+' '+T.lot.hoursShort+(x.cipReason&&x.cipReason!=='standard'?' · '+T.lot.reasons[x.cipReason]:''):T.lotd.running, by:x.endedAt?x.endedByName:x.startedByName, note:x.note,
+          open:s.planReady&&typeof x.id==='number'?()=>app.openLot(x.id,l.id):null, running:!x.endedAt,
           plan:x.planHours?T.lot.planOf.replace('{plan}',x.planHours):'', fills:x.fillCips?x.fillCips+' × '+T.lot.fillCip:'', overNote:x.overNote,
-          over:!!(x.startedAt&&(ms(x.endedAt)-ms(x.startedAt))>(l.maxRunHours||RUN_MAX_HOURS)*H)})),
+          over:!!(x.startedAt&&((x.endedAt?ms(x.endedAt):now)-ms(x.startedAt))>(l.maxRunHours||PLAN.runMax)*H)})),
         steps:[-10,-1,1,10].map(d=>({label:(d>0?'+':'−')+Math.abs(d),pick:()=>setQty(l.qty+d)})), onQty:e=>setQty(parseInt(e.target.value.replace(/[^0-9]/g,''),10)||0), reset:()=>setQty(0),
         note:s.lineNote!=null?s.lineNote:(l.note||''), onNote:e=>app.setState({lineNote:e.target.value}), noteDirty:s.lineNote!=null&&s.lineNote!==(l.note||''),
         saveNote:()=>{app.updateLine(l.id,{note:(s.lineNote||'').trim()}); app.setState({lineNote:null});},
@@ -135,7 +139,7 @@ export function buildViewModel(app) {
       products:(PNAMES[lf.type==='UHT'?'UHT milk':lf.type]||[]).map(n=>({label:n,...pill(lf.product===n),pick:()=>setLF({product:n})})),
       // How long a lot may run on this line, and whether the filler needs a CIP in the middle of a lot
       maxRun:lf.maxRun||'',onMaxRun:e=>setLF({maxRun:e.target.value.replace(/[^0-9]/g,'')}),
-      fillOpts:[['',T.lot.fillOff],['24','24 '+T.lot.hoursShort]].map(([k,lb])=>({label:lb,...pill((lf.fillEvery||'')===k),pick:()=>setLF({fillEvery:k})})),
+      fillOpts:[['',T.lot.fillOff],[String(PLAN.fillEvery),PLAN.fillEvery+' '+T.lot.hoursShort]].map(([k,lb])=>({label:lb,...pill((lf.fillEvery||'')===k),pick:()=>setLF({fillEvery:k})})),
       fillEvery:lf.fillEvery||'',onFillEvery:e=>setLF({fillEvery:e.target.value.replace(/[^0-9]/g,'')}),
       disabled:!!s.busy||!(lf.name||'').trim()||!(parseInt(lf.target,10)>0)||!(parseInt(lf.maxRun,10)>0), save:app.saveLineForm};
     const TICON={decide:'gavel',check:'bell-ring',fix:'hand',assign:'user-plus',done:'wrench',verify:'shield-check',approve:'stamp'};
@@ -383,7 +387,7 @@ export function buildViewModel(app) {
       saveDetails:()=>{ const d=s.draft; app.update(s.selId,r=>({...r,loc:d.loc,ptype:d.ptype,pname:d.pname==='__other'?d.pnameText:d.pname,lot:d.lot,qty:d.qty,unit:d.unit,hold:d.hold,desc:d.desc,action:d.action,suggestion:d.suggestion,urgent:d.urgent,support:d.support,voice:!!d.voice,
         holdCheck:d.hold?(r.holdCheck&&r.holdCheck.status!=='scheduled'&&r.holdCheck.type===d.hcType?r.holdCheck:{type:d.hcType,days:d.hcDays,owner:d.hcOwner,status:'scheduled',dueAt:addDaysIso(d.hcDays),due:dueLabel(d.hcDays)}):null,
         tl:[...r.tl,['details',me.name,app.now()]].concat(d.hold&&!(r.holdCheck)?[['hcSet',me.name,app.now()]]:[])})); app.setState({prev:'list',screen:'detail'}); },
-      sheet:{show:!!s.sheet,person:s.sheet==='person'&&!!pp,addPerson:s.sheet==='addPerson',line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',close:s.sheet==='close',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
+      sheet:{show:!!s.sheet,lot:s.sheet==='lot',plan:s.sheet==='plan',person:s.sheet==='person'&&!!pp,addPerson:s.sheet==='addPerson',line:s.sheet==='line'&&!!selLine,lineForm:s.sheet==='lineForm',escalate:s.sheet==='escalate',close:s.sheet==='close',filters:s.sheet==='filters',decide:s.sheet==='decide',roles:s.sheet==='roles',assign:s.sheet==='assign',verify:s.sheet==='verify'}, closeSheet:()=>app.setState({sheet:null}),
       asg:a, roots, owners, dues, asgDisabled:!(a.root!=null&&a.owner&&(a.text||'').trim()),
       onAsgText:e=>{const v=e.target.value; app.setState(st=>({asg:{...st.asg,text:v}}));},
       doAssign:()=>{ const due=T.dues[a.due]; app.update(s.selId,r=>({...r,status:'action',capa:{root:T.roots[a.root],text:a.text,owner:a.owner,due},tl:[...r.tl,['assigned',me.name,app.now(),' '+a.owner]]})); app.setState({sheet:null}); },
@@ -405,6 +409,7 @@ export function buildViewModel(app) {
         app.setState({sheet:null,closeNote:''});
         app.addNote(needA?{id:s.selId,icon:'stamp',tone:'blue',text:me.name+' asks to close '+s.selId+': '+rr.title,roles:['manager']}:{id:s.selId,icon:'circle-check',tone:'green',text:me.name+' closed '+s.selId+': '+rr.title,roles:['qc','qa','supervisor','manager'].filter(x=>x!==role)}); },
       verifyNo:()=>{ app.update(s.selId,r=>({...r,status:'action',tl:[...r.tl,['reopened',me.name,app.now()]]})); app.setState({sheet:null}); },
+      lotView:s.sheet==='lot'?buildLotView(app,{T,pill,stLabelOf,hoursLabel,stampLabel,P:PLAN}):null, planView:s.sheet==='plan'?buildPlanView(app,{T,pill,stampLabel,P:PLAN}):null,
       toast:app.toastView(), onPhoto, role, flow, lang:app.lang(), screen:s.screen, scrollRef:app.scrollRef
     };
 }

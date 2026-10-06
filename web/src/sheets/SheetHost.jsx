@@ -10,6 +10,8 @@ import { DecisionSheet } from './DecisionSheet.jsx';
 import { VerifySheet } from './VerifySheet.jsx';
 import { LineSheet } from './LineSheet.jsx';
 import { LineFormSheet } from './LineFormSheet.jsx';
+import { LotSheet } from './LotSheet.jsx';
+import { PlanSheet } from './PlanSheet.jsx';
 import { PersonSheet } from './PersonSheet.jsx';
 import { AddPersonSheet } from './AddPersonSheet.jsx';
 
@@ -26,6 +28,8 @@ export function SheetHost({ v }) {
         {s.addPerson ? <AddPersonSheet v={v} /> : null}
         {s.line ? <LineSheet v={v} /> : null}
         {s.lineForm ? <LineFormSheet v={v} /> : null}
+        {s.lot ? <LotSheet v={v} /> : null}
+        {s.plan ? <PlanSheet v={v} /> : null}
         {s.roles ? <RoleSheet v={v} /> : null}
         {s.assign ? <AssignSheet v={v} /> : null}
         {s.escalate ? <EscalateSheet v={v} /> : null}

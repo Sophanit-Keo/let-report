@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0010`), then deploy the two functions: `supabase functions deploy admin-users` and `supabase functions deploy push --no-verify-jwt`. For push notifications, also run once in the SQL Editor: `select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');` (the notification keys are made automatically the first time). This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0011`), then deploy the two functions: `supabase functions deploy admin-users` and `supabase functions deploy push --no-verify-jwt`. For push notifications, also run once in the SQL Editor: `select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');` (the notification keys are made automatically the first time). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -47,7 +47,10 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | Turn push notifications on or off for their own devices | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
 | Start a lot on a line, finish it (the line goes into CIP) and record the lot's details | ✓ | ✓ | ✓ | ✓ |
-| Delete a lot record | | | | ✓ |
+| View a lot's details; add, edit and delete its events; edit the lot's info (every change is kept in the change log) | ✓ | ✓ | ✓ | ✓ |
+| Delete a lot record (the change log keeps it) | | | | ✓ |
+| Change the production plan (run choices, maximum run, CIP times) | | | ✓ | ✓ |
+| Change or delete the change log | | | | |
 | Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
 | Remove production lines | | | | ✓ |
 | Change own name and profile photo | ✓ | ✓ | ✓ | ✓ |
@@ -151,6 +154,8 @@ web/
 - **Start time of a lot:** **Start lot** asks when the lot started (now by default, or earlier if it is recorded late; not in the future). A running lot can be corrected with **Change start time**. The run time, the CIP filling clock and the lot record all count from it, and the line card shows *Started 06:00*. **Finish lot** likewise asks when the lot ended (now by default; after the start and not in the future). The lot record keeps it, the over-maximum check uses it, and the CIP after the lot counts from it, so a lot recorded 2 hours late shows a 4-hour CIP with 2 hours left.
 - **Run time of a lot:** when starting a lot you pick the planned run: 24, 28, 32 or 36 hours (or type another number). 36 hours is the normal maximum for each line (change it in **Edit line info**). The card shows the run against its plan (*25 h / 36 h*), turns amber near the end and red past the maximum. Running past the maximum is allowed as a special case, but **Finish lot** then asks why, and the reason is kept with the lot.
 - **CIP filling:** some lines can fill only for a set time. UHT line 1 needs a CIP filling every 24 hours, then the same lot continues. The card shows when the next CIP filling is due and turns red when it is. **Start CIP filling** cleans the filler while the lot stays on the line; **Continue lot** carries on with the same lot and restarts the 24-hour clock. Set it per line in **Edit line info** (*CIP filling during a lot*).
+- **Lot details:** tap a lot in **Lot history**, or **Details** on the running lot. It shows the lot's facts (line, product, start, end, run time against the plan, output, CIP), its **events** and its **change log**. Events are written as things happen: start, the status buttons while the lot runs (Stopped, Running again…), CIP filling, continue and finish. Anyone can **add** an event (Stopped, Running again, Maintenance, CIP filling, Continued, Note), **edit** one (time, hours, status or CIP reason, note) or **delete** one; start and finish can be moved but not deleted, and an event must fall inside the lot. **Edit lot info** changes the lot number, product, output, planned run and notes. The **change log** lists every create, edit and delete (*Start time: 06:00 → 05:30*, who, when). The database writes it with triggers (table `lot_log`), so nobody can change or delete it, and it keeps a lot even after a manager deletes the lot.
+- **Production plan:** **Plan** next to *+ Add line* opens the factory's plan: the planned-run choices (24, 28, 32, 36 h), the normal maximum for new lines (36 h), the standard CIP after a lot (4 h), the CIP filling time (2 h) and when a CIP filling is needed (24 h). Line supervisors and the plant manager can change it; everyone else sees it read-only. Changes are in the plan's change history.
 - **If the database is behind the app:** a missing lot table or column no longer stops the app from loading. Lines and reports still show, and the line sheet says the database update is needed.
 - **Install on phones and tablets:** the app suggests installing itself (Android: an Install button; iPhone/iPad: Share → Add to Home Screen steps). "Not now" hides it for 7 days. A small service worker (`public/sw.js`) makes this possible and opens the app faster; data from Supabase is never cached.
 - **Live chat:** a team room for everyone plus private 1-to-1 chats, with text and photos, unread badges, a green dot for who is online, and a pop-up when a message arrives on another screen. Messages appear instantly (Supabase Realtime); if the live connection drops, the app catches up on its own. People can delete their own messages.

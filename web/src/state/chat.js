@@ -8,7 +8,10 @@ import { toSmallJpeg } from '../utils/image.js';
 import { nowIso } from '../utils/time.js';
 
 export const TEAM_ROOM = 'team';
-const LIVE_TABLES = ['messages', 'report_comments', 'reports', 'notifications', 'production_lines', 'line_lots'];
+const LIVE_TABLES = ['messages', 'report_comments', 'reports', 'notifications', 'production_lines'];
+// Tables from later database updates: only watched once the database has them, so a missing one
+// cannot break the live connection for chat and everything else.
+const LOT_TABLES = ['line_lots'], PLAN_TABLES = ['lot_events', 'lot_log', 'factory_settings'];
 // Times come from the database ("…+00:00") and from this device ("…Z"): compare them as dates.
 const ms = iso => Date.parse(iso) || 0;
 const byTime = (a, b) => ms(a.t) - ms(b.t);
@@ -44,7 +47,7 @@ export const chatMethods = {
     } catch (e) { /* tried again on the next refresh */ this._chatFor = null; return; }
     const me = this.me();
     this._rt = connectRealtime({
-      tables: LIVE_TABLES, presenceKey: this.myId(), presenceMeta: { name: me.name },
+      tables: [...LIVE_TABLES, ...(this.state.lotsReady !== false ? LOT_TABLES : []), ...(this.state.planReady ? PLAN_TABLES : [])], presenceKey: this.myId(), presenceMeta: { name: me.name },
       onStatus: s => this.setState({ live: s === 'live' }),
       onPresence: online => this.setState({ online }),
       onChange: d => this.onLiveChange(d),

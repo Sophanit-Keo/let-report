@@ -87,6 +87,7 @@ function LotNow({ l, t, label }) {
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ ...small, flex: 1, color: 'var(--gray-700)' }}>{t.lot.startedCap} {l.lot.started}</span>
+                  {l.openDetails ? <span {...tap(l.openDetails)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue-600)' }}>{t.lotd.details}</span> : null}
                   <span {...tap(l.openStartEdit)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue-600)' }}>{t.lot.changeStart}</span>
                 </div>
               )}
@@ -226,11 +227,13 @@ function LotHistory({ l, t, label }) {
       {l.history.length ? (
         <div style={{ border: '1.5px solid var(--blue-200)', borderRadius: 14, overflow: 'hidden' }}>
           {l.history.map((h, i) => (
-            <div key={h.id} style={{ ...col(3), padding: '10px 14px', borderTop: i ? '1px solid var(--blue-100)' : 'none' }}>
+            <div key={h.id} {...(h.open ? tap(h.open, 'card-tap') : {})} style={{ ...col(3), padding: '10px 14px', borderTop: i ? '1px solid var(--blue-100)' : 'none' }}>
               <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
                 <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: '-0.01em' }}>{h.lot}</span>
+                {h.running ? <span style={{ fontSize: 11, fontWeight: 800, padding: '2px 8px', borderRadius: 999, background: 'var(--green-100)', color: 'var(--green-700)', flex: 'none' }}>{t.lotd.running}</span> : null}
                 <span style={{ ...small, flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{h.product}</span>
                 <span style={{ fontSize: 13, fontWeight: 800, flex: 'none' }}>{h.qty}</span>
+                {h.open ? <Icon name="chevron-right" size={16} color="var(--navy-300)" style={{ alignSelf: 'center' }} /> : null}
               </div>
               <div style={small}>{h.when}{h.ran ? ' · ' + t.lot.ran + ' ' + h.ran : ''}{h.plan ? ' (' + h.plan + ')' : ''}{h.fills ? ' · ' + h.fills : ''} · {h.cip}{h.by ? ' · ' + t.lot.by + ' ' + h.by : ''}</div>
               {h.over || h.overNote ? <Warn text={h.overNote || t.lot.overWhy.replace('{max}', l.maxRun)} fg="var(--red-700)" /> : null}
