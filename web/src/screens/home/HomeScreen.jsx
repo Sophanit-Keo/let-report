@@ -161,6 +161,16 @@ export function HomeScreen({ v }) {
                     </div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: ln.stFg, flex: 'none' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: ln.dot, animation: ln.anim }} />{ln.stLabel}</span>
                   </div>
+                  {/* What the line is doing now: the lot it runs, or the CIP countdown after a lot */}
+                  {ln.now ? (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: ln.now.bg, borderRadius: 10, padding: '7px 10px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: ln.now.fg, minWidth: 0 }}>
+                        <Icon name={ln.now.icon} size={14} color={ln.now.fg} />
+                        <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ln.now.text}</span>
+                      </div>
+                      {ln.now.pct ? <div style={{ height: 4, borderRadius: 2, background: '#fff', overflow: 'hidden' }}><div style={{ height: '100%', width: ln.now.pct, background: ln.now.fg, borderRadius: 2, transition: 'width 400ms' }} /></div> : null}
+                    </div>
+                  ) : null}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                     <span style={{ fontSize: 13, color: 'var(--gray-500)', fontWeight: 600, flex: 1 }}>{ln.product}</span>
                     <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.02em' }}>{ln.qty}</span>

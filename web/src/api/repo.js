@@ -41,13 +41,14 @@ export function diffReport(before, after) {
 
 export const repo = {
   async loadAll() {
-    const [profiles, reports, notes, reads, ticks, lines] = await Promise.all([
+    const [profiles, reports, notes, reads, ticks, lines, lots] = await Promise.all([
       db.select('profiles', { order: 'created_at.asc' }),
       db.select('reports', { order: 'created_at.desc', limit: 500 }),
       db.select('notifications', { order: 'created_at.desc', limit: 200 }),
       db.select('notification_reads', { select: 'notification_id' }),
       db.select('checklist_ticks', { day: 'eq.' + today() }),
       db.select('production_lines', { order: 'sort.asc,created_at.asc' }),
+      db.select('line_lots', { order: 'ended_at.desc', limit: 300 }),
     ]);
     return {
       profiles,
@@ -56,6 +57,7 @@ export const repo = {
       readIds: reads.map(r => r.notification_id),
       ticks: ticks.map(t => t.item),
       lines: lines.map(rowToLine),
+      lots: lots.map(rowToLot),
     };
   },
 
@@ -89,6 +91,9 @@ export const repo = {
   removeLine(id) { return db.remove('production_lines', { id: 'eq.' + id }); },
   // Reports store the line name as their location; keep them in step when a line is renamed.
   renameLoc(from, to) { return db.update('reports', { loc: 'eq.' + from }, { loc: to }); },
+  // The record of a lot that ended (the line then goes into CIP).
+  async addLot(lot) { const [row] = await db.insert('line_lots', lotToRow(lot)); return rowToLot(row); },
+  renameLotsLine(lineId, name) { return db.update('line_lots', { line_id: 'eq.' + lineId }, { line_name: name }); },
 
   updateProfile(id, patch) { return db.update('profiles', { id: 'eq.' + id }, patch); },
   // Profile picture: stored in the public "avatars" bucket, in the person's own folder.
@@ -149,10 +154,23 @@ export function rowToComment(r) { return { id: r.id, reportId: r.report_id, auth
 // ───── Production lines ─────
 export function rowToLine(r) {
   return { id: r.id, name: r.name, type: r.type, product: r.product, qty: r.qty, target: r.target, status: r.status, note: r.note,
-    sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at };
+    sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at,
+    lot: r.lot || '', lotStartedAt: r.lot_started_at || null, cipUntil: r.cip_until || null, cipReason: r.cip_reason || '' };
 }
 function lineToRow(l) {
-  const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name' };
+  const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name',
+    lot: 'lot', lotStartedAt: 'lot_started_at', cipUntil: 'cip_until', cipReason: 'cip_reason' };
+  const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
+}
+
+// ───── Lot records (a lot that ended on a line) ─────
+export function rowToLot(r) {
+  return { id: r.id, lineId: r.line_id, lineName: r.line_name, product: r.product, lot: r.lot, startedAt: r.started_at, endedAt: r.ended_at,
+    qty: r.qty, target: r.target, cipHours: Number(r.cip_hours), cipReason: r.cip_reason, note: r.note || '', endedBy: r.ended_by, endedByName: r.ended_by_name || '' };
+}
+function lotToRow(l) {
+  const map = { lineId: 'line_id', lineName: 'line_name', product: 'product', lot: 'lot', startedAt: 'started_at', endedAt: 'ended_at', qty: 'qty', target: 'target',
+    cipHours: 'cip_hours', cipReason: 'cip_reason', note: 'note', endedBy: 'ended_by', endedByName: 'ended_by_name' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
 }
 

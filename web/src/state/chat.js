@@ -8,7 +8,7 @@ import { toSmallJpeg } from '../utils/image.js';
 import { nowIso } from '../utils/time.js';
 
 export const TEAM_ROOM = 'team';
-const LIVE_TABLES = ['messages', 'report_comments', 'reports', 'notifications', 'production_lines'];
+const LIVE_TABLES = ['messages', 'report_comments', 'reports', 'notifications', 'production_lines', 'line_lots'];
 // Times come from the database ("…+00:00") and from this device ("…Z"): compare them as dates.
 const ms = iso => Date.parse(iso) || 0;
 const byTime = (a, b) => ms(a.t) - ms(b.t);

@@ -4,7 +4,7 @@
 // Screens get their data from ./viewModel.js, which reads this state.
 import React from 'react';
 import { strings } from '../i18n/index.js';
-import { CATS, SEV, ST, ORDER, TITLES, MGR_AV } from '../data/constants.js';
+import { CATS, SEV, ST, ORDER, TITLES, MGR_AV, CIP_HOURS } from '../data/constants.js';
 import { SEED, NOTES } from '../data/seed.js';
 import { auth, isConfigured } from '../api/supabase.js';
 import { repo } from '../api/repo.js';
@@ -34,6 +34,7 @@ function initialsAvatar(name) {
 const WORDS = ['mango', 'lotus', 'river', 'tiger', 'mekong', 'jasmine', 'rice', 'palm', 'amber', 'cloud'];
 function makePassword() { return WORDS[Math.floor(Math.random() * WORDS.length)] + '-' + String(Math.floor(1000 + Math.random() * 9000)); }
 
+const hoursFromNow = h => new Date(Date.now() + h * 3600000).toISOString();
 const withDue = r => (r.holdCheck && r.holdCheck.status === 'scheduled' && isDue(r.holdCheck.dueAt) ? { ...r, holdCheck: { ...r.holdCheck, status: 'due', due: 'Today' } } : r);
 
 export class AppController extends React.Component {
@@ -45,6 +46,8 @@ export class AppController extends React.Component {
     screen: 'home', prev: 'home', lang: loadPrefs().lang || null, filter: 'all', selId: null, lastId: null, lastCritical: false,
     cap: { stage: 'camera', cat: null, sev: null, photo: false, customText: '' }, signed: false, draft: {}, recording: false,
     sheet: null, asg: {}, trendBy: 'line', esc: {}, lines: [], lineId: null, lineForm: {}, lineConfirm: false, lineNote: null,
+    // lots on the lines: records of ended lots, the "start lot" form, the "finish lot" form, and a clock for the CIP countdown
+    lots: [], lineLot: null, lineEnd: null, clock: Date.now(),
     // chat + comments (./chat.js)
     ...chatState,
     // push notifications (./push.js)
@@ -68,7 +71,11 @@ export class AppController extends React.Component {
     });
     // With the live connection up, a full reload every minute is enough; otherwise every 15 s.
     this._tick = 0;
-    this._poll = setInterval(() => { this._tick += 1; if (document.visibilityState !== 'hidden' && (!this.state.live || this._tick % 4 === 0)) this.refresh(); }, REFRESH_MS);
+    this._poll = setInterval(() => {
+      this._tick += 1; if (document.visibilityState === 'hidden') return;
+      this.setState({ clock: Date.now() });   // keeps "running for 2 h 10 min" and the CIP countdown current
+      if (!this.state.live || this._tick % 4 === 0) this.refresh();
+    }, REFRESH_MS);
     document.documentElement.lang = this.lang();
     if (this.state.session) this.refresh(true); else this.setState({ booting: false });
   }
@@ -98,7 +105,7 @@ export class AppController extends React.Component {
       const reports = d.reports.map(r => withDue(pending[r.id] || r));
       const pl = this._pendingLines || {};
       const lines = d.lines.map(l => (pl[l.id] ? { ...l, ...pl[l.id] } : l));
-      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, booting: false, loadError: null });
+      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, lots: d.lots, booting: false, loadError: null });
       this.loadPhotos(reports);
       this.syncChat();
       if (this._pushFor !== this.myId()) { this._pushFor = this.myId(); this.initPush(); }
@@ -368,12 +375,17 @@ export class AppController extends React.Component {
   // Where a problem can be: every production line, plus the non-line areas.
   locs() { return [...this.state.lines.map(l => l.name), 'Packing', 'Receiving']; }
   canManageLines() { return this.role() === 'manager'; }
-  openLine = id => this.setState({ sheet: 'line', lineId: id, lineConfirm: false, lineNote: null });
-  // Change a line right away, then save it (status, output, note).
+  openLine = id => this.setState({ sheet: 'line', lineId: id, lineConfirm: false, lineNote: null, lineLot: null, lineEnd: null });
+  // Change a line right away, then save it (status, output, note, lot, CIP).
   updateLine = (id, patch) => {
     const before = this.state.lines.find(l => l.id === id); if (!before) return;
     const full = { ...patch, updatedBy: this.me().name };
-    if (patch.status && patch.status !== before.status) full.statusSince = nowIso();
+    if (patch.status && patch.status !== before.status) {
+      full.statusSince = nowIso();
+      // Into CIP: plan the standard 4 hours unless told otherwise. Out of CIP: the countdown ends.
+      if (patch.status === 'cleaning') { if (full.cipUntil === undefined) full.cipUntil = hoursFromNow(CIP_HOURS); if (full.cipReason === undefined) full.cipReason = 'standard'; }
+      else if (before.status === 'cleaning') { if (full.cipUntil === undefined) full.cipUntil = null; if (full.cipReason === undefined) full.cipReason = ''; }
+    }
     this._pendingLines = { ...(this._pendingLines || {}), [id]: { ...((this._pendingLines || {})[id] || {}), ...full } };
     this.setState(s => ({ lines: s.lines.map(l => (l.id === id ? { ...l, ...full, updatedAt: nowIso() } : l)) }));
     clearTimeout((this._lineTimers || (this._lineTimers = {}))[id]);
@@ -395,8 +407,8 @@ export class AppController extends React.Component {
       if (id) {
         const old = this.state.lines.find(l => l.id === id);
         await repo.updateLine(id, { ...data, updatedBy: this.me().name });
-        // Renamed: move its reports to the new name so filters and "See open reports" still work.
-        if (old && old.name !== data.name) await repo.renameLoc(old.name, data.name);
+        // Renamed: move its reports and lot records to the new name so filters and "See open reports" still work.
+        if (old && old.name !== data.name) { await repo.renameLoc(old.name, data.name); await repo.renameLotsLine(id, data.name); }
       }
       else { const sort = Math.max(0, ...this.state.lines.map(l => l.sort || 0)) + 1; await repo.addLine({ ...data, sort, status: 'idle', qty: 0, updatedBy: this.me().name }); }
       this.setState({ busy: false, sheet: null });
@@ -407,6 +419,35 @@ export class AppController extends React.Component {
       this.toast(/duplicate|unique/i.test(e.message) ? '"' + data.name + '" already exists.' : e.message);
     }
   };
+  // ───── Lots: what a line is running now, finishing a lot, CIP after it ─────
+  // "Start lot": the lot number (and product) the line is going to run. The line goes to Running.
+  openStartLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); this.setState({ lineLot: { lot: '', product: l ? l.product : '' }, lineEnd: null }); };
+  startLot = () => {
+    const id = this.state.lineId, f = this.state.lineLot || {}; const lot = (f.lot || '').trim(); if (!id || !lot) return;
+    this.updateLine(id, { status: 'running', lot, product: (f.product || '').trim(), lotStartedAt: nowIso(), cipUntil: null, cipReason: '' });
+    this.setState({ lineLot: null });
+    this.toast('▶ ' + lot);
+  };
+  // "Finish lot": record the lot that ended, then the line goes into CIP (4 h standard, longer for maintenance or a system error).
+  openFinishLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return;
+    this.setState({ lineEnd: { qty: String(l.qty), hours: String(CIP_HOURS), reason: 'standard', note: '' }, lineLot: null }); };
+  finishLot = async () => {
+    const id = this.state.lineId, l = this.state.lines.find(x => x.id === id), f = this.state.lineEnd; if (!l || !f) return;
+    const hours = Math.max(0, parseFloat(f.hours) || 0), me = this.me();
+    const rec = { lineId: l.id, lineName: l.name, product: l.product || '', lot: l.lot || '—', startedAt: l.lotStartedAt || null, endedAt: nowIso(),
+      qty: Math.max(0, parseInt(f.qty, 10) || 0), target: l.target || 0, cipHours: hours, cipReason: f.reason || 'standard', note: (f.note || '').trim(), endedBy: this.myId(), endedByName: me.name };
+    this.setState({ busy: true });
+    try {
+      const saved = await repo.addLot(rec);
+      this.setState(s => ({ busy: false, lineEnd: null, lots: [saved, ...s.lots.filter(x => x.id !== saved.id)] }));
+      this.updateLine(id, { status: 'cleaning', lot: '', lotStartedAt: null, cipUntil: hoursFromNow(hours), cipReason: rec.cipReason });
+      this.toast('■ ' + rec.lot + ' · CIP ' + hours + ' h');
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  // CIP is taking longer (maintenance, system error): push the planned end out.
+  extendCip = hours => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return;
+    const from = l.cipUntil && Date.parse(l.cipUntil) > Date.now() ? Date.parse(l.cipUntil) : Date.now();
+    this.updateLine(l.id, { cipUntil: new Date(from + hours * 3600000).toISOString() }); };
   removeLine = async id => {
     const line = this.state.lines.find(l => l.id === id);
     this.setState(s => ({ sheet: null, lines: s.lines.filter(l => l.id !== id) }));
