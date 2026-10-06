@@ -31,3 +31,9 @@ export function durLabel(ms) {
   if (h >= 1) return h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
   return m + ' min';
 }
+
+// A run time always in hours, to compare with a 24 / 28 / 32 / 36 h plan: "25 h", "37 h 10 min".
+export function hoursLabel(ms) {
+  const m = Math.max(0, Math.round(ms / 60000)), h = Math.floor(m / 60);
+  return h ? h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '') : m + ' min';
+}

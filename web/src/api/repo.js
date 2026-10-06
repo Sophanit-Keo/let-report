@@ -2,6 +2,8 @@
 import { db, storage, functions } from './supabase.js';
 
 const PHOTO_BUCKET = 'photos';
+// False when the database has no lot table yet (migration 0008 not run): lot features then stay off.
+let lotsReady = true;
 
 // ───── Reports ─────
 export function rowToReport(r) {
@@ -48,8 +50,10 @@ export const repo = {
       db.select('notification_reads', { select: 'notification_id' }),
       db.select('checklist_ticks', { day: 'eq.' + today() }),
       db.select('production_lines', { order: 'sort.asc,created_at.asc' }),
-      db.select('line_lots', { order: 'ended_at.desc', limit: 300 }),
+      // Optional: if the lot table is missing (migration not run yet), everything else still loads.
+      db.select('line_lots', { order: 'ended_at.desc', limit: 300 }).catch(e => { console.warn('line_lots:', e.message); lotsReady = false; return null; }),
     ]);
+    if (lots) lotsReady = true;
     return {
       profiles,
       reports: reports.map(rowToReport),
@@ -57,7 +61,8 @@ export const repo = {
       readIds: reads.map(r => r.notification_id),
       ticks: ticks.map(t => t.item),
       lines: lines.map(rowToLine),
-      lots: lots.map(rowToLot),
+      lots: (lots || []).map(rowToLot),
+      lotsReady,
     };
   },
 
@@ -86,13 +91,13 @@ export const repo = {
   },
 
   // ───── Production lines ─────
-  async updateLine(id, patch) { const rows = await db.update('production_lines', { id: 'eq.' + id }, lineToRow(patch)); return rows && rows[0] ? rowToLine(rows[0]) : null; },
-  async addLine(line) { const [row] = await db.insert('production_lines', lineToRow(line)); return rowToLine(row); },
+  async updateLine(id, patch) { const rows = await withoutMissing(lineToRow(patch), row => db.update('production_lines', { id: 'eq.' + id }, row)); return rows && rows[0] ? rowToLine(rows[0]) : null; },
+  async addLine(line) { const [row] = await withoutMissing(lineToRow(line), r => db.insert('production_lines', r)); return rowToLine(row); },
   removeLine(id) { return db.remove('production_lines', { id: 'eq.' + id }); },
   // Reports store the line name as their location; keep them in step when a line is renamed.
   renameLoc(from, to) { return db.update('reports', { loc: 'eq.' + from }, { loc: to }); },
   // The record of a lot that ended (the line then goes into CIP).
-  async addLot(lot) { const [row] = await db.insert('line_lots', lotToRow(lot)); return rowToLot(row); },
+  async addLot(lot) { const [row] = await withoutMissing(lotToRow(lot), r => db.insert('line_lots', r)); return rowToLot(row); },
   renameLotsLine(lineId, name) { return db.update('line_lots', { line_id: 'eq.' + lineId }, { line_name: name }); },
 
   updateProfile(id, patch) { return db.update('profiles', { id: 'eq.' + id }, patch); },
@@ -155,22 +160,43 @@ export function rowToComment(r) { return { id: r.id, reportId: r.report_id, auth
 export function rowToLine(r) {
   return { id: r.id, name: r.name, type: r.type, product: r.product, qty: r.qty, target: r.target, status: r.status, note: r.note,
     sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at,
-    lot: r.lot || '', lotStartedAt: r.lot_started_at || null, cipUntil: r.cip_until || null, cipReason: r.cip_reason || '' };
+    lot: r.lot || '', lotStartedAt: r.lot_started_at || null, cipUntil: r.cip_until || null, cipReason: r.cip_reason || '',
+    maxRunHours: r.max_run_hours || 36, fillEvery: r.fill_cip_every_hours || null, planHours: r.lot_plan_hours != null ? Number(r.lot_plan_hours) : null,
+    fillSince: r.fill_since || null, fillCips: r.fill_cips || 0, hasRunLimits: r.max_run_hours !== undefined };
 }
 function lineToRow(l) {
   const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name',
-    lot: 'lot', lotStartedAt: 'lot_started_at', cipUntil: 'cip_until', cipReason: 'cip_reason' };
+    lot: 'lot', lotStartedAt: 'lot_started_at', cipUntil: 'cip_until', cipReason: 'cip_reason',
+    maxRunHours: 'max_run_hours', fillEvery: 'fill_cip_every_hours', planHours: 'lot_plan_hours', fillSince: 'fill_since', fillCips: 'fill_cips' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
+}
+
+// If the database is older than the app (a migration not run yet), PostgREST answers
+// "Could not find the 'x' column": leave those columns out and try again, so the rest still saves.
+async function withoutMissing(row, send) {
+  let r = { ...row };
+  for (let i = 0; i < 12; i++) {
+    try { return await send(r); } catch (e) {
+      const m = e.code === 'PGRST204' && /'([a-z_]+)' column/.exec(e.message || '');
+      if (!m || !(m[1] in r)) throw e;
+      console.warn('Column missing in the database, not saved:', m[1]);
+      delete r[m[1]]; r = { ...r };
+      if (!Object.keys(r).length) return [];
+    }
+  }
+  return send(r);
 }
 
 // ───── Lot records (a lot that ended on a line) ─────
 export function rowToLot(r) {
   return { id: r.id, lineId: r.line_id, lineName: r.line_name, product: r.product, lot: r.lot, startedAt: r.started_at, endedAt: r.ended_at,
-    qty: r.qty, target: r.target, cipHours: Number(r.cip_hours), cipReason: r.cip_reason, note: r.note || '', endedBy: r.ended_by, endedByName: r.ended_by_name || '' };
+    qty: r.qty, target: r.target, cipHours: Number(r.cip_hours), cipReason: r.cip_reason, note: r.note || '', endedBy: r.ended_by, endedByName: r.ended_by_name || '',
+    planHours: r.plan_hours != null ? Number(r.plan_hours) : null, fillCips: r.fill_cips || 0, overNote: r.over_note || '' };
 }
 function lotToRow(l) {
   const map = { lineId: 'line_id', lineName: 'line_name', product: 'product', lot: 'lot', startedAt: 'started_at', endedAt: 'ended_at', qty: 'qty', target: 'target',
-    cipHours: 'cip_hours', cipReason: 'cip_reason', note: 'note', endedBy: 'ended_by', endedByName: 'ended_by_name' };
+    cipHours: 'cip_hours', cipReason: 'cip_reason', note: 'note', endedBy: 'ended_by', endedByName: 'ended_by_name',
+    planHours: 'plan_hours', fillCips: 'fill_cips', overNote: 'over_note' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
 }
 

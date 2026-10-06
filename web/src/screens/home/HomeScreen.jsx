@@ -168,7 +168,9 @@ export function HomeScreen({ v }) {
                         <Icon name={ln.now.icon} size={14} color={ln.now.fg} />
                         <span style={{ flex: 1, minWidth: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ln.now.text}</span>
                       </div>
-                      {ln.now.pct ? <div style={{ height: 4, borderRadius: 2, background: '#fff', overflow: 'hidden' }}><div style={{ height: '100%', width: ln.now.pct, background: ln.now.fg, borderRadius: 2, transition: 'width 400ms' }} /></div> : null}
+                      {ln.now.pct ? <div style={{ height: 4, borderRadius: 2, background: '#fff', overflow: 'hidden' }}><div style={{ height: '100%', width: ln.now.pct, background: ln.now.bar || ln.now.fg, borderRadius: 2, transition: 'width 400ms' }} /></div> : null}
+                      {ln.now.warn ? <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 12, fontWeight: 700, color: ln.now.fg, lineHeight: 1.35 }}><Icon name="triangle-alert" size={13} color={ln.now.fg} style={{ marginTop: 1 }} />{ln.now.warn}</div> : null}
+                      {ln.now.sub ? <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--gray-700)' }}>{ln.now.sub}</div> : null}
                     </div>
                   ) : null}
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>

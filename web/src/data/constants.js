@@ -8,6 +8,10 @@ export const dueLabel=d=>{const x=typeof d==='string'?new Date(d):new Date(); if
 export const UNITS=['pcs','cartons','kg']; export const SUPPORTS=['QA','Supervisor','Maintenance'];
 // CIP (cleaning in place) after a lot ends: 4 hours as standard; maintenance or a system error take longer.
 export const CIP_HOURS=4; export const CIP_CHOICES=[4,6,8,12]; export const CIP_REASONS=['standard','maintenance','error','other'];
+// How long a lot runs: usually 24, 28, 32 or 36 hours; 36 is the normal maximum (more is a special case).
+export const RUN_MAX_HOURS=36; export const RUN_CHOICES=[24,28,32,36];
+// CIP filling (filler CIP in the middle of a lot, e.g. UHT line 1 every 24 h): how long it usually takes.
+export const FILL_CIP_HOURS=2; export const FILL_CIP_CHOICES=[1,2,3,4];
 export const SEV = [{bg:'var(--gray-100)',fg:'var(--gray-700)',bar:'var(--gray-300)'},{bg:'var(--blue-100)',fg:'var(--blue-700)',bar:'var(--blue-500)'},{bg:'var(--amber-100)',fg:'var(--amber-700)',bar:'var(--amber-500)'},{bg:'var(--red-100)',fg:'var(--red-700)',bar:'var(--red-500)'}];
 export const ST = {open:{i:0,bg:'var(--blue-100)',fg:'var(--blue-700)'},action:{i:1,bg:'var(--amber-100)',fg:'var(--amber-700)'},verify:{i:2,bg:'var(--blue-100)',fg:'var(--navy-900)'},closed:{i:3,bg:'var(--green-100)',fg:'var(--green-700)'}};
 export const MGR_AV = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%230F2D58'/><text x='20' y='26' font-family='Arial,sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'>CH</text></svg>";

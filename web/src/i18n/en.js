@@ -63,10 +63,21 @@ export const EN = {
   // Lots on a line: what it is running now, finishing a lot, CIP after it, and the record of ended lots
   lot:{title:'Lot', running:'Running lot', none:'No lot running', start:'Start lot', startNext:'Start next lot', number:'Lot number', numberPh:'270706-K2', product:'Product',
     started:'started', runFor:'running for', finish:'Finish lot', finishSub:'Record how this lot ended. The line then goes into CIP.', output:'Output of this lot (pallets)',
-    cipTime:'CIP time', hoursShort:'h', hoursPh:'hours', reason:'Why this CIP time?', reasons:{standard:'Standard CIP',maintenance:'Maintenance',error:'System error',other:'Other'},
+    cipTime:'CIP time', hoursShort:'h', hoursPh:'hours', reason:'Why this CIP time?', reasons:{standard:'Standard CIP',maintenance:'Maintenance',error:'System error',other:'Other',filling:'CIP filling'},
     reasonSub:'Standard CIP takes 4 hours. Maintenance or a system error take longer.', note:'Note', notePh:'e.g. Steam valve replaced during CIP', confirm:'Finish lot and start CIP', cancel:'Cancel',
     cip:'CIP', cipEnds:'ends', cipLeft:'left', cipDone:'CIP done. Ready for the next lot.', cipOver:'over', cipLonger:'CIP taking longer?', cipSet:'Planned',
-    history:'Lot history', noHistory:'No lots recorded yet.', ended:'Ended', by:'by', pal:'pal.', cipShort:'CIP', fromTo:'→', ran:'ran', unknown:'start time unknown'},
+    history:'Lot history', noHistory:'No lots recorded yet.', ended:'Ended', by:'by', pal:'pal.', cipShort:'CIP', fromTo:'→', ran:'ran', unknown:'start time unknown',
+    // run time of a lot: usually 24, 28, 32 or 36 h; 36 h is the maximum, more is a special case
+    plan:'Planned run', planSub:'Most lots run 24, 28, 32 or 36 hours. {max} hours is the maximum on this line.', special:'Special case: more than {max} hours. You will be asked why when the lot finishes.',
+    planOf:'plan {plan} h', of:'of', finishBy:'finish by', endsIn:'Plan ends in', overPlan:'Past the {plan} h plan. Finish the lot and CIP.', overMax:'Over the {max} h maximum by {by}. Special case: finish the lot and CIP as soon as possible.',
+    overWhy:'Why did it run over {max} hours?', overWhyPh:'e.g. Special order, QA approved running on',
+    maxRun:'Maximum run of a lot (hours)', maxRunSub:'Usually 36. A lot can run longer only as a special case.',
+    // CIP filling: the filler is cleaned in the middle of a lot, then the same lot continues (UHT line 1 every 24 h)
+    fillCip:'CIP filling', fillEvery:'CIP filling during a lot', fillEverySub:'For lines that can fill only for a set time (UHT line 1: 24 hours). The same lot continues after the CIP filling.', fillOff:'Not needed',
+    fillRule:'This line needs a CIP filling every {h} hours. The same lot continues afterwards.', fillNext:'Next CIP filling', fillIn:'CIP filling in', fillDue:'CIP filling due now ({h} h of filling). Then continue the same lot.',
+    fillStart:'Start CIP filling', fillTitle:'CIP filling', fillSub:'The filler is cleaned. Lot {lot} stays on the line and continues afterwards.', fillTime:'How long?', fillGo:'Start CIP filling',
+    fillDone:'CIP filling done. Continue lot {lot}.', cont:'Continue lot', fillCount:'CIP fillings in this lot',
+    notReady:'Lot tracking is not set up in the database yet. Ask the manager to run the latest database update (migration 0008 and 0009).'},
   people:{title:'Team', sub:'Everyone who can sign in to Let Report.', add:'Add person', addTitle:'Add a person', name:'Name', email:'Email',
     tempPw:'Temporary password', tempPwSub:'Give this to them. They can sign in straight away and change it later.', generate:'Make a password',
     role:'Role', active:'Can sign in', activeSub:'Turn off to block this account without deleting it.', off:'Turned off',
