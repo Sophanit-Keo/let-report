@@ -76,6 +76,8 @@ export const EN = {
     fillCip:'CIP filling', fillEvery:'CIP filling during a lot', fillEverySub:'For lines that can fill only for a set time (UHT line 1: 24 hours). The same lot continues after the CIP filling.', fillOff:'Not needed',
     fillRule:'This line needs a CIP filling every {h} hours. The same lot continues afterwards.', fillNext:'Next CIP filling', fillIn:'CIP filling in', fillDue:'CIP filling due now ({h} h of filling). Then continue the same lot.',
     fillStart:'Start CIP filling', fillTitle:'CIP filling', fillSub:'The filler is cleaned. Lot {lot} stays on the line and continues afterwards.', fillTime:'How long?', fillGo:'Start CIP filling',
+    startTime:'Start time', startTimeSub:'When the lot started on the line. Change it if you record the lot late.', startNow:'Now', startedCap:'Started',
+    changeStart:'Change start time', saveStart:'Save start time', startFuture:'The start time cannot be in the future.', startMissing:'Choose the start date and time.',
     fillDone:'CIP filling done. Continue lot {lot}.', cont:'Continue lot', fillCount:'CIP fillings in this lot',
     notReady:'Lot tracking is not set up in the database yet. Ask the manager to run the latest database update (migration 0008 and 0009).'},
   people:{title:'Team', sub:'Everyone who can sign in to Let Report.', add:'Add person', addTitle:'Add a person', name:'Name', email:'Email',

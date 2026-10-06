@@ -1,7 +1,7 @@
 // Builds the view model: every label, colour, list and click handler the screens need,
 // derived from the AppController state. Screens stay simple and only read from it.
 import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE, CIP_CHOICES, CIP_REASONS, RUN_MAX_HOURS, RUN_CHOICES, FILL_CIP_CHOICES } from '../data/constants.js';
-import { timeLabel, stampLabel, daysAgo, addDaysIso, durLabel, hoursLabel } from '../utils/time.js';
+import { timeLabel, stampLabel, daysAgo, addDaysIso, durLabel, hoursLabel, fromLocalInput } from '../utils/time.js';
 import { draftOf } from './draft.js';
 import { buildChatView, buildDiscussion } from './chatView.js';
 
@@ -34,6 +34,9 @@ export function buildViewModel(app) {
     // What the line is doing now: the lot it runs (and for how long), or the CIP countdown after a lot.
     const now=s.clock||Date.now(), ms=v=>Date.parse(v)||0;
     const H=3600000, isoAt=t=>new Date(t).toISOString();
+    // Start time check: empty or in the future is not allowed (5 min of clock difference is fine)
+    const startBad=v=>{ const t=fromLocalInput(v); return !t?T.lot.startMissing:Date.parse(t)>Date.now()+5*60000?T.lot.startFuture:''; };
+    const toLocalNow=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); };
     // [text, background, bar] for a lot that is fine, needs attention soon, or is over its limit
     const TONES={green:['var(--green-700)','var(--green-100)','var(--green-500)'],amber:['var(--amber-700)','var(--amber-100)','var(--amber-500)'],red:['var(--red-700)','var(--red-100)','var(--red-500)']};
     const cipOf=l=>{ if(l.status!=='cleaning'||!l.cipUntil) return null; const until=ms(l.cipUntil), from=ms(l.statusSince)||until-4*H, left=until-now;
@@ -61,7 +64,7 @@ export function buildViewModel(app) {
     const nowLine=l=>{ const lt=lotOf(l), c=cipOf(l);
       if(lt){ const r=lt.run, tc=r?r.tc:TONES.green;
         return {icon:'play',fg:tc[0],bg:tc[1],bar:tc[2],text:T.lot.running+' '+lt.lot+(r?' · '+r.ranLabel+' / '+r.plan+' '+T.lot.hoursShort:(lt.dur?' · '+lt.dur:'')),pct:r?r.pct:null,
-          warn:r&&r.warn?r.warn:'',sub:r&&r.fill&&!r.fill.due&&!r.fill.soon?T.lot.fillNext+' '+r.fill.at:''}; }
+          warn:r&&r.warn?r.warn:'',sub:[lt.started?T.lot.startedCap+' '+lt.started:'',r&&r.fill&&!r.fill.due&&!r.fill.soon?T.lot.fillNext+' '+r.fill.at:''].filter(Boolean).join(' · ')}; }
       if(c&&c.filling&&l.lot) return c.done?{icon:'circle-check',fg:'var(--green-700)',bg:'var(--green-100)',text:T.lot.fillDone.replace('{lot}',l.lot)}
         :{icon:'hourglass',fg:'var(--blue-700)',bg:'var(--blue-50)',bar:'var(--blue-700)',text:T.lot.fillCip+' · '+l.lot+' · '+c.leftLabel+' '+T.lot.cipLeft,pct:c.pct};
       if(c) return c.done?{icon:'circle-check',fg:'var(--green-700)',bg:'var(--green-100)',text:T.lot.cipDone}
@@ -87,6 +90,8 @@ export function buildViewModel(app) {
         openStart:app.openStartLot, openFinish:app.openFinishLot, extend:h=>app.extendCip(h),
         // CIP filling in the middle of the lot (lines with a filling limit, e.g. UHT line 1 every 24 h)
         canFill:!!(l.fillEvery&&l.lot&&l.status==='running'), openFill:app.openFillCip,
+        startEdit:s.lineStart!=null&&l.lot?{value:s.lineStart,onChange:e=>app.setState({lineStart:e.target.value}),bad:startBad(s.lineStart),save:app.saveStartEdit,cancel:()=>app.setState({lineStart:null})}:null,
+        openStartEdit:l.lot?app.openStartEdit:null,
         filling:l.status==='cleaning'&&l.cipReason==='filling'&&l.lot?{lot:l.lot,count:l.fillCips||0,cont:app.continueLot}:null,
         fillForm:s.lineFill?(()=>{const f=s.lineFill, h=parseFloat(f.hours), setF=p=>app.setState(st=>({lineFill:{...st.lineFill,...p}}));
           return {lot:l.lot||'—',hours:FILL_CIP_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n)})})),hoursText:f.hours||'',onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
@@ -97,7 +102,8 @@ export function buildViewModel(app) {
             plans:RUN_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(plan===n),pick:()=>setF({plan:String(n)})})), planText:f.plan||'',onPlan:e=>setF({plan:e.target.value.replace(/[^0-9.]/g,'')}),
             planNote:plan>max?T.lot.special.replace('{max}',max):T.lot.planSub.replace('{max}',max), special:plan>max,
             fillNote:l.fillEvery?T.lot.fillRule.replace('{h}',l.fillEvery):'',
-            disabled:!(f.lot||'').trim()||!(plan>0),save:app.startLot,cancel:()=>app.setState({lineLot:null})};})():null,
+            start:f.start||'', onStart:e=>setF({start:e.target.value}), startNow:()=>setF({start:toLocalNow()}), startBad:startBad(f.start),
+            disabled:!(f.lot||'').trim()||!(plan>0)||!!startBad(f.start),save:app.startLot,cancel:()=>app.setState({lineLot:null})};})():null,
         endForm:s.lineEnd?(()=>{const f=s.lineEnd, setF=p=>app.setState(st=>({lineEnd:{...st.lineEnd,...p}})); const h=parseFloat(f.hours), r=runOf(l), needWhy=!!(r&&r.over);
           return {lot:l.lot||'—',product:l.product||'—',started:l.lotStartedAt?stampLabel(l.lotStartedAt):T.lot.unknown,ran:l.lotStartedAt?hoursLabel(now-ms(l.lotStartedAt)):'',
             plan:r?T.lot.planOf.replace('{plan}',r.plan):'', fills:l.fillCips?l.fillCips+' × '+T.lot.fillCip:'',

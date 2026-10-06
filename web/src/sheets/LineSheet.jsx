@@ -19,6 +19,20 @@ function Bar({ pct, color, bg = '#fff', h = 6 }) {
 function Warn({ text, fg }) {
   return <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', fontSize: 12, fontWeight: 700, color: fg, lineHeight: 1.4 }}><Icon name="triangle-alert" size={14} color={fg} style={{ marginTop: 1 }} />{text}</div>;
 }
+// Date and time the lot started, with a "Now" shortcut and a message when it is not allowed.
+function StartTime({ value, onChange, bad, t, now }) {
+  return (
+    <div style={col(6)}>
+      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+        <input type="datetime-local" aria-label={t.lot.startTime} value={value} onChange={onChange}
+          style={{ ...inputStyle, flex: 1, fontSize: 15, fontWeight: 700, borderColor: bad ? 'var(--red-500)' : 'var(--blue-200)' }} />
+        {now ? <div {...tap(now, 'pill-tap')} style={hourBtn}>{t.lot.startNow}</div> : null}
+      </div>
+      {bad ? <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--red-700)' }}>{bad}</div> : null}
+    </div>
+  );
+}
+
 function CipBox({ c, t, extend }) {
   return (
     <div style={{ ...col(8), borderRadius: 14, padding: '12px 14px', background: c.done ? 'var(--green-100)' : 'var(--blue-50)', border: '1.5px solid ' + (c.done ? 'var(--green-500)' : 'var(--blue-300)') }}>
@@ -49,7 +63,7 @@ function LotNow({ l, t, label }) {
             <div style={{ width: 40, height: 40, borderRadius: 12, background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none' }}><Icon name="play" size={20} color={r ? r.tc[0] : 'var(--green-700)'} /></div>
             <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>
               <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-0.01em', color: r ? r.tc[0] : 'var(--green-700)' }}>{l.lot.lot}</div>
-              <div style={{ fontSize: 12, color: r ? r.tc[0] : 'var(--green-700)', lineHeight: 1.4 }}>{l.product}{l.lot.started ? ' · ' + t.lot.started + ' ' + l.lot.started : ''}</div>
+              <div style={{ fontSize: 12, color: r ? r.tc[0] : 'var(--green-700)', lineHeight: 1.4 }}>{l.product}{!r && l.lot.started ? ' · ' + t.lot.started + ' ' + l.lot.started : ''}</div>
             </div>
           </div>
           {r ? (
@@ -61,6 +75,21 @@ function LotNow({ l, t, label }) {
               </div>
               <Bar pct={r.pct} color={r.tc[2]} />
               {r.warn ? <Warn text={r.warn} fg={r.tc[0]} /> : null}
+              {l.startEdit ? (
+                <div style={{ ...col(8), padding: 10, borderRadius: 12, background: '#fff' }}>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>{t.lot.startTime}</div>
+                  <StartTime value={l.startEdit.value} onChange={l.startEdit.onChange} bad={l.startEdit.bad} t={t} />
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                    <Button variant="secondary" fullWidth onClick={l.startEdit.cancel}>{t.lot.cancel}</Button>
+                    <Button variant="primary" fullWidth disabled={!!l.startEdit.bad} onClick={l.startEdit.save}>{t.lot.saveStart}</Button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <span style={{ ...small, flex: 1, color: 'var(--gray-700)' }}>{t.lot.startedCap} {l.lot.started}</span>
+                  <span {...tap(l.openStartEdit)} style={{ fontSize: 12, fontWeight: 700, color: 'var(--blue-600)' }}>{t.lot.changeStart}</span>
+                </div>
+              )}
               {r.fill && !r.fill.due && !r.fill.soon ? <div style={small}>{t.lot.fillNext} {r.fill.at} · {t.lot.fillIn} {r.fill.label}</div> : null}
             </div>
           ) : <div style={{ fontSize: 12, color: 'var(--green-700)' }}>{l.lot.dur ? t.lot.runFor + ' ' + l.lot.dur : ''}</div>}
@@ -112,6 +141,9 @@ function LotNow({ l, t, label }) {
           <div style={label}>{t.lot.product}</div>
           {l.startForm.products.length ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{l.startForm.products.map((o, i) => <Pill key={i} o={o} h={34} px={12} />)}</div> : null}
           <input id="lot-product" value={l.startForm.product} onChange={l.startForm.onProduct} placeholder="ADCaMg 100ml" style={inputStyle} />
+          <div style={label}>{t.lot.startTime}</div>
+          <StartTime value={l.startForm.start} onChange={l.startForm.onStart} bad={l.startForm.startBad} t={t} now={l.startForm.startNow} />
+          <div style={small}>{t.lot.startTimeSub}</div>
           <div style={label}>{t.lot.plan}</div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
             {l.startForm.plans.map((o, i) => <Pill key={i} o={o} h={36} px={12} />)}

@@ -37,3 +37,8 @@ export function hoursLabel(ms) {
   const m = Math.max(0, Math.round(ms / 60000)), h = Math.floor(m / 60);
   return h ? h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '') : m + ' min';
 }
+
+// For <input type="datetime-local">: an ISO time as local "YYYY-MM-DDTHH:mm", and back.
+const p2 = n => String(n).padStart(2, '0');
+export function toLocalInput(v) { const d = v ? new Date(v) : new Date(); return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()) + 'T' + p2(d.getHours()) + ':' + p2(d.getMinutes()); }
+export function fromLocalInput(v) { const d = new Date(v); return v && !isNaN(d) ? d.toISOString() : null; }
