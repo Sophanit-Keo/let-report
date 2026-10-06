@@ -4,7 +4,7 @@
 // Screens get their data from ./viewModel.js, which reads this state.
 import React from 'react';
 import { strings } from '../i18n/index.js';
-import { CATS, SEV, ST, ORDER, TITLES, MGR_AV, CIP_HOURS, RUN_MAX_HOURS, FILL_CIP_HOURS } from '../data/constants.js';
+import { CATS, SEV, ST, ORDER, TITLES, MGR_AV, CIP_HOURS, RUN_MAX_HOURS, FILL_CIP_HOURS, RUN_CHOICES } from '../data/constants.js';
 import { SEED, NOTES } from '../data/seed.js';
 import { auth, isConfigured } from '../api/supabase.js';
 import { repo } from '../api/repo.js';
@@ -52,6 +52,8 @@ export class AppController extends React.Component {
     sheet: null, asg: {}, trendBy: 'line', esc: {}, lines: [], lineId: null, lineForm: {}, lineConfirm: false, lineNote: null,
     // lots on the lines: records of ended lots, the "start lot" form, the "finish lot" form, and a clock for the CIP countdown
     lots: [], lotsReady: true, lineLot: null, lineEnd: null, lineFill: null, lineStart: null, clock: Date.now(),
+    // production plan, lot details (events + change log) and their forms
+    plan: null, planReady: false, planForm: null, planLog: null, lotId: null, lotBack: null, lotDetail: null, lotEdit: null, evEdit: null, evAdd: null, evDel: null, lotDel: false,
     // chat + comments (./chat.js)
     ...chatState,
     // push notifications (./push.js)
@@ -109,7 +111,8 @@ export class AppController extends React.Component {
       const reports = d.reports.map(r => withDue(pending[r.id] || r));
       const pl = this._pendingLines || {};
       const lines = d.lines.map(l => (pl[l.id] ? { ...l, ...pl[l.id] } : l));
-      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, lots: d.lots, lotsReady: d.lotsReady, booting: false, loadError: null });
+      this.setState({ profiles: d.profiles, reports, notes: d.notes, read, checks, lines, lots: d.lots, lotsReady: d.lotsReady, plan: d.plan || this.state.plan, planReady: !!d.plan, booting: false, loadError: null });
+      if (this.state.sheet === 'lot' && this.state.lotId) this.reloadLot(this.state.lotId);
       this.loadPhotos(reports);
       this.syncChat();
       if (this._pushFor !== this.myId()) { this._pushFor = this.myId(); this.initPush(); }
@@ -389,7 +392,7 @@ export class AppController extends React.Component {
       full.statusSince = nowIso();
       // Into CIP: plan the standard 4 hours unless told otherwise. Out of CIP: the countdown ends.
       if (patch.status === 'cleaning') {
-        if (full.cipUntil === undefined) full.cipUntil = hoursFromNow(CIP_HOURS); if (full.cipReason === undefined) full.cipReason = 'standard';
+        if (full.cipUntil === undefined) full.cipUntil = hoursFromNow(this.plan().cipHours); if (full.cipReason === undefined) full.cipReason = 'standard';
         if (full.cipStartedAt === undefined) full.cipStartedAt = nowIso();
       }
       else if (before.status === 'cleaning') {
@@ -410,12 +413,12 @@ export class AppController extends React.Component {
     }, now ? 0 : 600);
   };
   openLineForm = line => this.setState({ sheet: 'lineForm', lineId: line ? line.id : null,
-    lineForm: line ? { name: line.name, type: line.type, product: line.product, target: String(line.target), maxRun: String(line.maxRunHours || RUN_MAX_HOURS), fillEvery: line.fillEvery ? String(line.fillEvery) : '' }
-      : { name: '', type: 'UHT', product: '', target: '100', maxRun: String(RUN_MAX_HOURS), fillEvery: '' } });
+    lineForm: line ? { name: line.name, type: line.type, product: line.product, target: String(line.target), maxRun: String(line.maxRunHours || this.plan().runMax), fillEvery: line.fillEvery ? String(line.fillEvery) : '' }
+      : { name: '', type: 'UHT', product: '', target: '100', maxRun: String(this.plan().runMax), fillEvery: '' } });
   saveLineForm = async () => {
     const f = this.state.lineForm, id = this.state.lineId;
     const data = { name: f.name.trim(), type: f.type, product: f.product.trim(), target: Math.max(1, parseInt(f.target, 10) || 100),
-      maxRunHours: Math.max(1, parseInt(f.maxRun, 10) || RUN_MAX_HOURS), fillEvery: parseInt(f.fillEvery, 10) > 0 ? parseInt(f.fillEvery, 10) : null };
+      maxRunHours: Math.max(1, parseInt(f.maxRun, 10) || this.plan().runMax), fillEvery: parseInt(f.fillEvery, 10) > 0 ? parseInt(f.fillEvery, 10) : null };
     this.setState({ busy: true });
     try {
       if (id) {
@@ -433,17 +436,61 @@ export class AppController extends React.Component {
       this.toast(/duplicate|unique/i.test(e.message) ? '"' + data.name + '" already exists.' : e.message);
     }
   };
+  // ───── Production plan (editable; defaults until migration 0011 is run) ─────
+  plan() {
+    const p = this.state.plan || {};
+    return { runChoices: p.runChoices && p.runChoices.length ? p.runChoices : RUN_CHOICES, runMax: p.runMax || RUN_MAX_HOURS, cipHours: p.cipHours || CIP_HOURS,
+      fillCipHours: p.fillCipHours || FILL_CIP_HOURS, fillEvery: p.fillEvery || 24, updatedByName: p.updatedByName || '', updatedAt: p.updatedAt || null };
+  }
+  canEditPlan() { return ['supervisor', 'manager'].includes(this.role()); }
+  openPlan = () => {
+    const p = this.plan();
+    this.setState({ sheet: 'plan', planForm: { runChoices: p.runChoices.map(String), add: '', runMax: String(p.runMax), cipHours: String(p.cipHours), fillCipHours: String(p.fillCipHours), fillEvery: String(p.fillEvery) }, planLog: null });
+    if (this.state.planReady) repo.planLog().then(planLog => this.setState({ planLog })).catch(() => this.setState({ planLog: [] }));
+  };
+  savePlan = async () => {
+    const f = this.state.planForm || {}, num = v => parseFloat(v) > 0 ? parseFloat(v) : null;
+    const runChoices = [...new Set((f.runChoices || []).map(Number).filter(n => n > 0))].sort((a, b) => a - b);
+    const data = { runChoices, runMax: Math.round(num(f.runMax) || 0), cipHours: num(f.cipHours), fillCipHours: num(f.fillCipHours), fillEvery: Math.round(num(f.fillEvery) || 0), updatedByName: this.me().name };
+    if (!runChoices.length || !data.runMax || !data.cipHours || !data.fillCipHours || !data.fillEvery) return;
+    this.setState({ busy: true });
+    try {
+      const saved = await repo.updatePlan(data);
+      if (!saved) throw new Error(this.T().plan.denied);
+      this.setState({ busy: false, plan: saved, sheet: null }); this.toast(this.T().plan.saved);
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+
+  // ───── Lot events (migration 0011): what happened during a lot, written as it happens ─────
+  lotEvent(lotId, kind, at, extra) {
+    if (!this.state.planReady || !lotId) return Promise.resolve(null);
+    return repo.addEvent({ lotId, kind, at: at || nowIso(), byName: this.me().name, ...(extra || {}) })
+      .then(ev => { this.reloadLot(lotId); return ev; })
+      .catch(e => { this.toast(e.message); return null; });
+  }
+
   // ───── Lots: what a line is running now, finishing a lot, CIP after it ─────
   // "Start lot": the lot number (and product) the line is going to run. The line goes to Running.
-  // The planned run is picked from 24 / 28 / 32 / 36 h (the line's maximum by default); more than the maximum is a special case.
-  openStartLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId);
-    this.setState({ lineLot: { lot: '', product: l ? l.product : '', plan: String(Math.min(RUN_MAX_HOURS, (l && l.maxRunHours) || RUN_MAX_HOURS)), start: toLocalInput() }, lineEnd: null, lineFill: null, lineStart: null }); };
+  // The planned run is picked from the production plan's choices (the line's maximum by default); more than the maximum is a special case.
+  openStartLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId), P = this.plan();
+    this.setState({ lineLot: { lot: '', product: l ? l.product : '', plan: String(Math.min(P.runMax, (l && l.maxRunHours) || P.runMax)), start: toLocalInput() }, lineEnd: null, lineFill: null, lineStart: null }); };
   // The start time is when the lot really started on the line (now by default; earlier if it is recorded late).
-  startLot = () => {
-    const id = this.state.lineId, f = this.state.lineLot || {}; const lot = (f.lot || '').trim(); if (!id || !lot) return;
+  // With migration 0011 the lot record is created now (it has no end time until the lot finishes) and a start event is written.
+  startLot = async () => {
+    const id = this.state.lineId, l = this.state.lines.find(x => x.id === id), f = this.state.lineLot || {}; const lot = (f.lot || '').trim(); if (!l || !lot) return;
     const t = fromLocalInput(f.start) || nowIso(); if (!startOk(t)) return;
-    const plan = parseFloat(f.plan) > 0 ? parseFloat(f.plan) : null;
-    this.updateLine(id, { status: 'running', lot, product: (f.product || '').trim(), lotStartedAt: t, planHours: plan, fillSince: t, fillCips: 0, cipUntil: null, cipReason: '' }, true);
+    const plan = parseFloat(f.plan) > 0 ? parseFloat(f.plan) : null, product = (f.product || '').trim();
+    let currentLotId = null;
+    if (this.state.planReady) {
+      this.setState({ busy: true });
+      try {
+        const rec = await repo.addLot({ lineId: l.id, lineName: l.name, product, lot, startedAt: t, planHours: plan, target: l.target || 0, qty: 0, endedBy: this.myId(), startedByName: this.me().name });
+        currentLotId = rec.id;
+        this.setState(s => ({ busy: false, lots: [rec, ...s.lots] }));
+        this.lotEvent(rec.id, 'start', t);
+      } catch (e) { this.setState({ busy: false }); this.toast(e.message); return; }
+    }
+    this.updateLine(id, { status: 'running', lot, product, lotStartedAt: t, planHours: plan, fillSince: t, fillCips: 0, cipUntil: null, cipReason: '', ...(currentLotId ? { currentLotId } : {}) }, true);
     this.setState({ lineLot: null });
     this.toast('▶ ' + lot + (plan ? ' · ' + plan + ' h' : ''));
   };
@@ -452,25 +499,41 @@ export class AppController extends React.Component {
   openStartEdit = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return; this.setState({ lineStart: toLocalInput(l.lotStartedAt) }); };
   saveStartEdit = () => {
     const l = this.state.lines.find(x => x.id === this.state.lineId), t = fromLocalInput(this.state.lineStart); if (!l || !t || !startOk(t)) return;
+    this.setLotStart(l, t); this.setState({ lineStart: null }); this.toast(l.lot + ' · ' + stampLabel(t));
+  };
+  // The start time lives on the line, the lot record and the start event: keep all three in step.
+  setLotStart(l, t) {
     const patch = { lotStartedAt: t };
     if (!l.fillSince || l.fillSince === l.lotStartedAt || !l.fillCips) patch.fillSince = t;
-    this.updateLine(l.id, patch, true); this.setState({ lineStart: null }); this.toast(l.lot + ' · ' + stampLabel(t));
+    this.updateLine(l.id, patch, true);
+    if (l.currentLotId && this.state.planReady) {
+      repo.updateLot(l.currentLotId, { startedAt: t }).catch(e => this.toast(e.message));
+      repo.moveEvent(l.currentLotId, 'start', t).then(() => this.reloadLot(l.currentLotId)).catch(e => this.toast(e.message));
+      this.setState(s => ({ lots: s.lots.map(x => (x.id === l.currentLotId ? { ...x, startedAt: t } : x)) }));
+    }
+  }
+  // Status buttons: while a lot is on the line, a change (stopped, running again…) is written as an event.
+  setLineStatus = (id, status) => {
+    const l = this.state.lines.find(x => x.id === id); if (!l) return;
+    this.updateLine(id, { status });
+    if (l.lot && l.currentLotId && status !== l.status) this.lotEvent(l.currentLotId, 'status', nowIso(), { detail: status });
   };
   // CIP filling: the filler is cleaned in the middle of a lot (UHT line 1 after 24 h). The lot stays on the line.
-  openFillCip = () => this.setState({ lineFill: { hours: String(FILL_CIP_HOURS) }, lineLot: null, lineEnd: null });
+  openFillCip = () => this.setState({ lineFill: { hours: String(this.plan().fillCipHours) }, lineLot: null, lineEnd: null });
   startFillCip = () => {
     const l = this.state.lines.find(x => x.id === this.state.lineId), f = this.state.lineFill || {}; if (!l || !l.lot) return;
-    const hours = parseFloat(f.hours) > 0 ? parseFloat(f.hours) : FILL_CIP_HOURS;
+    const hours = parseFloat(f.hours) > 0 ? parseFloat(f.hours) : this.plan().fillCipHours;
     this.updateLine(l.id, { status: 'cleaning', cipReason: 'filling', cipUntil: hoursFromNow(hours), fillCips: (l.fillCips || 0) + 1 }, true);
+    this.lotEvent(l.currentLotId, 'fill_cip', nowIso(), { hours });
     this.setState({ lineFill: null });
     this.toast('CIP filling · ' + l.lot + ' · ' + hours + ' h');
   };
   // After the CIP filling: carry on with the same lot.
   continueLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l || !l.lot) return;
-    this.updateLine(l.id, { status: 'running', fillSince: nowIso() }, true); this.toast('▶ ' + l.lot); };
+    this.updateLine(l.id, { status: 'running', fillSince: nowIso() }, true); this.lotEvent(l.currentLotId, 'continue'); this.toast('▶ ' + l.lot); };
   // "Finish lot": record the lot that ended, then the line goes into CIP (4 h standard, longer for maintenance or a system error).
   openFinishLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return;
-    this.setState({ lineEnd: { qty: String(l.qty), hours: String(CIP_HOURS), reason: 'standard', note: '', overNote: '', end: toLocalInput() }, lineLot: null, lineFill: null, lineStart: null }); };
+    this.setState({ lineEnd: { qty: String(l.qty), hours: String(this.plan().cipHours), reason: 'standard', note: '', overNote: '', end: toLocalInput() }, lineLot: null, lineFill: null, lineStart: null }); };
   // The end time is when the lot really ended (now by default; earlier if it is recorded late).
   // The CIP after it starts at that time, so its countdown ends at end time + CIP hours.
   finishLot = async () => {
@@ -482,9 +545,15 @@ export class AppController extends React.Component {
       planHours: l.planHours || null, fillCips: l.fillCips || 0, overNote: (f.overNote || '').trim() };
     this.setState({ busy: true });
     try {
-      const saved = await repo.addLot(rec);
+      // The record already exists when the lot was started with migration 0011; older lots get one now.
+      let saved = l.currentLotId && this.state.planReady ? await repo.updateLot(l.currentLotId, rec) : null;
+      const created = !saved;
+      if (!saved) saved = await repo.addLot(rec);
       this.setState(s => ({ busy: false, lineEnd: null, lots: [saved, ...s.lots.filter(x => x.id !== saved.id)] }));
-      this.updateLine(id, { status: 'cleaning', lot: '', lotStartedAt: null, planHours: null, fillSince: null, fillCips: 0, cipStartedAt: end, cipUntil: new Date(Date.parse(end) + hours * 3600000).toISOString(), cipReason: rec.cipReason }, true);
+      this.updateLine(id, { status: 'cleaning', lot: '', lotStartedAt: null, planHours: null, fillSince: null, fillCips: 0, cipStartedAt: end, cipUntil: new Date(Date.parse(end) + hours * 3600000).toISOString(), cipReason: rec.cipReason,
+        ...(this.state.planReady ? { currentLotId: null } : {}) }, true);
+      if (created && rec.startedAt) this.lotEvent(saved.id, 'start', rec.startedAt);
+      this.lotEvent(saved.id, 'finish', end, { hours, detail: rec.cipReason, note: rec.note });
       this.toast('■ ' + rec.lot + ' · CIP ' + hours + ' h');
     } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
   };
@@ -492,6 +561,100 @@ export class AppController extends React.Component {
   extendCip = hours => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return;
     const from = l.cipUntil && Date.parse(l.cipUntil) > Date.now() ? Date.parse(l.cipUntil) : Date.now();
     this.updateLine(l.id, { cipUntil: new Date(from + hours * 3600000).toISOString() }); };
+
+  // ───── Lot details: facts, events (view, add, edit, delete) and the change log ─────
+  openLot = (lotId, back) => {
+    this.setState({ sheet: 'lot', lotId, lotBack: back || null, lotDetail: { lotId, events: [], log: [], loading: true }, lotEdit: null, evEdit: null, evAdd: null, evDel: null, lotDel: false });
+    this.reloadLot(lotId);
+  };
+  backFromLot = () => { const b = this.state.lotBack; this.setState(b ? { sheet: 'line', lineId: b } : { sheet: null }); };
+  reloadLot(lotId) {
+    if (!this.state.planReady || !lotId) return;
+    repo.lotDetail(lotId)
+      .then(d => { if (this.state.lotId === lotId) this.setState({ lotDetail: { lotId, ...d, loading: false } }); })
+      .catch(e => { if (this.state.lotId === lotId) this.setState({ lotDetail: { lotId, events: [], log: [], loading: false, error: e.message } }); });
+  }
+  lineOfLot(lot) { return this.state.lines.find(x => lot && x.currentLotId === lot.id); }
+  // Lot info: number, product, output, planned run, note, reason over the maximum.
+  openLotEdit = () => { const x = this.state.lots.find(o => o.id === this.state.lotId); if (!x) return;
+    this.setState({ lotEdit: { lot: x.lot, product: x.product || '', qty: String(x.qty || 0), plan: x.planHours ? String(x.planHours) : '', note: x.note || '', overNote: x.overNote || '' }, evEdit: null, evAdd: null }); };
+  saveLotEdit = async () => {
+    const x = this.state.lots.find(o => o.id === this.state.lotId), f = this.state.lotEdit; if (!x || !f || !(f.lot || '').trim()) return;
+    const patch = { lot: f.lot.trim(), product: (f.product || '').trim(), qty: Math.max(0, parseInt(f.qty, 10) || 0), planHours: parseFloat(f.plan) > 0 ? parseFloat(f.plan) : null, note: (f.note || '').trim(), overNote: (f.overNote || '').trim() };
+    this.setState({ busy: true });
+    try {
+      const saved = await repo.updateLot(x.id, patch);
+      this.setState(s => ({ busy: false, lotEdit: null, lots: s.lots.map(o => (o.id === x.id ? { ...o, ...(saved || patch) } : o)) }));
+      // the lot that is running now: the line shows the same number, product and plan
+      const line = this.lineOfLot(x); if (line) this.updateLine(line.id, { lot: patch.lot, product: patch.product, planHours: patch.planHours, qty: patch.qty }, true);
+      this.reloadLot(x.id); this.toast(this.T().lotd.saved);
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  // Events: start and finish can be moved (they are the lot's start and end time) but not deleted.
+  openEvEdit = ev => this.setState({ evEdit: { id: ev.id, kind: ev.kind, at: toLocalInput(ev.at), hours: ev.hours != null ? String(ev.hours) : '', detail: ev.detail || '', note: ev.note || '' }, evAdd: null, lotEdit: null, evDel: null });
+  saveEvEdit = async () => {
+    const f = this.state.evEdit, x = this.state.lots.find(o => o.id === this.state.lotId); if (!f || !x) return;
+    const at = fromLocalInput(f.at); if (!at || !this.evTimeOk(f.kind, at, x)) return;
+    const ev = ((this.state.lotDetail || {}).events || []).find(e => e.id === f.id);
+    const all = { at, note: (f.note || '').trim(), detail: f.detail || '', hours: f.hours !== '' && parseFloat(f.hours) >= 0 ? parseFloat(f.hours) : null };
+    // only what changed, so the log stays short
+    const patch = {}; Object.keys(all).forEach(k => { const was = ev ? (k === 'at' ? ev.at && new Date(ev.at).toISOString() : ev[k]) : undefined; if (all[k] !== (was == null ? (k === 'hours' ? null : '') : was)) patch[k] = all[k]; });
+    if (!Object.keys(patch).length) { this.setState({ evEdit: null }); return; }
+    this.setState({ busy: true });
+    try {
+      await repo.updateEvent(f.id, patch);
+      if (f.kind === 'start') {
+        await repo.updateLot(x.id, { startedAt: at });
+        this.setState(s => ({ lots: s.lots.map(o => (o.id === x.id ? { ...o, startedAt: at } : o)) }));
+        const line = this.lineOfLot(x); if (line) this.setLotStart(line, at);
+      }
+      if (f.kind === 'finish') {
+        const lp = { endedAt: at, cipHours: all.hours != null ? all.hours : x.cipHours, cipReason: all.detail || x.cipReason };
+        await repo.updateLot(x.id, lp);
+        this.setState(s => ({ lots: s.lots.map(o => (o.id === x.id ? { ...o, ...lp } : o)) }));
+        // the CIP after this lot is still on the line: move it with the new end time
+        const line = this.state.lines.find(o => o.id === x.lineId);
+        if (line && line.status === 'cleaning' && line.cipReason !== 'filling' && ev && line.cipStartedAt && Math.abs(Date.parse(line.cipStartedAt) - Date.parse(ev.at)) < 60000)
+          this.updateLine(line.id, { cipStartedAt: at, cipUntil: new Date(Date.parse(at) + lp.cipHours * 3600000).toISOString(), cipReason: lp.cipReason }, true);
+      }
+      this.setState({ busy: false, evEdit: null }); this.reloadLot(x.id); this.toast(this.T().lotd.saved);
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  // An event must be in the past, after the lot's start (the start itself before the finish), and not after its end.
+  evTimeOk(kind, at, x) {
+    const t = Date.parse(at), st = x.startedAt ? Date.parse(x.startedAt) : null, en = x.endedAt ? Date.parse(x.endedAt) : null;
+    if (t > Date.now() + 5 * 60000) return false;
+    if (kind === 'start') return !en || t < en;
+    if (kind === 'finish') return !st || t > st;
+    return (!st || t >= st) && (!en || t <= en);
+  }
+  openEvAdd = () => this.setState({ evAdd: { kind: 'stopped', at: toLocalInput(), hours: String(this.plan().fillCipHours), note: '' }, evEdit: null, lotEdit: null, evDel: null });
+  saveEvAdd = async () => {
+    const f = this.state.evAdd, x = this.state.lots.find(o => o.id === this.state.lotId); if (!f || !x) return;
+    const at = fromLocalInput(f.at); if (!at || !this.evTimeOk('other', at, x)) return;
+    const map = { stopped: ['status', 'stopped'], running: ['status', 'running'], maintenance: ['status', 'maintenance'], fill: ['fill_cip', ''], cont: ['continue', ''], note: ['note', ''] };
+    const [kind, detail] = map[f.kind] || map.note;
+    this.setState({ busy: true });
+    const ev = await this.lotEvent(x.id, kind, at, { detail, note: (f.note || '').trim(), hours: kind === 'fill_cip' ? parseFloat(f.hours) || this.plan().fillCipHours : null });
+    this.setState({ busy: false }); if (ev) { this.setState({ evAdd: null }); this.toast(this.T().lotd.added); }
+  };
+  deleteEvent = async id => {
+    const x = this.state.lots.find(o => o.id === this.state.lotId); this.setState({ busy: true });
+    try { await repo.removeEvent(id); this.setState({ busy: false, evDel: null }); this.reloadLot(x && x.id); this.toast(this.T().lotd.deleted); }
+    catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
+  // Plant managers can delete a whole lot record (it stays in the change log).
+  deleteLot = async () => {
+    const x = this.state.lots.find(o => o.id === this.state.lotId); if (!x) return;
+    this.setState({ busy: true });
+    try {
+      await repo.removeLot(x.id);
+      const line = this.lineOfLot(x);
+      if (line) this.updateLine(line.id, { lot: '', lotStartedAt: null, planHours: null, fillSince: null, fillCips: 0, currentLotId: null, status: line.status === 'running' ? 'idle' : line.status }, true);
+      this.setState(s => ({ busy: false, lots: s.lots.filter(o => o.id !== x.id), lotDel: false }));
+      this.backFromLot(); this.toast('− ' + x.lot);
+    } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
+  };
   removeLine = async id => {
     const line = this.state.lines.find(l => l.id === id);
     this.setState(s => ({ sheet: null, lines: s.lines.filter(l => l.id !== id) }));

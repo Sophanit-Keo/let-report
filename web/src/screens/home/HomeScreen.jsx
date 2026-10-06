@@ -144,6 +144,9 @@ export function HomeScreen({ v }) {
           <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }} data-tour="lines">
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h2 style={{ ...secHead, margin: 0 }}>{t.linesNow}</h2>
+              <div {...tap(v.linesHead.openPlan, 'pill-tap')} aria-label={t.plan.title} style={{ height: 30, padding: '0 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, background: '#fff', color: 'var(--blue-700)', border: '1.5px solid var(--blue-200)' }}>
+                <Icon name="sliders-horizontal" size={14} color="var(--blue-700)" />{t.plan.button}
+              </div>
               {v.linesHead.canAdd ? (
                 <div {...tap(v.linesHead.add, 'pill-tap')} style={{ height: 30, padding: '0 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, background: '#fff', color: 'var(--blue-700)', border: '1.5px solid var(--blue-200)' }}>
                   + {t.line.add}
