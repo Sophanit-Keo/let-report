@@ -39,7 +39,7 @@ export function buildViewModel(app) {
     const toLocalNow=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); };
     // [text, background, bar] for a lot that is fine, needs attention soon, or is over its limit
     const TONES={green:['var(--green-700)','var(--green-100)','var(--green-500)'],amber:['var(--amber-700)','var(--amber-100)','var(--amber-500)'],red:['var(--red-700)','var(--red-100)','var(--red-500)']};
-    const cipOf=l=>{ if(l.status!=='cleaning'||!l.cipUntil) return null; const until=ms(l.cipUntil), from=ms(l.statusSince)||until-4*H, left=until-now;
+    const cipOf=l=>{ if(l.status!=='cleaning'||!l.cipUntil) return null; const until=ms(l.cipUntil), from=ms(l.cipStartedAt)||ms(l.statusSince)||until-4*H, left=until-now;
       const filling=l.cipReason==='filling', reason=l.cipReason&&l.cipReason!=='standard'&&!filling?T.lot.reasons[l.cipReason]:'';
       return {done:left<=0,left,until,ends:stampLabel(l.cipUntil),leftLabel:durLabel(Math.abs(left)),planned:durLabel(until-from),pct:Math.min(100,Math.max(0,Math.round((now-from)/Math.max(1,until-from)*100)))+'%',reason,filling,
         title:filling?T.lot.fillCip:T.lot.cip+(reason?' · '+reason:'')}; };
@@ -104,14 +104,20 @@ export function buildViewModel(app) {
             fillNote:l.fillEvery?T.lot.fillRule.replace('{h}',l.fillEvery):'',
             start:f.start||'', onStart:e=>setF({start:e.target.value}), startNow:()=>setF({start:toLocalNow()}), startBad:startBad(f.start),
             disabled:!(f.lot||'').trim()||!(plan>0)||!!startBad(f.start),save:app.startLot,cancel:()=>app.setState({lineLot:null})};})():null,
-        endForm:s.lineEnd?(()=>{const f=s.lineEnd, setF=p=>app.setState(st=>({lineEnd:{...st.lineEnd,...p}})); const h=parseFloat(f.hours), r=runOf(l), needWhy=!!(r&&r.over);
-          return {lot:l.lot||'—',product:l.product||'—',started:l.lotStartedAt?stampLabel(l.lotStartedAt):T.lot.unknown,ran:l.lotStartedAt?hoursLabel(now-ms(l.lotStartedAt)):'',
+        endForm:s.lineEnd?(()=>{const f=s.lineEnd, setF=p=>app.setState(st=>({lineEnd:{...st.lineEnd,...p}})); const h=parseFloat(f.hours), r=runOf(l);
+          // run time up to the chosen end time; over the maximum needs a reason
+          const endT=fromLocalInput(f.end), endMs=endT?Date.parse(endT):now, start=ms(l.lotStartedAt), ranMs=start?endMs-start:0;
+          const endBad=!endT?T.lot.endMissing:endMs>Date.now()+5*60000?T.lot.endFuture:start&&endMs<=start?T.lot.endBeforeStart:'';
+          const needWhy=!!(r&&start&&ranMs>r.max*H);
+          return {lot:l.lot||'—',product:l.product||'—',started:l.lotStartedAt?stampLabel(l.lotStartedAt):T.lot.unknown,ran:start&&ranMs>0?hoursLabel(ranMs):'',
+            end:f.end||'', onEnd:e=>setF({end:e.target.value}), endNow:()=>setF({end:toLocalNow()}), endBad,
+            cipEnds:!endBad&&h>=0?stampLabel(isoAt(endMs+h*H)):'',
             plan:r?T.lot.planOf.replace('{plan}',r.plan):'', fills:l.fillCips?l.fillCips+' × '+T.lot.fillCip:'',
             needWhy, whyLabel:r?T.lot.overWhy.replace('{max}',r.max):'', overNote:f.overNote||'', onOverNote:e=>setF({overNote:e.target.value}),
             qty:f.qty,onQty:e=>setF({qty:e.target.value.replace(/[^0-9]/g,'')}),
             hours:CIP_CHOICES.map(n=>({label:n+' '+T.lot.hoursShort,...pill(h===n),pick:()=>setF({hours:String(n),reason:n===4&&f.reason==='other'?'standard':f.reason})})), hoursText:f.hours, onHours:e=>setF({hours:e.target.value.replace(/[^0-9.]/g,'')}),
             reasons:CIP_REASONS.map(k=>({label:T.lot.reasons[k],...pill(f.reason===k),pick:()=>setF({reason:k,hours:k==='standard'?'4':(h>4?f.hours:'6')})})),
-            note:f.note||'',onNote:e=>setF({note:e.target.value}),disabled:!!s.busy||!(h>=0)||(needWhy&&!(f.overNote||'').trim()),save:app.finishLot,cancel:()=>app.setState({lineEnd:null})};})():null,
+            note:f.note||'',onNote:e=>setF({note:e.target.value}),disabled:!!s.busy||!(h>=0)||!!endBad||(needWhy&&!(f.overNote||'').trim()),save:app.finishLot,cancel:()=>app.setState({lineEnd:null})};})():null,
         history:(s.lots||[]).filter(x=>x.lineId===l.id||(!x.lineId&&x.lineName===l.name)).slice(0,8).map(x=>({id:x.id,lot:x.lot,product:x.product||'—',
           when:(x.startedAt?stampLabel(x.startedAt)+' '+T.lot.fromTo+' ':'')+stampLabel(x.endedAt), ran:x.startedAt?hoursLabel(ms(x.endedAt)-ms(x.startedAt)):'', qty:x.qty+' / '+(x.target||'—')+' '+T.lot.pal,
           cip:T.lot.cipShort+' '+x.cipHours+' '+T.lot.hoursShort+(x.cipReason&&x.cipReason!=='standard'?' · '+T.lot.reasons[x.cipReason]:''), by:x.endedByName, note:x.note,

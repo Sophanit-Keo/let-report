@@ -37,6 +37,8 @@ function makePassword() { return WORDS[Math.floor(Math.random() * WORDS.length)]
 const hoursFromNow = h => new Date(Date.now() + h * 3600000).toISOString();
 // A lot cannot start in the future (5 minutes of clock difference allowed).
 export const startOk = iso => !!iso && Date.parse(iso) <= Date.now() + 5 * 60000;
+// A lot ends after it started, and not in the future.
+export const endOk = (iso, start) => startOk(iso) && (!start || Date.parse(iso) > Date.parse(start));
 const withDue = r => (r.holdCheck && r.holdCheck.status === 'scheduled' && isDue(r.holdCheck.dueAt) ? { ...r, holdCheck: { ...r.holdCheck, status: 'due', due: 'Today' } } : r);
 
 export class AppController extends React.Component {
@@ -386,9 +388,12 @@ export class AppController extends React.Component {
     if (patch.status && patch.status !== before.status) {
       full.statusSince = nowIso();
       // Into CIP: plan the standard 4 hours unless told otherwise. Out of CIP: the countdown ends.
-      if (patch.status === 'cleaning') { if (full.cipUntil === undefined) full.cipUntil = hoursFromNow(CIP_HOURS); if (full.cipReason === undefined) full.cipReason = 'standard'; }
+      if (patch.status === 'cleaning') {
+        if (full.cipUntil === undefined) full.cipUntil = hoursFromNow(CIP_HOURS); if (full.cipReason === undefined) full.cipReason = 'standard';
+        if (full.cipStartedAt === undefined) full.cipStartedAt = nowIso();
+      }
       else if (before.status === 'cleaning') {
-        if (full.cipUntil === undefined) full.cipUntil = null; if (full.cipReason === undefined) full.cipReason = '';
+        if (full.cipUntil === undefined) full.cipUntil = null; if (full.cipReason === undefined) full.cipReason = ''; if (full.cipStartedAt === undefined) full.cipStartedAt = null;
         // Back to Running after a CIP filling: the same lot carries on and the filling clock starts again.
         if (before.cipReason === 'filling' && patch.status === 'running' && full.fillSince === undefined) full.fillSince = nowIso();
       }
@@ -465,18 +470,21 @@ export class AppController extends React.Component {
     this.updateLine(l.id, { status: 'running', fillSince: nowIso() }, true); this.toast('▶ ' + l.lot); };
   // "Finish lot": record the lot that ended, then the line goes into CIP (4 h standard, longer for maintenance or a system error).
   openFinishLot = () => { const l = this.state.lines.find(x => x.id === this.state.lineId); if (!l) return;
-    this.setState({ lineEnd: { qty: String(l.qty), hours: String(CIP_HOURS), reason: 'standard', note: '', overNote: '' }, lineLot: null, lineFill: null }); };
+    this.setState({ lineEnd: { qty: String(l.qty), hours: String(CIP_HOURS), reason: 'standard', note: '', overNote: '', end: toLocalInput() }, lineLot: null, lineFill: null, lineStart: null }); };
+  // The end time is when the lot really ended (now by default; earlier if it is recorded late).
+  // The CIP after it starts at that time, so its countdown ends at end time + CIP hours.
   finishLot = async () => {
     const id = this.state.lineId, l = this.state.lines.find(x => x.id === id), f = this.state.lineEnd; if (!l || !f) return;
+    const end = fromLocalInput(f.end) || nowIso(); if (!endOk(end, l.lotStartedAt)) return;
     const hours = Math.max(0, parseFloat(f.hours) || 0), me = this.me();
-    const rec = { lineId: l.id, lineName: l.name, product: l.product || '', lot: l.lot || '—', startedAt: l.lotStartedAt || null, endedAt: nowIso(),
+    const rec = { lineId: l.id, lineName: l.name, product: l.product || '', lot: l.lot || '—', startedAt: l.lotStartedAt || null, endedAt: end,
       qty: Math.max(0, parseInt(f.qty, 10) || 0), target: l.target || 0, cipHours: hours, cipReason: f.reason || 'standard', note: (f.note || '').trim(), endedBy: this.myId(), endedByName: me.name,
       planHours: l.planHours || null, fillCips: l.fillCips || 0, overNote: (f.overNote || '').trim() };
     this.setState({ busy: true });
     try {
       const saved = await repo.addLot(rec);
       this.setState(s => ({ busy: false, lineEnd: null, lots: [saved, ...s.lots.filter(x => x.id !== saved.id)] }));
-      this.updateLine(id, { status: 'cleaning', lot: '', lotStartedAt: null, planHours: null, fillSince: null, fillCips: 0, cipUntil: hoursFromNow(hours), cipReason: rec.cipReason }, true);
+      this.updateLine(id, { status: 'cleaning', lot: '', lotStartedAt: null, planHours: null, fillSince: null, fillCips: 0, cipStartedAt: end, cipUntil: new Date(Date.parse(end) + hours * 3600000).toISOString(), cipReason: rec.cipReason }, true);
       this.toast('■ ' + rec.lot + ' · CIP ' + hours + ' h');
     } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
   };

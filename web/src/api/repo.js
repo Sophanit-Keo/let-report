@@ -162,12 +162,12 @@ export function rowToLine(r) {
     sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at,
     lot: r.lot || '', lotStartedAt: r.lot_started_at || null, cipUntil: r.cip_until || null, cipReason: r.cip_reason || '',
     maxRunHours: r.max_run_hours || 36, fillEvery: r.fill_cip_every_hours || null, planHours: r.lot_plan_hours != null ? Number(r.lot_plan_hours) : null,
-    fillSince: r.fill_since || null, fillCips: r.fill_cips || 0, hasRunLimits: r.max_run_hours !== undefined };
+    fillSince: r.fill_since || null, fillCips: r.fill_cips || 0, hasRunLimits: r.max_run_hours !== undefined, cipStartedAt: r.cip_started_at || null };
 }
 function lineToRow(l) {
   const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name',
     lot: 'lot', lotStartedAt: 'lot_started_at', cipUntil: 'cip_until', cipReason: 'cip_reason',
-    maxRunHours: 'max_run_hours', fillEvery: 'fill_cip_every_hours', planHours: 'lot_plan_hours', fillSince: 'fill_since', fillCips: 'fill_cips' };
+    maxRunHours: 'max_run_hours', fillEvery: 'fill_cip_every_hours', planHours: 'lot_plan_hours', fillSince: 'fill_since', fillCips: 'fill_cips', cipStartedAt: 'cip_started_at' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
 }
 

@@ -19,12 +19,12 @@ function Bar({ pct, color, bg = '#fff', h = 6 }) {
 function Warn({ text, fg }) {
   return <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', fontSize: 12, fontWeight: 700, color: fg, lineHeight: 1.4 }}><Icon name="triangle-alert" size={14} color={fg} style={{ marginTop: 1 }} />{text}</div>;
 }
-// Date and time the lot started, with a "Now" shortcut and a message when it is not allowed.
-function StartTime({ value, onChange, bad, t, now }) {
+// Date and time the lot started (or ended), with a "Now" shortcut and a message when it is not allowed.
+function StartTime({ value, onChange, bad, t, now, name }) {
   return (
     <div style={col(6)}>
       <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-        <input type="datetime-local" aria-label={t.lot.startTime} value={value} onChange={onChange}
+        <input type="datetime-local" aria-label={name || t.lot.startTime} value={value} onChange={onChange}
           style={{ ...inputStyle, flex: 1, fontSize: 15, fontWeight: 700, borderColor: bad ? 'var(--red-500)' : 'var(--blue-200)' }} />
         {now ? <div {...tap(now, 'pill-tap')} style={hourBtn}>{t.lot.startNow}</div> : null}
       </div>
@@ -185,6 +185,9 @@ function LotNow({ l, t, label }) {
             <div style={small}>{t.lot.finishSub}</div>
             <div style={small}>{l.endForm.product} · {t.lot.started} {l.endForm.started}{l.endForm.ran ? ' · ' + t.lot.ran + ' ' + l.endForm.ran : ''}{l.endForm.plan ? ' · ' + l.endForm.plan : ''}{l.endForm.fills ? ' · ' + l.endForm.fills : ''}</div>
           </div>
+          <div style={label}>{t.lot.endTime}</div>
+          <StartTime value={l.endForm.end} onChange={l.endForm.onEnd} bad={l.endForm.endBad} t={t} now={l.endForm.endNow} name={t.lot.endTime} />
+          <div style={small}>{t.lot.endTimeSub}</div>
           {l.endForm.needWhy ? (
             <div style={col(8)}>
               <Warn text={l.endForm.whyLabel} fg="var(--red-700)" />
@@ -201,7 +204,7 @@ function LotNow({ l, t, label }) {
           </div>
           <div style={label}>{t.lot.reason}</div>
           <div style={grid(2)}>{l.endForm.reasons.map((o, i) => <Pill key={i} o={o} h={36} px={8} />)}</div>
-          <div style={small}>{t.lot.reasonSub}</div>
+          <div style={small}>{t.lot.reasonSub}{l.endForm.cipEnds ? ' ' + t.lot.cipEndsAt + ' ' + l.endForm.cipEnds + '.' : ''}</div>
           <div style={label}>{t.lot.note}</div>
           <textarea value={l.endForm.note} onChange={l.endForm.onNote} placeholder={t.lot.notePh} rows={2} style={{ ...areaStyle, fontSize: 14 }} />
           <div style={col(8)}>

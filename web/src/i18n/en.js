@@ -78,6 +78,7 @@ export const EN = {
     fillStart:'Start CIP filling', fillTitle:'CIP filling', fillSub:'The filler is cleaned. Lot {lot} stays on the line and continues afterwards.', fillTime:'How long?', fillGo:'Start CIP filling',
     startTime:'Start time', startTimeSub:'When the lot started on the line. Change it if you record the lot late.', startNow:'Now', startedCap:'Started',
     changeStart:'Change start time', saveStart:'Save start time', startFuture:'The start time cannot be in the future.', startMissing:'Choose the start date and time.',
+    endTime:'End time', endTimeSub:'When the lot ended on the line. The CIP starts from this time.', endFuture:'The end time cannot be in the future.', endBeforeStart:'The end time must be after the start time.', endMissing:'Choose the end date and time.', cipEndsAt:'CIP ends',
     fillDone:'CIP filling done. Continue lot {lot}.', cont:'Continue lot', fillCount:'CIP fillings in this lot',
     notReady:'Lot tracking is not set up in the database yet. Ask the manager to run the latest database update (migration 0008 and 0009).'},
   people:{title:'Team', sub:'Everyone who can sign in to Let Report.', add:'Add person', addTitle:'Add a person', name:'Name', email:'Email',
