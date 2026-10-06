@@ -19,7 +19,10 @@ export function HomeScreen({ v }) {
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         <h1 style={{ margin: 0, fontWeight: 800, fontSize: 26, letterSpacing: '-0.02em', lineHeight: 1.2 }}>{t.greet}, {v.me.name}</h1>
-        <div style={{ fontSize: 14, color: 'var(--gray-500)', fontWeight: 500 }}>{v.me.roleLabel} · {t.site}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: 'var(--gray-500)', fontWeight: 500 }}>
+          <span>{v.me.roleLabel} · {v.site.name}</span>
+          {v.site.canEdit ? <span {...tap(v.site.edit, 'icon-btn')} aria-label={t.plan.site} style={{ display: 'inline-flex', padding: 4, borderRadius: 8 }}><Icon name="pencil-line" size={14} color="var(--blue-600)" /></span> : null}
+        </div>
       </div>
 
       <div className="home-grid">

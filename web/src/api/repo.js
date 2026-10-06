@@ -118,7 +118,7 @@ export const repo = {
   // Move the start (or finish) event of a lot when its time is corrected elsewhere.
   moveEvent(lotId, kind, at) { return db.update('lot_events', { lot_id: 'eq.' + lotId, kind: 'eq.' + kind }, { at }); },
   // Production plan: one row for the factory; supervisors and the plant manager can change it.
-  async updatePlan(patch) { const rows = await db.update('factory_settings', { id: 'eq.1' }, planToRow(patch)); return rows && rows[0] ? rowToPlan(rows[0]) : null; },
+  async updatePlan(patch) { const rows = await withoutMissing(planToRow(patch), r => db.update('factory_settings', { id: 'eq.1' }, r)); return rows && rows[0] ? rowToPlan(rows[0]) : null; },
   async planLog() { const rows = await db.select('lot_log', { entity: 'eq.plan', order: 'at.desc', limit: 30 }); return rows.map(rowToLog); },
 
   updateProfile(id, patch) { return db.update('profiles', { id: 'eq.' + id }, patch); },
@@ -244,9 +244,9 @@ export function rowToLog(r) {
 // ───── Production plan ─────
 export function rowToPlan(r) {
   return { runChoices: (r.run_choices || []).map(Number).filter(n => n > 0).sort((a, b) => a - b), runMax: r.run_max_hours, cipHours: Number(r.cip_hours),
-    fillCipHours: Number(r.fill_cip_hours), fillEvery: r.fill_every_hours, updatedByName: r.updated_by_name || '', updatedAt: r.updated_at };
+    fillCipHours: Number(r.fill_cip_hours), fillEvery: r.fill_every_hours, updatedByName: r.updated_by_name || '', updatedAt: r.updated_at, siteName: r.site_name || '' };
 }
 function planToRow(p) {
-  const map = { runChoices: 'run_choices', runMax: 'run_max_hours', cipHours: 'cip_hours', fillCipHours: 'fill_cip_hours', fillEvery: 'fill_every_hours', updatedByName: 'updated_by_name' };
+  const map = { runChoices: 'run_choices', runMax: 'run_max_hours', cipHours: 'cip_hours', fillCipHours: 'fill_cip_hours', fillEvery: 'fill_every_hours', updatedByName: 'updated_by_name', siteName: 'site_name' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (p[k] !== undefined) row[c] = p[k]; }); return row;
 }
