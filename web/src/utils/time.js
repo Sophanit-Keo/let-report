@@ -23,3 +23,11 @@ export function stampLabel(v) {
 export const nowIso = () => new Date().toISOString();
 export function addDaysIso(days) { const d = startOfDay(new Date()); d.setDate(d.getDate() + days); d.setHours(8, 0, 0, 0); return d.toISOString(); }
 export const isDue = iso => isIso(iso) && new Date(iso) <= new Date();
+
+// A length of time: "45 min", "2 h 10 min", "1 d 3 h". Never negative.
+export function durLabel(ms) {
+  const m = Math.max(0, Math.round(ms / 60000)), h = Math.floor(m / 60), d = Math.floor(h / 24);
+  if (d >= 1) return d + ' d ' + (h % 24) + ' h';
+  if (h >= 1) return h + ' h' + (m % 60 ? ' ' + (m % 60) + ' min' : '');
+  return m + ' min';
+}

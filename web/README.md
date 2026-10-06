@@ -18,7 +18,7 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 
 **1. Create the database** (once)
 1. Create a free project at [supabase.com](https://supabase.com).
-2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0007`), then deploy the two functions: `supabase functions deploy admin-users` and `supabase functions deploy push --no-verify-jwt`. For push notifications, also run once in the SQL Editor: `select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');` (the notification keys are made automatically the first time). This creates the tables, the security rules and the private `photos` storage bucket.
+2. Open **SQL Editor** and run the files in `supabase/migrations/` in order (`0001` → `0008`), then deploy the two functions: `supabase functions deploy admin-users` and `supabase functions deploy push --no-verify-jwt`. For push notifications, also run once in the SQL Editor: `select vault.create_secret('https://<project-ref>.supabase.co', 'project_url');` (the notification keys are made automatically the first time). This creates the tables, the security rules and the private `photos` storage bucket.
 3. Optional, for testing: **Authentication → Sign In / Providers → Email**, turn off **Confirm email** so new accounts can sign in straight away.
 4. **Project Settings → API**: copy the **Project URL** and the **anon public** key.
 
@@ -46,6 +46,8 @@ The app stores everything in **Supabase** (Postgres database, logins and photo s
 | Comment on any trouble; delete their own comments and messages | ✓ | ✓ | ✓ | ✓ |
 | Turn push notifications on or off for their own devices | ✓ | ✓ | ✓ | ✓ |
 | Change a production line's status, output and note | ✓ | ✓ | ✓ | ✓ |
+| Start a lot on a line, finish it (the line goes into CIP) and record the lot's details | ✓ | ✓ | ✓ | ✓ |
+| Delete a lot record | | | | ✓ |
 | Add a line, edit its name, type, product and target | ✓ | ✓ | ✓ | ✓ |
 | Remove production lines | | | | ✓ |
 | Change own name and profile photo | ✓ | ✓ | ✓ | ✓ |
@@ -145,6 +147,7 @@ web/
 - **Hold checks:** release, or reject and then a QA decision (keep on hold, lab test, reject, other, escalate).
 - **Reports:** search, All / Open / Closed, and filters for date, line, product and severity.
 - **Production lines:** tap a line under "Lines now" to set its status (Running, Stopped, CIP, Changeover, Maintenance, Idle), update today's output, leave a note for the next shift, and edit the line's name or the product it's running (renaming keeps its reports linked). Anyone can add a line with **+ Add line**; only managers remove lines.
+- **Lots and CIP:** each line card shows what it is doing now: *Running lot 270706-K2 · 3 h 20 min*, or the CIP countdown after a lot (*CIP · 2 h 10 min left · ends 16:30*). In the line sheet, **Start lot** sets the lot number and product and puts the line on Running. **Finish lot** records the lot's end (output, who, when, how long it ran, a note) and puts the line into CIP for 4 hours as standard; for maintenance or a system error you choose a longer time and the reason, and **+1 h / +2 h / +4 h** extend a CIP that is taking longer. Picking the *Cleaning (CIP)* status while a lot is running also opens Finish lot, so no lot end goes unrecorded. The **Lot history** on each line lists the lots that ended there (table `line_lots`).
 - **Install on phones and tablets:** the app suggests installing itself (Android: an Install button; iPhone/iPad: Share → Add to Home Screen steps). "Not now" hides it for 7 days. A small service worker (`public/sw.js`) makes this possible and opens the app faster; data from Supabase is never cached.
 - **Live chat:** a team room for everyone plus private 1-to-1 chats, with text and photos, unread badges, a green dot for who is online, and a pop-up when a message arrives on another screen. Messages appear instantly (Supabase Realtime); if the live connection drops, the app catches up on its own. People can delete their own messages.
 - **Discussion on each trouble:** comments with text and photos at the bottom of a report. The reporter, everyone who commented before, and the role the trouble is with now get an alert.
