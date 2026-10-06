@@ -127,7 +127,7 @@ export function buildPlanView(app, { T, pill, stampLabel, P }) {
   const addChoice = () => { const n = parseFloat(f.add); if (n > 0 && !choices.includes(n)) set({ runChoices: [...choices, n].map(String), add: '' }); else set({ add: '' }); };
   const pos = k => parseFloat(f[k]) > 0;
   return {
-    ready: !!s.planReady, canEdit: can,
+    ready: !!s.planReady, canEdit: can, viewOnly: T.plan.viewOnly.replace('{role}', T.roles[app.role()] || app.role()),
     siteName: f.siteName || '', onSiteName: e => set({ siteName: e.target.value.slice(0, 80) }), sitePh: T.site,
     choices: choices.map(n => ({ label: n + ' ' + T.lot.hoursShort, remove: can && choices.length > 1 ? () => set({ runChoices: choices.filter(c => c !== n).map(String) }) : null })),
     add: f.add || '', onAdd: num('add'), addChoice,

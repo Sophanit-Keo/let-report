@@ -21,7 +21,7 @@ export function PlanSheet({ v }) {
         {p.updated ? <div style={small}>{p.updated}</div> : null}
       </div>
       {!p.ready ? <div style={{ ...small, color: 'var(--amber-700)', fontWeight: 700 }}>{t.plan.notReady}</div>
-        : ro ? <div style={{ display: 'flex', gap: 6, ...small, color: 'var(--gray-700)', fontWeight: 700 }}><Icon name="shield-check" size={15} color="var(--gray-700)" />{t.plan.viewOnly}</div> : null}
+        : ro ? <div style={{ display: 'flex', gap: 6, ...small, color: 'var(--gray-700)', fontWeight: 700 }}><Icon name="shield-check" size={15} color="var(--gray-700)" />{p.viewOnly}</div> : null}
 
       <Field label={t.plan.site}>
         <input aria-label={t.plan.site} value={p.siteName} onChange={p.onSiteName} placeholder={p.sitePh} readOnly={ro} style={inputStyle} />

@@ -78,7 +78,7 @@ export const EN = {
   plan:{site:'Factory / site name', siteSub:'Shown under the greeting on everyone\'s home screen. Leave empty for the default name.', title:'Production plan', button:'Plan', sub:'The run times and CIP times the whole factory uses.', runChoices:'Planned run choices', runChoicesSub:'Shown when a lot starts.', addChoice:'Add',
     runMax:'Normal maximum run (hours)', runMaxSub:'Used for new lines. Each line can have its own maximum in Edit line info.', cipHours:'Standard CIP after a lot (hours)', fillCipHours:'CIP filling time (hours)',
     fillEvery:'CIP filling needed after (hours of filling)', fillEverySub:'Offered when a line needs a CIP filling during a lot.', save:'Save plan', saved:'Production plan saved. The change is in the log.',
-    viewOnly:'Only a line supervisor or the plant manager can change the plan.', notReady:'The production plan needs the latest database update (migration 0011).',
+    viewOnly:'You are signed in as {role}. Only a line supervisor or the plant manager can change the plan and the factory name. The plant manager can change your role in Team.', notReady:'Editing needs a database update that has not been run yet (migrations 0011 and 0012). Until then the plan and the factory name cannot be changed.',
     denied:'You cannot change the production plan.', updated:'Last changed by {who} · {when}', history:'Plan changes'},
   lot:{title:'Lot', running:'Running lot', none:'No lot running', start:'Start lot', startNext:'Start next lot', number:'Lot number', numberPh:'270706-K2', product:'Product',
     started:'started', runFor:'running for', finish:'Finish lot', finishSub:'Record how this lot ended. The line then goes into CIP.', output:'Output of this lot (pallets)',

@@ -410,7 +410,7 @@ export function buildViewModel(app) {
         app.addNote(needA?{id:s.selId,icon:'stamp',tone:'blue',text:me.name+' asks to close '+s.selId+': '+rr.title,roles:['manager']}:{id:s.selId,icon:'circle-check',tone:'green',text:me.name+' closed '+s.selId+': '+rr.title,roles:['qc','qa','supervisor','manager'].filter(x=>x!==role)}); },
       verifyNo:()=>{ app.update(s.selId,r=>({...r,status:'action',tl:[...r.tl,['reopened',me.name,app.now()]]})); app.setState({sheet:null}); },
       // factory / site name under the greeting: editable in the production plan
-      site:{name:PLAN.siteName||T.site, canEdit:app.canEditPlan()&&!!s.planReady, edit:app.openPlan},
+      site:{name:PLAN.siteName||T.site, canEdit:true, edit:app.openPlan},   // everyone sees the pencil; the Plan sheet says who can change it
       lotView:s.sheet==='lot'?buildLotView(app,{T,pill,stLabelOf,hoursLabel,stampLabel,P:PLAN}):null, planView:s.sheet==='plan'?buildPlanView(app,{T,pill,stampLabel,P:PLAN}):null,
       toast:app.toastView(), onPhoto, role, flow, lang:app.lang(), screen:s.screen, scrollRef:app.scrollRef
     };
