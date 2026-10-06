@@ -23,6 +23,10 @@ export function PlanSheet({ v }) {
       {!p.ready ? <div style={{ ...small, color: 'var(--amber-700)', fontWeight: 700 }}>{t.plan.notReady}</div>
         : ro ? <div style={{ display: 'flex', gap: 6, ...small, color: 'var(--gray-700)', fontWeight: 700 }}><Icon name="shield-check" size={15} color="var(--gray-700)" />{t.plan.viewOnly}</div> : null}
 
+      <Field label={t.plan.site}>
+        <input aria-label={t.plan.site} value={p.siteName} onChange={p.onSiteName} placeholder={p.sitePh} readOnly={ro} style={inputStyle} />
+        {hint(t.plan.siteSub)}
+      </Field>
       <Field label={t.plan.runChoices}>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
           {p.choices.map((c, i) => (

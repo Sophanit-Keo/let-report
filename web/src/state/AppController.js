@@ -440,18 +440,18 @@ export class AppController extends React.Component {
   plan() {
     const p = this.state.plan || {};
     return { runChoices: p.runChoices && p.runChoices.length ? p.runChoices : RUN_CHOICES, runMax: p.runMax || RUN_MAX_HOURS, cipHours: p.cipHours || CIP_HOURS,
-      fillCipHours: p.fillCipHours || FILL_CIP_HOURS, fillEvery: p.fillEvery || 24, updatedByName: p.updatedByName || '', updatedAt: p.updatedAt || null };
+      fillCipHours: p.fillCipHours || FILL_CIP_HOURS, fillEvery: p.fillEvery || 24, updatedByName: p.updatedByName || '', updatedAt: p.updatedAt || null, siteName: p.siteName || '' };
   }
   canEditPlan() { return ['supervisor', 'manager'].includes(this.role()); }
   openPlan = () => {
     const p = this.plan();
-    this.setState({ sheet: 'plan', planForm: { runChoices: p.runChoices.map(String), add: '', runMax: String(p.runMax), cipHours: String(p.cipHours), fillCipHours: String(p.fillCipHours), fillEvery: String(p.fillEvery) }, planLog: null });
+    this.setState({ sheet: 'plan', planForm: { siteName: p.siteName, runChoices: p.runChoices.map(String), add: '', runMax: String(p.runMax), cipHours: String(p.cipHours), fillCipHours: String(p.fillCipHours), fillEvery: String(p.fillEvery) }, planLog: null });
     if (this.state.planReady) repo.planLog().then(planLog => this.setState({ planLog })).catch(() => this.setState({ planLog: [] }));
   };
   savePlan = async () => {
     const f = this.state.planForm || {}, num = v => parseFloat(v) > 0 ? parseFloat(v) : null;
     const runChoices = [...new Set((f.runChoices || []).map(Number).filter(n => n > 0))].sort((a, b) => a - b);
-    const data = { runChoices, runMax: Math.round(num(f.runMax) || 0), cipHours: num(f.cipHours), fillCipHours: num(f.fillCipHours), fillEvery: Math.round(num(f.fillEvery) || 0), updatedByName: this.me().name };
+    const data = { siteName: (f.siteName || '').trim().slice(0, 80), runChoices, runMax: Math.round(num(f.runMax) || 0), cipHours: num(f.cipHours), fillCipHours: num(f.fillCipHours), fillEvery: Math.round(num(f.fillEvery) || 0), updatedByName: this.me().name };
     if (!runChoices.length || !data.runMax || !data.cipHours || !data.fillCipHours || !data.fillEvery) return;
     this.setState({ busy: true });
     try {
