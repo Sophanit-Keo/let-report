@@ -1,4 +1,5 @@
-// Add a production line, or edit its name, type, product, target, maximum lot run and CIP filling rule (everyone).
+// Add a production line, or edit its name, type, product, target, maximum lot run and CIP filling rule (everyone),
+// and its place in the factory: the UHT that feeds it, its filler, speed and pack size (the simulation's Factory board reads them).
 import { Button, Field, Pill } from '../components/index.js';
 import { inputStyle } from '../styles/inline.js';
 import { title, col, grid } from './sheetStyles.js';
@@ -29,6 +30,24 @@ export function LineFormSheet({ v }) {
         </div>
         <div style={hint}>{t.lot.fillEverySub}</div>
       </Field>
+      <Field label={t.line.uht}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{f.uhts.map((o, i) => <Pill key={i} o={o} h={36} px={14} />)}</div>
+        <div style={hint}>{f.uhtEmpty ? t.line.uhtNone : t.line.uhtSub}</div>
+      </Field>
+      <Field label={t.line.filler}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+          {f.fillers.map((o, i) => <Pill key={i} o={o} h={36} px={12} />)}
+          {f.otherOn ? <input id="line-filler" aria-label={t.line.fillerPh} value={f.fillerText} onChange={f.onFillerText} placeholder={t.line.fillerPh} maxLength={40}
+            style={{ ...inputStyle, width: 160, height: 36, padding: '0 12px', fontSize: 14, fontWeight: 700, borderRadius: 999 }} /> : null}
+        </div>
+      </Field>
+      <div style={col(8)}>
+        <div style={{ ...grid(2, 12), alignItems: 'end' }}>
+          <Field label={t.line.speed}><input id="line-speed" inputMode="numeric" value={f.packsPerH} onChange={f.onPacksPerH} style={inputStyle} /></Field>
+          <Field label={t.line.packMl}><input id="line-pack-ml" inputMode="numeric" value={f.packMl} onChange={f.onPackMl} style={inputStyle} /></Field>
+        </div>
+        {f.lph ? <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--navy-900)' }}>{f.lph}</div> : null}
+      </div>
       <Button type="submit" variant="primary" fullWidth disabled={f.disabled}>{f.isNew ? t.line.create : t.line.save}</Button>
     </form>
   );

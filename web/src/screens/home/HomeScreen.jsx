@@ -167,6 +167,8 @@ export function HomeScreen({ v }) {
                     </div>
                     <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, fontWeight: 700, color: ln.stFg, flex: 'none' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: ln.dot, animation: ln.anim }} />{ln.stLabel}</span>
                   </div>
+                  {/* Where it sits in the factory: the UHT that feeds it and its filler */}
+                  {ln.layout ? <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', marginTop: -6 }}>{ln.layout}</div> : null}
                   {/* What the line is doing now: the lot it runs, or the CIP countdown after a lot */}
                   {ln.now ? (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 6, background: ln.now.bg, borderRadius: 10, padding: '7px 10px' }}>

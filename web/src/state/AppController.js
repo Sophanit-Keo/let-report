@@ -4,7 +4,7 @@
 // Screens get their data from ./viewModel.js, which reads this state.
 import React from 'react';
 import { strings } from '../i18n/index.js';
-import { CATS, SEV, ST, ORDER, TITLES, MGR_AV, CIP_HOURS, RUN_MAX_HOURS, FILL_CIP_HOURS, RUN_CHOICES } from '../data/constants.js';
+import { CATS, SEV, ST, ORDER, TITLES, MGR_AV, CIP_HOURS, RUN_MAX_HOURS, FILL_CIP_HOURS, RUN_CHOICES, FILLERS } from '../data/constants.js';
 import { SEED, NOTES } from '../data/seed.js';
 import { auth, isConfigured } from '../api/supabase.js';
 import { repo } from '../api/repo.js';
@@ -428,13 +428,16 @@ export class AppController extends React.Component {
         .catch(e => { if (this._pendingLines) delete this._pendingLines[id]; this.toast(e.message); this.refresh(); });
     }, now ? 0 : 600);
   };
+  // The factory layout is part of the line's info: the UHT that feeds it, its filler (one of FILLERS or another model), speed and pack size.
   openLineForm = line => this.setState({ sheet: 'lineForm', lineId: line ? line.id : null,
-    lineForm: line ? { name: line.name, type: line.type, product: line.product, target: String(line.target), maxRun: String(line.maxRunHours || this.plan().runMax), fillEvery: line.fillEvery ? String(line.fillEvery) : '' }
-      : { name: '', type: 'UHT', product: '', target: '100', maxRun: String(this.plan().runMax), fillEvery: '' } });
+    lineForm: line ? { name: line.name, type: line.type, product: line.product, target: String(line.target), maxRun: String(line.maxRunHours || this.plan().runMax), fillEvery: line.fillEvery ? String(line.fillEvery) : '',
+        uht: line.uht || '', filler: line.filler || '', fillerOther: !!line.filler && !FILLERS.some(([k]) => k === line.filler), packsPerH: line.packsPerH ? String(line.packsPerH) : '', packMl: line.packMl ? String(line.packMl) : '' }
+      : { name: '', type: 'UHT', product: '', target: '100', maxRun: String(this.plan().runMax), fillEvery: '', uht: '', filler: '', fillerOther: false, packsPerH: '', packMl: '' } });
   saveLineForm = async () => {
-    const f = this.state.lineForm, id = this.state.lineId;
+    const f = this.state.lineForm, id = this.state.lineId, int = v => (parseInt(v, 10) > 0 ? parseInt(v, 10) : null);
     const data = { name: f.name.trim(), type: f.type, product: f.product.trim(), target: Math.max(1, parseInt(f.target, 10) || 100),
-      maxRunHours: Math.max(1, parseInt(f.maxRun, 10) || this.plan().runMax), fillEvery: parseInt(f.fillEvery, 10) > 0 ? parseInt(f.fillEvery, 10) : null };
+      maxRunHours: Math.max(1, parseInt(f.maxRun, 10) || this.plan().runMax), fillEvery: parseInt(f.fillEvery, 10) > 0 ? parseInt(f.fillEvery, 10) : null,
+      uht: f.uht || '', filler: (f.filler || '').trim().slice(0, 40), packsPerH: int(f.packsPerH), packMl: int(f.packMl) };
     this.setState({ busy: true });
     try {
       if (id) {
@@ -456,24 +459,37 @@ export class AppController extends React.Component {
   plan() {
     const p = this.state.plan || {};
     return { runChoices: p.runChoices && p.runChoices.length ? p.runChoices : RUN_CHOICES, runMax: p.runMax || RUN_MAX_HOURS, cipHours: p.cipHours || CIP_HOURS,
-      fillCipHours: p.fillCipHours || FILL_CIP_HOURS, fillEvery: p.fillEvery || 24, updatedByName: p.updatedByName || '', updatedAt: p.updatedAt || null, siteName: p.siteName || '' };
+      fillCipHours: p.fillCipHours || FILL_CIP_HOURS, fillEvery: p.fillEvery || 24, updatedByName: p.updatedByName || '', updatedAt: p.updatedAt || null, siteName: p.siteName || '',
+      uhtUnits: Array.isArray(p.uhtUnits) ? p.uhtUnits : [] };
   }
   canEditPlan() { return ['supervisor', 'manager'].includes(this.role()); }
   openPlan = () => {
     const p = this.plan();
-    this.setState({ sheet: 'plan', planForm: { siteName: p.siteName, runChoices: p.runChoices.map(String), add: '', runMax: String(p.runMax), cipHours: String(p.cipHours), fillCipHours: String(p.fillCipHours), fillEvery: String(p.fillEvery) }, planLog: null });
+    this.setState({ sheet: 'plan', planForm: { siteName: p.siteName, runChoices: p.runChoices.map(String), add: '', runMax: String(p.runMax), cipHours: String(p.cipHours), fillCipHours: String(p.fillCipHours), fillEvery: String(p.fillEvery),
+      uhtUnits: p.uhtUnits.map((u, i) => ({ key: 'u' + i, name: u.name || '', cap: u.capacityLph ? String(u.capacityLph) : '', was: u.name || '' })) }, planLog: null });
     if (this.state.planReady) repo.planLog().then(planLog => this.setState({ planLog })).catch(() => this.setState({ planLog: [] }));
   };
+  // The plan's UHT plants as typed ({ key, name, cap, was }; `was` only on rows that were already saved). New rows left empty are dropped;
+  // the others need a name no other UHT has and a whole number of L/h above 0.
+  uhtRows(rows) {
+    const nm = r => (r.name || '').trim().toLowerCase();
+    const kept = (rows || []).filter(r => r.was !== undefined || nm(r) || r.cap);
+    return kept.map(r => ({ ...r, badName: !nm(r) || kept.filter(x => nm(x) === nm(r)).length > 1, badCap: !(/^\d+$/.test(r.cap || '') && parseInt(r.cap, 10) > 0) }));
+  }
   savePlan = async () => {
     const f = this.state.planForm || {}, num = v => parseFloat(v) > 0 ? parseFloat(v) : null;
-    const runChoices = [...new Set((f.runChoices || []).map(Number).filter(n => n > 0))].sort((a, b) => a - b);
-    const data = { siteName: (f.siteName || '').trim().slice(0, 80), runChoices, runMax: Math.round(num(f.runMax) || 0), cipHours: num(f.cipHours), fillCipHours: num(f.fillCipHours), fillEvery: Math.round(num(f.fillEvery) || 0), updatedByName: this.me().name };
-    if (!runChoices.length || !data.runMax || !data.cipHours || !data.fillCipHours || !data.fillEvery) return;
+    const runChoices = [...new Set((f.runChoices || []).map(Number).filter(n => n > 0))].sort((a, b) => a - b), uht = this.uhtRows(f.uhtUnits);
+    const data = { siteName: (f.siteName || '').trim().slice(0, 80), runChoices, runMax: Math.round(num(f.runMax) || 0), cipHours: num(f.cipHours), fillCipHours: num(f.fillCipHours), fillEvery: Math.round(num(f.fillEvery) || 0),
+      uhtUnits: uht.map(r => ({ name: r.name.trim(), capacityLph: parseInt(r.cap, 10) })), updatedByName: this.me().name };
+    if (!runChoices.length || !data.runMax || !data.cipHours || !data.fillCipHours || !data.fillEvery || uht.some(r => r.badName || r.badCap)) return;
     this.setState({ busy: true });
     try {
       const saved = await repo.updatePlan(data);
       if (!saved) throw new Error(this.T().plan.denied);
       this.setState({ busy: false, plan: saved, sheet: null }); this.toast(this.T().plan.saved);
+      // A UHT renamed in the plan: the lines it feeds follow the new name (as a renamed line keeps its reports).
+      const renamed = new Map(uht.filter(r => r.was && r.was !== r.name.trim()).map(r => [r.was, r.name.trim()]));
+      this.state.lines.forEach(l => { if (renamed.has(l.uht)) this.updateLine(l.id, { uht: renamed.get(l.uht) }, true); });
     } catch (e) { this.setState({ busy: false }); this.toast(e.message); }
   };
 
