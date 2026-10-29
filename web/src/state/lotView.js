@@ -30,6 +30,8 @@ export function formatLog(g, { T, stLabelOf, stampLabel }) {
     if (k === 'at' || /_at$/.test(k)) return stampLabel(v);
     if (k === 'cip_reason') return T.lot.reasons[v] || v;
     if (k === 'detail') return g.eventKind === 'status' ? stLabelOf(v) : (T.lot.reasons[v] || v);
+    // the database logs the UHT list as text ("UHT 1 · 4000 L/h, UHT 2 · 8000 L/h"), shown as it is; a list is written the same way
+    if (k === 'uht_units' && Array.isArray(v)) return v.length ? v.map(u => (u && u.name) + ' · ' + ((u && u.capacityLph) || 0) + ' L/h').join(', ') : '—';
     if (Array.isArray(v)) return v.join(', ') + ' ' + T.lot.hoursShort;
     if (/hours$/.test(k)) return v + ' ' + T.lot.hoursShort;
     return String(v);
@@ -117,8 +119,9 @@ export function buildLotView(app, { T, pill, stLabelOf, hoursLabel, stampLabel, 
 }
 
 function H(n) { return n * 3600000; }
+let uhtSeq = 0; // keys for UHT rows added in the plan form
 
-// The production plan: run choices, the normal maximum and CIP times. Supervisors and the plant manager edit it.
+// The production plan: run choices, the normal maximum, CIP times and the UHT plants. Supervisors and the plant manager edit it.
 export function buildPlanView(app, { T, pill, stampLabel, P }) {
   const s = app.state, f = s.planForm || {}, can = app.canEditPlan() && !!s.planReady;
   const set = p => app.setState(st => ({ planForm: { ...st.planForm, ...p } }));
@@ -126,6 +129,20 @@ export function buildPlanView(app, { T, pill, stampLabel, P }) {
   const choices = (f.runChoices || []).map(Number).filter(n => n > 0).sort((a, b) => a - b);
   const addChoice = () => { const n = parseFloat(f.add); if (n > 0 && !choices.includes(n)) set({ runChoices: [...choices, n].map(String), add: '' }); else set({ add: '' }); };
   const pos = k => parseFloat(f[k]) > 0;
+  // UHT plants: name and capacity (L/h), add and remove; rows with a problem are marked
+  const setUht = fn => app.setState(st => ({ planForm: { ...st.planForm, uhtUnits: fn(st.planForm.uhtUnits || []) } }));
+  const uhtChecked = app.uhtRows(f.uhtUnits), uhtBad = {};
+  uhtChecked.forEach(r => { uhtBad[r.key] = r; });
+  // The lines each UHT feeds, by its saved name (a renamed UHT takes its lines along when the plan is saved)
+  const feeds = name => { const ls = (s.lines || []).filter(l => name && l.uht === name).map(l => l.name); return ls.length ? T.plan.uhtFeeds.replace('{lines}', ls.join(', ')) : ''; };
+  const uht = (f.uhtUnits || []).map(r => {
+    const b = uhtBad[r.key] || {}, edit = p => setUht(rows => rows.map(x => (x.key === r.key ? { ...x, ...p } : x)));
+    return { key: r.key, name: r.name, cap: r.cap, capLabel: r.cap ? Number(r.cap).toLocaleString('en-US') + ' L/h' : '—', badName: !!b.badName, badCap: !!b.badCap,
+      feeds: feeds(r.was !== undefined ? r.was : (r.name || '').trim()),
+      onName: e => edit({ name: e.target.value.slice(0, 40) }), onCap: e => edit({ cap: e.target.value.replace(/[^0-9]/g, '').slice(0, 6) }),
+      remove: can ? () => setUht(rows => rows.filter(x => x.key !== r.key)) : null };
+  });
+  const uhtErr = [uhtChecked.some(r => r.badName) ? T.plan.uhtNameBad : '', uhtChecked.some(r => r.badCap) ? T.plan.uhtCapBad : ''].filter(Boolean);
   return {
     ready: !!s.planReady, canEdit: can, viewOnly: T.plan.viewOnly.replace('{role}', T.roles[app.role()] || app.role()),
     siteName: f.siteName || '', onSiteName: e => set({ siteName: e.target.value.slice(0, 80) }), sitePh: T.site,
@@ -135,7 +152,8 @@ export function buildPlanView(app, { T, pill, stampLabel, P }) {
     fillCipHours: f.fillCipHours || '', onFillCipHours: num('fillCipHours'), fillEvery: f.fillEvery || '', onFillEvery: num('fillEvery'),
     updated: P.updatedAt && P.updatedByName ? T.plan.updated.replace('{who}', P.updatedByName || '—').replace('{when}', stampLabel(P.updatedAt)) : '',
     log: (s.planLog || []).map(g => formatLog(g, { T, stLabelOf: k => k, stampLabel })), logLoading: s.planReady && s.planLog === null,
-    disabled: !can || !!s.busy || !choices.length || !pos('runMax') || !pos('cipHours') || !pos('fillCipHours') || !pos('fillEvery'),
+    uht: can ? uht : uht.filter(u => u.name), uhtErr, addUht: can ? () => setUht(rows => [...rows, { key: 'n' + (++uhtSeq), name: '', cap: '' }]) : null,
+    disabled: !can || !!s.busy || !choices.length || !pos('runMax') || !pos('cipHours') || !pos('fillCipHours') || !pos('fillEvery') || !!uhtErr.length,
     save: app.savePlan, pill,
   };
 }

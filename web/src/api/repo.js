@@ -183,12 +183,15 @@ export function rowToLine(r) {
     sort: r.sort, statusSince: r.status_since, updatedBy: r.updated_by_name, updatedAt: r.updated_at,
     lot: r.lot || '', lotStartedAt: r.lot_started_at || null, cipUntil: r.cip_until || null, cipReason: r.cip_reason || '',
     maxRunHours: r.max_run_hours || 36, fillEvery: r.fill_cip_every_hours || null, planHours: r.lot_plan_hours != null ? Number(r.lot_plan_hours) : null,
-    fillSince: r.fill_since || null, fillCips: r.fill_cips || 0, hasRunLimits: r.max_run_hours !== undefined, cipStartedAt: r.cip_started_at || null, currentLotId: r.current_lot_id || null };
+    fillSince: r.fill_since || null, fillCips: r.fill_cips || 0, hasRunLimits: r.max_run_hours !== undefined, cipStartedAt: r.cip_started_at || null, currentLotId: r.current_lot_id || null,
+    // The line's place in the factory (migration 0013): its UHT, filler, filler speed and pack size
+    uht: r.uht || '', filler: r.filler || '', packsPerH: r.filler_packs_per_h != null ? Number(r.filler_packs_per_h) : null, packMl: r.pack_ml != null ? Number(r.pack_ml) : null };
 }
 function lineToRow(l) {
   const map = { name: 'name', type: 'type', product: 'product', qty: 'qty', target: 'target', status: 'status', note: 'note', sort: 'sort', updatedBy: 'updated_by_name',
     lot: 'lot', lotStartedAt: 'lot_started_at', cipUntil: 'cip_until', cipReason: 'cip_reason',
-    maxRunHours: 'max_run_hours', fillEvery: 'fill_cip_every_hours', planHours: 'lot_plan_hours', fillSince: 'fill_since', fillCips: 'fill_cips', cipStartedAt: 'cip_started_at', currentLotId: 'current_lot_id' };
+    maxRunHours: 'max_run_hours', fillEvery: 'fill_cip_every_hours', planHours: 'lot_plan_hours', fillSince: 'fill_since', fillCips: 'fill_cips', cipStartedAt: 'cip_started_at', currentLotId: 'current_lot_id',
+    uht: 'uht', filler: 'filler', packsPerH: 'filler_packs_per_h', packMl: 'pack_ml' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (l[k] !== undefined) row[c] = l[k]; }); return row;
 }
 
@@ -244,9 +247,17 @@ export function rowToLog(r) {
 // ───── Production plan ─────
 export function rowToPlan(r) {
   return { runChoices: (r.run_choices || []).map(Number).filter(n => n > 0).sort((a, b) => a - b), runMax: r.run_max_hours, cipHours: Number(r.cip_hours),
-    fillCipHours: Number(r.fill_cip_hours), fillEvery: r.fill_every_hours, updatedByName: r.updated_by_name || '', updatedAt: r.updated_at, siteName: r.site_name || '' };
+    fillCipHours: Number(r.fill_cip_hours), fillEvery: r.fill_every_hours, updatedByName: r.updated_by_name || '', updatedAt: r.updated_at, siteName: r.site_name || '',
+    uhtUnits: rowToUhtUnits(r.uht_units) };
+}
+// The UHT plants (migration 0013): [{ name, capacityLph }], leaving out entries without a name or a capacity.
+function rowToUhtUnits(v) {
+  if (!Array.isArray(v)) return [];
+  return v.filter(u => u && typeof u.name === 'string' && u.name.trim() && Number.isFinite(Number(u.capacityLph)) && Number(u.capacityLph) > 0)
+    .map(u => ({ name: u.name, capacityLph: Number(u.capacityLph) }));
 }
 function planToRow(p) {
-  const map = { runChoices: 'run_choices', runMax: 'run_max_hours', cipHours: 'cip_hours', fillCipHours: 'fill_cip_hours', fillEvery: 'fill_every_hours', updatedByName: 'updated_by_name', siteName: 'site_name' };
+  const map = { runChoices: 'run_choices', runMax: 'run_max_hours', cipHours: 'cip_hours', fillCipHours: 'fill_cip_hours', fillEvery: 'fill_every_hours', updatedByName: 'updated_by_name', siteName: 'site_name',
+    uhtUnits: 'uht_units' };
   const row = {}; Object.entries(map).forEach(([k, c]) => { if (p[k] !== undefined) row[c] = p[k]; }); return row;
 }

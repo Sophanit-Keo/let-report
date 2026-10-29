@@ -1,6 +1,6 @@
 // Builds the view model: every label, colour, list and click handler the screens need,
 // derived from the AppController state. Screens stay simple and only read from it.
-import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE, CIP_REASONS } from '../data/constants.js';
+import { CATS, PTYPES, PNAMES, HC_TYPES, HC_DAYS, dueLabel, UNITS, SUPPORTS, SEV, ST, ORDER, TONE, CIP_REASONS, FILLERS, PACK_ML_DEFAULT } from '../data/constants.js';
 import { buildLotView, buildPlanView } from './lotView.js';
 import { timeLabel, stampLabel, daysAgo, addDaysIso, durLabel, hoursLabel, fromLocalInput } from '../utils/time.js';
 import { draftOf } from './draft.js';
@@ -73,15 +73,17 @@ export function buildViewModel(app) {
         :{icon:'hourglass',fg:'var(--blue-700)',bg:'var(--blue-50)',bar:'var(--blue-700)',text:c.title+' · '+c.leftLabel+' '+T.lot.cipLeft+' · '+T.lot.cipEnds+' '+c.ends,pct:c.pct};
       if(l.lot&&l.status!=='running') return {icon:'circle-pause',fg:'var(--gray-700)',bg:'var(--gray-100)',text:T.lot.number+' '+l.lot+' · '+stLabelOf(l.status)};
       return null; };
+    // Under the line's name: the UHT that feeds it and its filler, e.g. "UHT 1 · TBA/22"
+    const layoutOf=l=>[l.uht,l.filler].filter(Boolean).join(' · ');
     const lines=(s.lines||[]).map(l=>{const n=issuesOn(l.name); const c=LST[l.status]||LST.idle; const nw=nowLine(l);
-      return {id:l.id,name:l.name,type:l.type,product:l.product||'—',note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
+      return {id:l.id,name:l.name,type:l.type,product:l.product||'—',layout:layoutOf(l),note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
         bd:(n&&l.status==='stopped')||(nw&&nw.fg==='var(--red-700)')?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
         now:nw, open:()=>app.openLine(l.id)};});
     const linesHead={canAdd:true,add:()=>app.openLineForm(null),empty:!lines.length,openPlan:app.openPlan};
     // Line control sheet
     const selLine=(s.lines||[]).find(l=>l.id===s.lineId);
     const lineSheet=selLine?(()=>{const l=selLine, n=issuesOn(l.name), setQty=q=>app.updateLine(l.id,{qty:Math.max(0,Math.round(q)||0)});
-      return {name:l.name,type:l.type,product:l.product||'—',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',bar:(LST[l.status]||LST.idle)[3],
+      return {name:l.name,type:l.type,product:l.product||'—',layout:layoutOf(l),qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',bar:(LST[l.status]||LST.idle)[3],
         updated:(l.updatedBy?T.line.updated+' '+l.updatedBy+' · ':'')+stLabelOf(l.status)+' '+T.line.since+' '+stampLabel(l.statusSince),
         // Picking CIP while a lot is running opens "Finish lot", so the lot's end gets recorded.
         states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],on,bg:on?c[4]:'#fff',fg:on?c[0]:'var(--navy-900)',bd:on?c[1]:'var(--blue-200)',pick:()=>(k==='cleaning'&&l.lot&&l.status==='running'?app.openFinishLot():app.setLineStatus(l.id,k))};}),
@@ -134,6 +136,10 @@ export function buildViewModel(app) {
         canManage:app.canManageLines(), canEdit:true, edit:()=>app.openLineForm(l), confirm:!!s.lineConfirm, askRemove:()=>app.setState({lineConfirm:true}), cancelRemove:()=>app.setState({lineConfirm:false}), remove:()=>app.removeLine(l.id)};})():null;
     // Add / edit line form
     const lf=s.lineForm||{}; const setLF=p=>app.setState(st=>({lineForm:{...st.lineForm,...p}}));
+    // Picking a filler (k; null for "Other") fills in its rated speed, unless someone typed their own, and the usual pack size. Tapping it again takes it off.
+    const fDef=k=>{const x=FILLERS.find(([n])=>n===k); return x?String(x[1]):'';};
+    const pickFiller=k=>{ const other=k===null, on=other?!!lf.fillerOther:!lf.fillerOther&&lf.filler===k, nk=on||other?'':k, sp=lf.packsPerH||'';
+      setLF({filler:nk,fillerOther:other&&!on,packsPerH:!sp||sp===(lf.fillerOther?'':fDef(lf.filler))?fDef(nk):sp,packMl:!on&&!lf.packMl?String(PACK_ML_DEFAULT):lf.packMl||''}); };
     const lineForm={isNew:!s.lineId,name:lf.name||'',product:lf.product||'',target:lf.target||'',onName:e=>setLF({name:e.target.value}),onProduct:e=>setLF({product:e.target.value}),onTarget:e=>setLF({target:e.target.value.replace(/[^0-9]/g,'')}),
       types:['UHT','SCM','Yogurt','Other'].map(k=>({label:k==='Other'?T.line.other:k,...pill(lf.type===k),pick:()=>setLF({type:k})})),
       products:(PNAMES[lf.type==='UHT'?'UHT milk':lf.type]||[]).map(n=>({label:n,...pill(lf.product===n),pick:()=>setLF({product:n})})),
@@ -141,6 +147,15 @@ export function buildViewModel(app) {
       maxRun:lf.maxRun||'',onMaxRun:e=>setLF({maxRun:e.target.value.replace(/[^0-9]/g,'')}),
       fillOpts:[['',T.lot.fillOff],[String(PLAN.fillEvery),PLAN.fillEvery+' '+T.lot.hoursShort]].map(([k,lb])=>({label:lb,...pill((lf.fillEvery||'')===k),pick:()=>setLF({fillEvery:k})})),
       fillEvery:lf.fillEvery||'',onFillEvery:e=>setLF({fillEvery:e.target.value.replace(/[^0-9]/g,'')}),
+      // Factory layout: the UHT that feeds the line (from the plan's list; one no longer on it still shows), its filler, speed and pack size
+      uhts:['',...PLAN.uhtUnits.map(u=>u.name),...(lf.uht&&!PLAN.uhtUnits.some(u=>u.name===lf.uht)?[lf.uht]:[])].map(k=>({label:k||T.line.none,...pill((lf.uht||'')===k),pick:()=>setLF({uht:k})})),
+      uhtEmpty:!PLAN.uhtUnits.length,
+      fillers:[...FILLERS.map(([k])=>({label:k,...pill(!lf.fillerOther&&lf.filler===k),pick:()=>pickFiller(k)})),{label:T.line.other,...pill(!!lf.fillerOther),pick:()=>pickFiller(null)}],
+      otherOn:!!lf.fillerOther,fillerText:lf.fillerOther?lf.filler||'':'',onFillerText:e=>setLF({filler:e.target.value.slice(0,40)}),
+      packsPerH:lf.packsPerH||'',onPacksPerH:e=>setLF({packsPerH:e.target.value.replace(/[^0-9]/g,'').slice(0,6)}),
+      packMl:lf.packMl||'',onPackMl:e=>setLF({packMl:e.target.value.replace(/[^0-9]/g,'').slice(0,5)}),
+      // The litres per hour the filler takes: packs/h × ml ÷ 1000
+      lph:parseInt(lf.packsPerH,10)>0&&parseInt(lf.packMl,10)>0?'= '+Math.round(parseInt(lf.packsPerH,10)*parseInt(lf.packMl,10)/1000).toLocaleString('en-US')+' L/h':'',
       disabled:!!s.busy||!(lf.name||'').trim()||!(parseInt(lf.target,10)>0)||!(parseInt(lf.maxRun,10)>0), save:app.saveLineForm};
     const TICON={decide:'gavel',check:'bell-ring',fix:'hand',assign:'user-plus',done:'wrench',verify:'shield-check',approve:'stamp'};
     const tasksOf=rl=>{const out=[]; s.reports.forEach(rr=>app.tasksFor(rr,rl).forEach(k=>out.push({r:rr,k}))); return out;};

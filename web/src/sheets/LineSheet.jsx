@@ -257,6 +257,7 @@ export function LineSheet({ v }) {
           <span style={{ fontSize: 11, fontWeight: 800, padding: '3px 8px', borderRadius: 6, background: 'var(--navy-900)', color: '#fff' }}>{l.type}</span>
           <h2 style={title}>{l.name}</h2>
         </div>
+        {l.layout ? <div style={{ fontSize: 12, color: 'var(--gray-500)', fontWeight: 600 }}>{l.layout}</div> : null}
         <div style={{ fontSize: 13, color: 'var(--gray-500)', fontWeight: 600 }}>{l.product}</div>
         <div style={{ fontSize: 12, color: 'var(--gray-500)' }}>{l.updated}</div>
       </div>

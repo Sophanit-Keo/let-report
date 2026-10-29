@@ -1,4 +1,4 @@
-// Production plan: the run choices, the normal maximum run and the CIP times the factory uses.
+// Production plan: the run choices, the normal maximum run, the CIP times and the UHT plants the factory uses.
 // Line supervisors and the plant manager can change it; every change goes into the change log.
 import { Button, Field, Icon } from '../components/index.js';
 import { tap } from '../utils/tap.js';
@@ -47,6 +47,38 @@ export function PlanSheet({ v }) {
       <Field label={t.plan.cipHours}><input aria-label={t.plan.cipHours} inputMode="decimal" value={p.cipHours} onChange={p.onCipHours} readOnly={ro} style={numInput} /></Field>
       <Field label={t.plan.fillCipHours}><input aria-label={t.plan.fillCipHours} inputMode="decimal" value={p.fillCipHours} onChange={p.onFillCipHours} readOnly={ro} style={numInput} /></Field>
       <Field label={t.plan.fillEvery}><input aria-label={t.plan.fillEvery} inputMode="numeric" value={p.fillEvery} onChange={p.onFillEvery} readOnly={ro} style={numInput} />{hint(t.plan.fillEverySub)}</Field>
+      <Field label={t.plan.uht}>
+        {ro ? (p.uht.length ? (
+          <div style={{ borderRadius: 14, border: '1.5px solid var(--blue-200)', overflow: 'hidden' }}>
+            {p.uht.map((u, i) => (
+              <div key={u.key} style={{ display: 'flex', gap: 8, padding: '10px 14px', fontSize: 14, fontWeight: 700, borderTop: i ? '1px solid var(--blue-100)' : 'none' }}>
+                <span style={{ ...col(2), flex: 1, minWidth: 0 }}>{u.name}{u.feeds ? <span style={{ ...small, fontWeight: 600 }}>{u.feeds}</span> : null}</span>
+                <span style={{ color: 'var(--gray-700)' }}>{u.capLabel}</span>
+              </div>
+            ))}
+          </div>
+        ) : <div style={small}>{t.plan.noUht}</div>) : <>
+          {p.uht.map(u => (
+            <div key={u.key} style={col(4)}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <input aria-label={t.plan.uhtName} value={u.name} onChange={u.onName} placeholder="UHT 1" maxLength={40}
+                  style={{ ...inputStyle, flex: 1, height: 44, fontWeight: 700, borderColor: u.badName ? 'var(--red-500)' : 'var(--blue-200)' }} />
+                <input aria-label={t.plan.uhtCap} inputMode="numeric" value={u.cap} onChange={u.onCap}
+                  style={{ ...inputStyle, width: 92, height: 44, padding: '0 8px', textAlign: 'center', fontWeight: 800, borderColor: u.badCap ? 'var(--red-500)' : 'var(--blue-200)' }} />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-500)', flex: 'none' }}>L/h</span>
+                <span {...tap(u.remove, 'pill-tap')} aria-label={t.plan.uhtRemove + ' ' + (u.name || t.plan.uhtName)} style={{ width: 36, height: 36, flex: 'none', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', border: '1.5px solid var(--blue-200)' }}>
+                  <Icon name="x" size={16} color="var(--gray-700)" />
+                </span>
+              </div>
+              {u.feeds ? <div style={small}>{u.feeds}</div> : null}
+            </div>
+          ))}
+          {!p.uht.length ? <div style={small}>{t.plan.noUht}</div> : null}
+          <span {...tap(p.addUht, 'pill-tap')} style={{ alignSelf: 'flex-start', height: 36, padding: '0 12px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', fontSize: 13, fontWeight: 700, color: 'var(--blue-700)', border: '1.5px solid var(--blue-200)' }}>+ {t.plan.addUht}</span>
+          {p.uhtErr.map((e, i) => <div key={i} style={{ fontSize: 12, fontWeight: 700, color: 'var(--red-700)' }}>{e}</div>)}
+        </>}
+        {hint(t.plan.uhtSub)}
+      </Field>
       {!ro ? <Button type="submit" variant="primary" fullWidth disabled={p.disabled}>{t.plan.save}</Button> : null}
 
       {p.ready ? (

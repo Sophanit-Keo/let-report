@@ -59,7 +59,10 @@ export const EN = {
   lnStX:{changeover:'Changeover',maintenance:'Maintenance',idle:'Idle'},
   line:{add:'Add line', edit:'Edit line info', remove:'Remove line', removeQ:'Remove this line?', removeSub:'Reports that mention it keep their location.', cancel:'Cancel',
     status:'Status', output:'Output today', target:'Target (pallets)', name:'Line name', type:'Type', product:'Product', note:'Note for the next shift', notePh:'e.g. Waiting for steam valve repair',
-    reset:'Reset to 0', seeIssues:'See open reports', updated:'Updated by', since:'since', save:'Save', create:'Add line', saveNote:'Save note', noLines:'No production lines yet.', other:'Other'},
+    reset:'Reset to 0', seeIssues:'See open reports', updated:'Updated by', since:'since', save:'Save', create:'Add line', saveNote:'Save note', noLines:'No production lines yet.', other:'Other',
+    // The line's place in the factory: the UHT that feeds it, its filler, speed and pack size
+    uht:'UHT plant', uhtSub:'The UHT plant that feeds this line. The list of UHT plants is in Plan.', uhtNone:'No UHT plants in the plan yet. A line supervisor or the plant manager adds them in Plan.', none:'None',
+    filler:'Filler', fillerPh:'Filler model', speed:'Speed (packs/h)', packMl:'Pack size (ml)'},
   // Lots on a line: what it is running now, finishing a lot, CIP after it, and the record of ended lots
   // Lot details: facts, events (add, edit, delete) and the change log
   lotd:{back:'Back', details:'Details', now:'now', running:'Running', line:'Line', start:'Start', end:'End', ran:'Ran', output:'Output', cipAfter:'CIP after',
@@ -72,14 +75,17 @@ export const EN = {
     add:{stopped:'Stopped', running:'Running again', maintenance:'Maintenance', fill:'CIP filling', cont:'Continued', note:'Note'},
     fields:{site_name:'Factory / site name', lot:'Lot number', product:'Product', qty:'Output', target:'Target', plan_hours:'Planned run', started_at:'Start time', ended_at:'End time', cip_hours:'CIP time', cip_reason:'CIP reason',
       note:'Note', over_note:'Reason over maximum', fill_cips:'CIP fillings', line_name:'Line', at:'Time', hours:'Hours', detail:'Detail',
-      run_choices:'Run choices', run_max_hours:'Normal maximum', fill_cip_hours:'CIP filling time', fill_every_hours:'CIP filling every'},
+      run_choices:'Run choices', run_max_hours:'Normal maximum', fill_cip_hours:'CIP filling time', fill_every_hours:'CIP filling every', uht_units:'UHT plants'},
     delLot:'Delete lot', delLotQ:'Delete this lot and its events? The change log keeps a record of it.', loading:'Loading…', missing:'This lot was deleted.'},
   // Production plan (factory settings)
-  plan:{site:'Factory / site name', siteSub:'Shown under the greeting on everyone\'s home screen. Leave empty for the default name.', title:'Production plan', button:'Plan', sub:'The run times and CIP times the whole factory uses.', runChoices:'Planned run choices', runChoicesSub:'Shown when a lot starts.', addChoice:'Add',
+  plan:{site:'Factory / site name', siteSub:'Shown under the greeting on everyone\'s home screen. Leave empty for the default name.', title:'Production plan', button:'Plan', sub:'The run times, CIP times and UHT plants the whole factory uses.', runChoices:'Planned run choices', runChoicesSub:'Shown when a lot starts.', addChoice:'Add',
     runMax:'Normal maximum run (hours)', runMaxSub:'Used for new lines. Each line can have its own maximum in Edit line info.', cipHours:'Standard CIP after a lot (hours)', fillCipHours:'CIP filling time (hours)',
     fillEvery:'CIP filling needed after (hours of filling)', fillEverySub:'Offered when a line needs a CIP filling during a lot.', save:'Save plan', saved:'Production plan saved. The change is in the log.',
     viewOnly:'You are signed in as {role}. Only a line supervisor or the plant manager can change the plan and the factory name. The plant manager can change your role in Team.', notReady:'Editing needs a database update that has not been run yet (migrations 0011 and 0012). Until then the plan and the factory name cannot be changed.',
-    denied:'You cannot change the production plan.', updated:'Last changed by {who} · {when}', history:'Plan changes'},
+    denied:'You cannot change the production plan.', updated:'Last changed by {who} · {when}', history:'Plan changes',
+    // UHT plants: each with its capacity; lines pick theirs in Edit line info
+    uht:'UHT plants', uhtSub:'Each UHT plant and how many litres it makes per hour. In Edit line info, each line picks the UHT that feeds it.', uhtName:'UHT name', uhtCap:'Capacity (L/h)',
+    addUht:'Add UHT', uhtRemove:'Remove', noUht:'No UHT plants yet.', uhtFeeds:'Feeds {lines}', uhtNameBad:'Each UHT needs a name, and no two can have the same name.', uhtCapBad:'Capacity must be a whole number of litres per hour, more than 0.'},
   lot:{title:'Lot', running:'Running lot', none:'No lot running', start:'Start lot', startNext:'Start next lot', number:'Lot number', numberPh:'270706-K2', product:'Product',
     started:'started', runFor:'running for', finish:'Finish lot', finishSub:'Record how this lot ended. The line then goes into CIP.', output:'Output of this lot (pallets)',
     cipTime:'CIP time', hoursShort:'h', hoursPh:'hours', reason:'Why this CIP time?', reasons:{standard:'Standard CIP',maintenance:'Maintenance',error:'System error',other:'Other',filling:'CIP filling'},
