@@ -3,6 +3,7 @@
 import { repo } from '../api/repo.js';
 import { pushSupport, permission, subscribe, subscriptionRow, currentSubscription, unsubscribe } from '../utils/push.js';
 import { TEAM_ROOM } from './chat.js';
+import { parseNewLink } from './simLink.js';
 
 const LATER_KEY = 'let-report:push-later';
 
@@ -50,20 +51,21 @@ export const pushMethods = {
     this.setState(s => ({ push: { ...s.push, later: true } }));
   },
 
-  // ───── Links from notifications: #report=TR-1043, #chat=team, #alerts ─────
+  // ───── Links from notifications: #report=TR-1043, #chat=team, #alerts; and #new?… for a report filled in (./simLink.js) ─────
   openLink(link) {
-    const m = String(link || '').match(/#(report|chat|alerts)=?(.*)$/);
+    const m = String(link || '').match(/#(report|chat|alerts|new)=?(.*)$/);
     if (!m) return;
     if (m[1] === 'report' && m[2]) this.go('detail', { selId: decodeURIComponent(m[2]), sheet: null });
     else if (m[1] === 'chat') this.openRoom(decodeURIComponent(m[2]) || TEAM_ROOM);
     else if (m[1] === 'alerts') this.go('alerts', { sheet: null });
+    else if (m[1] === 'new') { if (this.state.session) this.startFromLink(parseNewLink(link)); else this._link = link; }   // signed out: after signing in
   },
   listenForLinks() {
     // opened from a notification: the link is in the address
     const h = window.location.hash;
-    if (/^#(report|chat|alerts)/.test(h)) { this._link = h; try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* old browsers */ } }
+    if (/^#(report|chat|alerts|new)/.test(h)) { this._link = h; try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* old browsers */ } }
     // the address changed while the app is open
-    this._onHash = () => { const x = window.location.hash; if (!/^#(report|chat|alerts)/.test(x)) return; try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* old browsers */ } if (this.state.booting) this._link = x; else this.openLink(x); };
+    this._onHash = () => { const x = window.location.hash; if (!/^#(report|chat|alerts|new)/.test(x)) return; try { window.history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* old browsers */ } if (this.state.booting) this._link = x; else this.openLink(x); };
     window.addEventListener('hashchange', this._onHash);
     // app already open: the service worker tells us
     this._onSwMessage = e => { if (e.data && e.data.type === 'open') { if (this.state.booting) this._link = e.data.link; else this.openLink(e.data.link); } };

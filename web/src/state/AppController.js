@@ -332,16 +332,20 @@ export class AppController extends React.Component {
   send = async () => {
     if (this.state.busy) return;
     const { cap } = this.state; const role = this.role(), me = this.me().name; const t = this.now();
+    const pre = cap.pre || {};   // filled in by a link (startFromLink)
     const tl = [['reported', me, t]]; if (cap.sev === 3) tl.push(['alert', 'System', t]);
     const level = cap.sev >= 2 && ORDER.indexOf(role) < 1 ? 'qa' : role; if (level !== role) tl.push(['esc', 'System', t, ' QA · ' + (cap.sev === 3 ? 'critical' : 'high severity')]);
+    // a hold from a link gets the check the "Add details" form starts with: swollen packs, 3 days, the QC team
+    const holdCheck = pre.hold ? { type: 'swollen', days: 3, owner: 'QC team', status: 'scheduled', dueAt: addDaysIso(3), due: dueLabel(3) } : null;
+    if (holdCheck) tl.push(['hcSet', me, t]);
     const title = cap.cat === 'custom' ? (cap.customText || '').trim() : TITLES[cap.cat];
     let signature = null; try { signature = this._sig ? this._sig.toDataURL('image/png') : null; } catch (e) { signature = null; }
     this.setState({ busy: true });
     try {
       const photoPath = cap.photoUrl ? await repo.uploadImage(cap.photoUrl, 'reports') : null;
       const signaturePath = signature ? await repo.uploadImage(signature, 'signatures') : null;
-      const saved = await repo.createReport({ level, title, cat: cap.cat, sev: cap.sev, loc: this.locs()[0], status: 'open', by: me, photoPath, signaturePath, signedAt: t,
-        ptype: '', pname: '', lot: '', qty: '', unit: 'pcs', hold: false, urgent: cap.sev === 3, support: [], desc: '', action: '', suggestion: '', voice: false, capa: null, tl });
+      const saved = await repo.createReport({ level, title, cat: cap.cat, sev: cap.sev, loc: pre.loc || this.locs()[0], status: 'open', by: me, photoPath, signaturePath, signedAt: t,
+        ptype: pre.ptype || '', pname: '', lot: '', qty: '', unit: 'pcs', hold: !!pre.hold, holdCheck, urgent: cap.sev === 3, support: [], desc: pre.desc || '', action: '', suggestion: '', voice: false, capa: null, tl });
       if (cap.photoUrl && photoPath) this.setState(s => ({ photoUrls: { ...s.photoUrls, [photoPath]: cap.photoUrl } }));
       const id = saved.id;
       if (cap.sev === 3) this.addNote({ id, icon: 'siren', tone: 'red', text: 'Critical: ' + title, roles: ['qa', 'supervisor', 'manager'] });
@@ -353,6 +357,18 @@ export class AppController extends React.Component {
       this.toast(e.message);
     }
   };
+
+  // A #new?… link (./simLink.js) starts a report already filled in, on the step that signs it when it has a category and
+  // a severity. Its place is the one it names, else the first line of its product type, else the first place.
+  startFromLink(p) {
+    if (!p) return;
+    const locs = this.locs(), line = p.ptype && this.state.lines.find(l => (l.type === 'UHT' ? 'UHT milk' : l.type) === p.ptype);
+    const loc = locs.includes(p.loc) ? p.loc : line ? line.name : locs[0];
+    const ready = p.cat && p.sev != null && (p.cat !== 'custom' || p.title);
+    this._sig = null;
+    this.go('capture', { cap: { stage: ready ? (this.flow() === 'C' ? 'pick' : 'sign') : 'pick', cat: p.cat, sev: p.sev, photo: false, customText: p.title,
+      pre: { loc, ptype: p.ptype, hold: p.hold, desc: p.desc } }, signed: false, sheet: null });
+  }
 
   // Managers: fill an empty database with the design's sample reports (for demos and testing).
   loadSample = async () => {
