@@ -41,7 +41,16 @@ The agents' definitions are in `.claude/agents/`. The simulation's `lead` runs t
 
 ## Exit checklist
 
-- [ ] `npm run lint` shows no new warnings; `npm run build` passes.
-- [ ] Against a fake backend in a browser: edit a line's UHT, filler, speed and pack size, and the UHT list; the saved rows carry them; a database without the columns still saves the rest.
-- [ ] Migration 0013 applied; the new columns and the UHT list read back from the database.
+- [x] `npm run lint` shows no new warnings; `npm run build` passes.
+- [x] Against a fake backend in a browser: edit a line's UHT, filler, speed and pack size, and the UHT list; the saved rows carry them; a database without the columns still saves the rest.
+- [x] Migration 0013 applied; the new columns and the UHT list read back from the database.
 - [ ] Changing a line in Let Report shows on the simulation's Factory board within a second.
+
+## Status
+
+Built on 29 October by `lr-data` and `lr-ui` in parallel, checked by the simulation's `qa`:
+
+- `npm run lint`: 179 warnings before and after, none new; `npm run build` passes (its two duplicate-key warnings for `lot` in `en.js` and `km.js` predate this phase).
+- Against a fake backend, 7 checks: the line cards show "UHT 2 · TBA/19"; Edit line info saves `uht`, `filler`, `filler_packs_per_h` and `pack_ml`; renaming UHT 3 in the Plan saves the list and moves its lines; a duplicate UHT name blocks saving.
+- Migration 0013 ran on a throwaway Postgres three times, then on the project's database: the real lines (named "UHT-line 1", "UHT- line 2", "UHT line 4"…) got their layout by number; SCM and Yogurt were left alone; the plan lists UHT 1, 2 and 3.
+- Open: the end-to-end check with the simulation's board, signed in.
