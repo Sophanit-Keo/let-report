@@ -259,7 +259,7 @@ export function buildViewModel(app) {
       subCat:c.stage==='pick', subSev:c.stage==='sev', stepTitle:c.stage==='sev'?T.step2:T.step1,
       bars:[0,1,2].map(i=>({bg:i<=stepIdx?'var(--blue-600)':'var(--blue-200)'})),
       sevOp:c.cat?1:.35, sevPe:c.cat?'auto':'none',
-      catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:app.locs()[0],
+      catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:(c.pre&&c.pre.loc)||app.locs()[0],
       critical:c.sev===3, isCustom:c.cat==='custom', customText:c.customText||'', customEmpty:!(c.customText||'').trim(),
       photoUrl:c.photoUrl||null, photoName:c.photoName||'IMG_0423.jpg',
       sendDisabled:!!s.busy||!(c.cat&&c.sev!=null&&s.signed&&(c.cat!=='custom'||(c.customText||'').trim()))

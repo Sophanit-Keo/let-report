@@ -103,6 +103,7 @@ web/
 │   │   ├── viewModel.js       turns state into what each screen shows
 │   │   ├── chat.js            chat + comment actions (mixed into AppController)
 │   │   ├── push.js            push notifications on/off, test, open the screen a notification points to
+│   │   ├── simLink.js         reads a #new?… link: a report filled in by another app (the milk-plant simulation)
 │   │   ├── tour.js            the "How to use" guide: steps, start, skip, remember it was seen
 │   │   ├── chatView.js        what the Chat screen and a trouble's Discussion show
 │   │   ├── draft.js           "Add details" form values
@@ -170,6 +171,7 @@ web/
 
 - `?lang=km`: start in Khmer
 - `?flow=B`: report flow variant from the design: `A` overlay chips (default), `B` step cards, `C` one sheet
+- `#new?cat=temperature&sev=2&ptype=UHT+milk&loc=…&title=…&hold=1&desc=…`: start a report already filled in, on the sign step (`src/state/simLink.js`). `cat` is a category key (`temperature`, `hygiene`, `foreign`, `pest`, `equipment`, `allergen`, `labelling`, `cleaning`, `custom`), `sev` 0–3 (Low to Critical), `ptype` a product type, `title` the text of a `custom` report, `loc` a place (else the first line of that product type), `hold=1` holds the product with the usual 3-day check, `desc` the trouble (up to 800 characters). Values the app doesn't know are dropped, and the person still signs and sends the report. Signed out, it opens after signing in. The [UHT milk plant simulation](https://github.com/Sophanit-Keo/simulation-milk-process) sends these from a fault's **Report in Let Report** link.
 
 ### Still simulated
 
