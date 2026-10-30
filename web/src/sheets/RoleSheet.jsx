@@ -1,6 +1,6 @@
 // Account sheet: your photo and name, sign out. Plant managers also open "Manage team"
 // and can load the sample reports into an empty database.
-import { Button, Icon, PhotoPicker, Toggle } from '../components/index.js';
+import { Button, Icon, PhotoPicker, ThemeToggle, Toggle } from '../components/index.js';
 import { tap } from '../utils/tap.js';
 import { inputStyle } from '../styles/inline.js';
 import { title, col, label } from './sheetStyles.js';
@@ -28,6 +28,12 @@ export function RoleSheet({ v }) {
           <input id="my-name" value={a.nameDraft} onChange={a.onName} autoComplete="name" style={{ ...inputStyle, flex: 1 }} />
           {a.nameDirty ? <Button variant="primary" onClick={a.saveName}>{t.people.save}</Button> : null}
         </div>
+      </div>
+
+      {/* Dark or light screen (on computers it is also in the sidebar, by the language switch) */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <span style={label}>{t.theme.label}</span>
+        <ThemeToggle v={v} />
       </div>
 
       {v.push.support !== 'no' ? (
