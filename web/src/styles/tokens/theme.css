@@ -1,0 +1,90 @@
+/* Theme tokens (phase 11): what each colour is FOR, in the light design and in the dark control-room look.
+   Components use these --c-* names, never a hex value or a hue name for a surface, text, border or state.
+   index.html sets <html data-theme> before this loads, from the person's choice (prefs.theme), else "dark".
+   Light keeps the Let Report design system exactly; dark matches the UHT milk plant simulation's control room. */
+
+:root {
+  /* surfaces */
+  --c-bg: var(--blue-50);              /* the page behind everything */
+  --c-surface: #FFFFFF;                /* cards, sheets, the sidebar, bars */
+  --c-raised: var(--gray-50);          /* idle chips, rows inside a card */
+  --c-field: #FFFFFF;                  /* inputs, text areas, idle pills and options */
+  --c-tint: var(--blue-100);           /* a soft highlight: info boxes, the current item */
+  --c-scrim: rgba(11, 26, 48, .55);    /* behind a sheet or dialog */
+  --c-shadow: rgba(15, 45, 88, .12);   /* the colour of card and sheet shadows */
+  /* text */
+  --c-ink: var(--navy-900);            /* headings and body text */
+  --c-ink-2: var(--gray-700);          /* secondary text */
+  --c-muted: var(--gray-500);          /* hints, placeholders, timestamps */
+  --c-on-dark: #FFFFFF;                /* text on a surface that is dark in both themes (camera, photo overlays) */
+  /* lines */
+  --c-line: var(--blue-200);           /* card and input borders */
+  --c-line-soft: var(--gray-200);      /* dividers inside a card */
+  /* action */
+  --c-accent: var(--blue-600);         /* links, primary buttons, focus */
+  --c-accent-hover: var(--blue-700);
+  --c-accent-ink: #FFFFFF;             /* text on --c-accent */
+  --c-accent-soft: var(--blue-100);    /* an accent-tinted background */
+  /* a selected pill, tab or option */
+  --c-selected-bg: var(--navy-900);
+  --c-selected-ink: #FFFFFF;
+  --c-selected-line: var(--navy-900);
+  /* the brand's green action ("Report an issue", the camera button) */
+  --c-brand: var(--green-600);
+  --c-brand-hover: var(--green-700);
+  --c-brand-ink: #FFFFFF;
+  /* states: the mark (dot, bar, icon), the text, the background */
+  --c-ok: var(--green-500);   --c-ok-ink: var(--green-700);   --c-ok-bg: var(--green-100);
+  --c-warn: var(--amber-500); --c-warn-ink: var(--amber-700); --c-warn-bg: var(--amber-100);
+  --c-bad: var(--red-500);    --c-bad-ink: var(--red-700);    --c-bad-bg: var(--red-100);
+  --c-info: var(--blue-500);  --c-info-ink: var(--blue-700);  --c-info-bg: var(--blue-100);
+  /* the control room's glows: none in light */
+  --c-glow-ok: none; --c-glow-warn: none; --c-glow-bad: none; --c-glow-accent: none;
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --c-bg: #070B0E;
+  --c-surface: #0C1317;
+  --c-raised: #111A20;
+  --c-field: #111A20;
+  --c-tint: #0F2230;
+  --c-scrim: rgba(0, 0, 0, .65);
+  --c-shadow: rgba(0, 0, 0, .55);
+  --c-ink: #E4ECF1;
+  --c-ink-2: #B6C3CD;
+  --c-muted: #8A9CAB;
+  --c-on-dark: #FFFFFF;
+  --c-line: #22313B;
+  --c-line-soft: #18232B;
+  --c-accent: #38BDF8;
+  --c-accent-hover: #7DD3FC;
+  --c-accent-ink: #04121A;
+  --c-accent-soft: rgba(56, 189, 248, .14);
+  --c-selected-bg: rgba(56, 189, 248, .18);
+  --c-selected-ink: #E0F5FF;
+  --c-selected-line: #38BDF8;
+  --c-brand: #22C55E;
+  --c-brand-hover: #4ADE80;
+  --c-brand-ink: #03140A;
+  --c-ok: #22D37A;   --c-ok-ink: #6EE7A8;   --c-ok-bg: rgba(34, 211, 122, .14);
+  --c-warn: #F5B134; --c-warn-ink: #FCD27A; --c-warn-bg: rgba(245, 177, 52, .14);
+  --c-bad: #FF5B4A;  --c-bad-ink: #FF9A8F;  --c-bad-bg: rgba(255, 91, 74, .14);
+  --c-info: #38BDF8; --c-info-ink: #7DD3FC; --c-info-bg: rgba(56, 189, 248, .12);
+  --c-glow-ok: 0 0 10px rgba(34, 211, 122, .55);
+  --c-glow-warn: 0 0 10px rgba(245, 177, 52, .5);
+  --c-glow-bad: 0 0 10px rgba(255, 91, 74, .55);
+  --c-glow-accent: 0 0 14px rgba(56, 189, 248, .35);
+
+  /* A safety net for anything still on the design system's hue names: light tints become dark tints and dark
+     shades become light ones, so text stays readable. It cannot fix a dark hue used as a BACKGROUND (a selected
+     navy pill with white text would turn light on white): those must move to the --c-* names above. */
+  --white: #0C1317;
+  --navy-900: #E4ECF1; --navy-800: #D0DBE3; --navy-700: #B6C3CD; --navy-500: #8A9CAB; --navy-300: #52636F;
+  --blue-700: #7DD3FC; --blue-600: #38BDF8; --blue-500: #38BDF8; --blue-300: #2F6F99; --blue-200: #22313B; --blue-100: #0F2230; --blue-50: #070B0E;
+  --green-700: #6EE7A8; --green-600: #22D37A; --green-500: #22C55E; --green-300: #1F7A4D; --green-100: rgba(34, 211, 122, .14); --green-50: #0B1A12;
+  --amber-700: #FCD27A; --amber-500: #F5B134; --amber-100: rgba(245, 177, 52, .14);
+  --red-700: #FF9A8F; --red-500: #FF5B4A; --red-100: rgba(255, 91, 74, .14);
+  --gray-50: #111A20; --gray-100: #16212A; --gray-200: #22313B; --gray-300: #2C3C47; --gray-500: #8A9CAB; --gray-700: #B6C3CD;
+  color-scheme: dark;
+}
