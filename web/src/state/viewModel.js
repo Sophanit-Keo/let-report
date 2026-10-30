@@ -21,14 +21,18 @@ export function buildViewModel(app) {
     const nav={home:()=>app.go('home'),list:()=>app.go('list'),tasks:()=>app.go('tasks'),alerts:()=>app.go('alerts'),capture:startCap,
       detail:()=>app.go('detail'),details:()=>{ const r=s.reports.find(x=>x.id===s.selId); app.go('details',{draft:draftOf(r),recording:false}); }};
 
-    const stats=[{n:active.length,label:T.open,fg:'var(--blue-600)',onClick:()=>app.go('list',{filter:'open'})},
-      {n:active.filter(r=>r.sev===T.sev[3]).length,label:T.criticalN,fg:'var(--red-700)',onClick:()=>app.go('list',{filter:'open'})},
-      {n:all.filter(r=>r.status==='closed'&&daysAgo(r.updatedAt)<7).length,label:T.closedWk,fg:'var(--green-600)',onClick:()=>app.go('list',{filter:'closed'})}];
-    const pill=(on)=>({bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'});
-    // Production lines: [text colour, dot, dot animation, progress bar, pill background]
-    const LST={running:['var(--green-700)','var(--green-500)','lrPulse 1.6s infinite','var(--green-500)','var(--green-100)'],stopped:['var(--red-700)','var(--red-500)','none','var(--red-500)','var(--red-100)'],
-      cleaning:['var(--blue-700)','var(--blue-500)','none','var(--blue-300)','var(--blue-100)'],changeover:['var(--amber-700)','var(--amber-500)','none','var(--amber-500)','var(--amber-100)'],
-      maintenance:['var(--navy-900)','var(--navy-500)','none','var(--navy-300)','var(--gray-100)'],idle:['var(--gray-500)','var(--gray-300)','none','var(--gray-300)','var(--gray-100)']};
+    // Colours are the theme's --c-* tokens (styles/tokens/theme.css): today's design in light, the control room in dark.
+    const stats=[{n:active.length,label:T.open,fg:'var(--c-accent)',onClick:()=>app.go('list',{filter:'open'})},
+      {n:active.filter(r=>r.sev===T.sev[3]).length,label:T.criticalN,fg:'var(--c-bad-ink)',onClick:()=>app.go('list',{filter:'open'})},
+      {n:all.filter(r=>r.status==='closed'&&daysAgo(r.updatedAt)<7).length,label:T.closedWk,fg:'var(--c-brand)',onClick:()=>app.go('list',{filter:'closed'})}];
+    // A pill or option: selected (navy in light, cyan-tinted in dark) or idle. `on` says which, for aria-pressed.
+    const pill=(on)=>({on:!!on,bg:on?'var(--c-selected-bg)':'var(--c-field)',fg:on?'var(--c-selected-ink)':'var(--c-ink)',bd:on?'var(--c-selected-line)':'var(--c-line)'});
+    // The same with the accent (blue in light, cyan in dark) for the selected one.
+    const accentPill=(on)=>({on:!!on,bg:on?'var(--c-accent)':'var(--c-field)',fg:on?'var(--c-accent-ink)':'var(--c-ink)',bd:on?'var(--c-accent)':'var(--c-line)'});
+    // Production lines: [text colour, dot, dot animation, progress bar, pill background, dot glow (dark only)]
+    const LST={running:['var(--c-ok-ink)','var(--c-ok)','lrPulse 1.6s infinite','var(--c-ok)','var(--c-ok-bg)','var(--c-glow-ok)'],stopped:['var(--c-bad-ink)','var(--c-bad)','none','var(--c-bad)','var(--c-bad-bg)','var(--c-glow-bad)'],
+      cleaning:['var(--c-info-ink)','var(--c-info)','none','var(--c-info)','var(--c-info-bg)','var(--c-glow-accent)'],changeover:['var(--c-warn-ink)','var(--c-warn)','none','var(--c-warn)','var(--c-warn-bg)','var(--c-glow-warn)'],
+      maintenance:['var(--c-ink)','var(--c-ink-2)','none','var(--c-muted)','var(--c-raised)','none'],idle:['var(--c-muted)','var(--c-muted)','none','var(--c-muted)','var(--c-raised)','none']};
     const LSTATES=['running','stopped','cleaning','changeover','maintenance','idle'];
     const stLabelOf=k=>T.lnSt[k]||T.lnStX[k]||k;
     const issuesOn=name=>s.reports.filter(r=>r.loc===name&&r.status!=='closed').length;
@@ -40,7 +44,7 @@ export function buildViewModel(app) {
     const startBad=v=>{ const t=fromLocalInput(v); return !t?T.lot.startMissing:Date.parse(t)>Date.now()+5*60000?T.lot.startFuture:''; };
     const toLocalNow=()=>{ const d=new Date(), p=n=>String(n).padStart(2,'0'); return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); };
     // [text, background, bar] for a lot that is fine, needs attention soon, or is over its limit
-    const TONES={green:['var(--green-700)','var(--green-100)','var(--green-500)'],amber:['var(--amber-700)','var(--amber-100)','var(--amber-500)'],red:['var(--red-700)','var(--red-100)','var(--red-500)']};
+    const TONES={green:['var(--c-ok-ink)','var(--c-ok-bg)','var(--c-ok)'],amber:['var(--c-warn-ink)','var(--c-warn-bg)','var(--c-warn)'],red:['var(--c-bad-ink)','var(--c-bad-bg)','var(--c-bad)']};
     const cipOf=l=>{ if(l.status!=='cleaning'||!l.cipUntil) return null; const until=ms(l.cipUntil), from=ms(l.cipStartedAt)||ms(l.statusSince)||until-4*H, left=until-now;
       const filling=l.cipReason==='filling', reason=l.cipReason&&l.cipReason!=='standard'&&!filling?T.lot.reasons[l.cipReason]:'';
       return {done:left<=0,left,until,ends:stampLabel(l.cipUntil),leftLabel:durLabel(Math.abs(left)),planned:durLabel(until-from),pct:Math.min(100,Math.max(0,Math.round((now-from)/Math.max(1,until-from)*100)))+'%',reason,filling,
@@ -65,19 +69,19 @@ export function buildViewModel(app) {
     // What the home card says under the line name.
     const nowLine=l=>{ const lt=lotOf(l), c=cipOf(l);
       if(lt){ const r=lt.run, tc=r?r.tc:TONES.green;
-        return {icon:'play',fg:tc[0],bg:tc[1],bar:tc[2],text:T.lot.running+' '+lt.lot+(r?' · '+r.ranLabel+' / '+r.plan+' '+T.lot.hoursShort:(lt.dur?' · '+lt.dur:'')),pct:r?r.pct:null,
+        return {icon:'play',tone:r?r.tone:'green',fg:tc[0],bg:tc[1],bar:tc[2],text:T.lot.running+' '+lt.lot+(r?' · '+r.ranLabel+' / '+r.plan+' '+T.lot.hoursShort:(lt.dur?' · '+lt.dur:'')),pct:r?r.pct:null,
           warn:r&&r.warn?r.warn:'',sub:[lt.started?T.lot.startedCap+' '+lt.started:'',r&&r.fill&&!r.fill.due&&!r.fill.soon?T.lot.fillNext+' '+r.fill.at:''].filter(Boolean).join(' · ')}; }
-      if(c&&c.filling&&l.lot) return c.done?{icon:'circle-check',fg:'var(--green-700)',bg:'var(--green-100)',text:T.lot.fillDone.replace('{lot}',l.lot)}
-        :{icon:'hourglass',fg:'var(--blue-700)',bg:'var(--blue-50)',bar:'var(--blue-700)',text:T.lot.fillCip+' · '+l.lot+' · '+c.leftLabel+' '+T.lot.cipLeft,pct:c.pct};
-      if(c) return c.done?{icon:'circle-check',fg:'var(--green-700)',bg:'var(--green-100)',text:T.lot.cipDone}
-        :{icon:'hourglass',fg:'var(--blue-700)',bg:'var(--blue-50)',bar:'var(--blue-700)',text:c.title+' · '+c.leftLabel+' '+T.lot.cipLeft+' · '+T.lot.cipEnds+' '+c.ends,pct:c.pct};
-      if(l.lot&&l.status!=='running') return {icon:'circle-pause',fg:'var(--gray-700)',bg:'var(--gray-100)',text:T.lot.number+' '+l.lot+' · '+stLabelOf(l.status)};
+      if(c&&c.filling&&l.lot) return c.done?{icon:'circle-check',fg:'var(--c-ok-ink)',bg:'var(--c-ok-bg)',text:T.lot.fillDone.replace('{lot}',l.lot)}
+        :{icon:'hourglass',fg:'var(--c-info-ink)',bg:'var(--c-bg)',bar:'var(--c-info-ink)',text:T.lot.fillCip+' · '+l.lot+' · '+c.leftLabel+' '+T.lot.cipLeft,pct:c.pct};
+      if(c) return c.done?{icon:'circle-check',fg:'var(--c-ok-ink)',bg:'var(--c-ok-bg)',text:T.lot.cipDone}
+        :{icon:'hourglass',fg:'var(--c-info-ink)',bg:'var(--c-bg)',bar:'var(--c-info-ink)',text:c.title+' · '+c.leftLabel+' '+T.lot.cipLeft+' · '+T.lot.cipEnds+' '+c.ends,pct:c.pct};
+      if(l.lot&&l.status!=='running') return {icon:'circle-pause',fg:'var(--c-ink-2)',bg:'var(--c-raised)',text:T.lot.number+' '+l.lot+' · '+stLabelOf(l.status)};
       return null; };
     // Under the line's name: the UHT that feeds it and its filler, e.g. "UHT 1 · TBA/22"
     const layoutOf=l=>[l.uht,l.filler].filter(Boolean).join(' · ');
     const lines=(s.lines||[]).map(l=>{const n=issuesOn(l.name); const c=LST[l.status]||LST.idle; const nw=nowLine(l);
-      return {id:l.id,name:l.name,type:l.type,product:l.product||'—',layout:layoutOf(l),note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],
-        bd:(n&&l.status==='stopped')||(nw&&nw.fg==='var(--red-700)')?'var(--red-500)':'var(--blue-200)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--red-700)':'var(--green-700)',isIcon:n?'triangle-alert':'circle-check',
+      return {id:l.id,name:l.name,type:l.type,product:l.product||'—',layout:layoutOf(l),note:l.note||'',qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',stLabel:stLabelOf(l.status),stFg:c[0],dot:c[1],anim:c[2],bar:c[3],glow:c[5],
+        bd:(n&&l.status==='stopped')||(nw&&nw.tone==='red')?'var(--c-bad)':'var(--c-line)',issues:n?n+' '+(n===1?T.oneIssue:T.manyIssues):T.noIssues,isFg:n?'var(--c-bad-ink)':'var(--c-ok-ink)',isIcon:n?'triangle-alert':'circle-check',
         now:nw, open:()=>app.openLine(l.id)};});
     const linesHead={canAdd:true,add:()=>app.openLineForm(null),empty:!lines.length,openPlan:app.openPlan};
     // Line control sheet
@@ -86,7 +90,7 @@ export function buildViewModel(app) {
       return {name:l.name,type:l.type,product:l.product||'—',layout:layoutOf(l),qty:l.qty,target:l.target,pct:Math.min(100,Math.round(l.qty/Math.max(1,l.target)*100))+'%',bar:(LST[l.status]||LST.idle)[3],
         updated:(l.updatedBy?T.line.updated+' '+l.updatedBy+' · ':'')+stLabelOf(l.status)+' '+T.line.since+' '+stampLabel(l.statusSince),
         // Picking CIP while a lot is running opens "Finish lot", so the lot's end gets recorded.
-        states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],on,bg:on?c[4]:'#fff',fg:on?c[0]:'var(--navy-900)',bd:on?c[1]:'var(--blue-200)',pick:()=>(k==='cleaning'&&l.lot&&l.status==='running'?app.openFinishLot():app.setLineStatus(l.id,k))};}),
+        states:LSTATES.map(k=>{const on=l.status===k, c=LST[k]; return {label:stLabelOf(k),dot:c[1],glow:on?c[5]:'none',on,bg:on?c[4]:'var(--c-field)',fg:on?c[0]:'var(--c-ink)',bd:on?c[1]:'var(--c-line)',pick:()=>(k==='cleaning'&&l.lot&&l.status==='running'?app.openFinishLot():app.setLineStatus(l.id,k))};}),
         // Lot now, CIP now, the two forms, and this line's lot history
         lotsReady:s.lotsReady!==false, maxRun:l.maxRunHours||PLAN.runMax, fillEvery:l.fillEvery||null,
         lot:lotOf(l), cip:cipOf(l), run:runOf(l), idleLot:l.lot&&l.status!=='running'&&!(l.status==='cleaning'&&l.cipReason==='filling')?l.lot:'', canFinish:!!l.lot,
@@ -159,12 +163,12 @@ export function buildViewModel(app) {
       disabled:!!s.busy||!(lf.name||'').trim()||!(parseInt(lf.target,10)>0)||!(parseInt(lf.maxRun,10)>0), save:app.saveLineForm};
     const TICON={decide:'gavel',check:'bell-ring',fix:'hand',assign:'user-plus',done:'wrench',verify:'shield-check',approve:'stamp'};
     const tasksOf=rl=>{const out=[]; s.reports.forEach(rr=>app.tasksFor(rr,rl).forEach(k=>out.push({r:rr,k}))); return out;};
-    const hintOf=r=>{ if(r.capa&&r.capa.overdue&&r.status==='action') return {hint:T.hintOver+' '+r.capa.due,hintIcon:'clock',hintFg:'var(--red-700)'};
-      if(r.needsApproval) return {hint:T.hintAppr,hintIcon:'stamp',hintFg:'var(--blue-700)'};
-      if(r.holdCheck&&['due','decision','scheduled'].includes(r.holdCheck.status)) return {hint:T.hcTypes[r.holdCheck.type]+' · '+T.hcSt[r.holdCheck.status]+' · '+r.holdCheck.due,hintIcon:'circle-pause',hintFg:'var(--amber-700)'};
-      const e=[...r.tl].reverse().find(x=>x[0]==='esc'); if(e) return {hint:T.hintEsc+' '+e[1]+' ·'+e[3],hintIcon:'arrow-up-right',hintFg:'var(--blue-700)'}; return null; };
-    const row=r=>{const d=app.deco(r), hn=hintOf(r); return {...d,...(hn||{}),hasHint:!!hn,cardBd:d.mine?'var(--blue-500)':'var(--blue-200)'};};
-    const sec=(title,list,tone)=>({title,items:list.slice(0,4).map(row),count:list.length,empty:!list.length,cBg:list.length?(tone==='red'?'var(--red-100)':'var(--blue-100)'):'var(--gray-100)',cFg:list.length?(tone==='red'?'var(--red-700)':'var(--blue-700)'):'var(--gray-500)'});
+    const hintOf=r=>{ if(r.capa&&r.capa.overdue&&r.status==='action') return {hint:T.hintOver+' '+r.capa.due,hintIcon:'clock',hintFg:'var(--c-bad-ink)'};
+      if(r.needsApproval) return {hint:T.hintAppr,hintIcon:'stamp',hintFg:'var(--c-info-ink)'};
+      if(r.holdCheck&&['due','decision','scheduled'].includes(r.holdCheck.status)) return {hint:T.hcTypes[r.holdCheck.type]+' · '+T.hcSt[r.holdCheck.status]+' · '+r.holdCheck.due,hintIcon:'circle-pause',hintFg:'var(--c-warn-ink)'};
+      const e=[...r.tl].reverse().find(x=>x[0]==='esc'); if(e) return {hint:T.hintEsc+' '+e[1]+' ·'+e[3],hintIcon:'arrow-up-right',hintFg:'var(--c-info-ink)'}; return null; };
+    const row=r=>{const d=app.deco(r), hn=hintOf(r); return {...d,...(hn||{}),hasHint:!!hn,cardBd:d.mine?'var(--c-info)':'var(--c-line)'};};
+    const sec=(title,list,tone)=>({title,items:list.slice(0,4).map(row),count:list.length,empty:!list.length,cBg:list.length?(tone==='red'?'var(--c-bad-bg)':'var(--c-info-bg)'):'var(--c-raised)',cFg:list.length?(tone==='red'?'var(--c-bad-ink)':'var(--c-info-ink)'):'var(--c-muted)'});
     const R=s.reports, openR=R.filter(r=>r.status!=='closed'), bySev=(a,b)=>b.sev-a.sev;
     const overdueR=openR.filter(r=>r.capa&&r.capa.overdue&&r.status==='action');
     const homeSections = role==='qc' ? [sec(T.myReports,R.filter(r=>r.by===me.name).sort((a,b)=>(a.status==='closed')-(b.status==='closed')))]
@@ -172,20 +176,20 @@ export function buildViewModel(app) {
           sec(T.verifyFix,openR.filter(r=>r.status==='verify'&&!r.needsApproval)),sec(T.holdList,R.filter(r=>r.hold))]
       : role==='supervisor' ? [sec(T.myLine,openR.filter(r=>r.level==='supervisor'||(r.capa&&r.capa.owner===me.name&&r.status==='action')).sort(bySev)),sec(T.overdueL,overdueR,'red')]
       : [sec(T.critEsc,openR.filter(r=>r.sev===3||r.level==='manager').sort(bySev),'red'),sec(T.approvals,openR.filter(r=>r.needsApproval))];
-    const kpis = role==='manager' ? [{n:openR.length,label:T.kOpen,fg:'var(--blue-600)'},{n:openR.filter(r=>r.sev===3).length,label:T.kCrit,fg:'var(--red-700)'},{n:overdueR.length,label:T.kOver,fg:'var(--amber-700)'},{n:R.filter(r=>r.status==='closed'&&daysAgo(r.updatedAt)<7).length,label:T.kClosed,fg:'var(--green-600)'}]
-      : [{n:openR.filter(r=>r.level==='qa'&&r.status==='open').length,label:T.kReview,fg:'var(--blue-600)'},{n:R.filter(r=>r.hold).length,label:T.kHold,fg:'var(--navy-900)'},{n:openR.filter(r=>r.holdCheck&&r.holdCheck.status==='decision').length,label:T.kDecide,fg:'var(--red-700)'},{n:openR.filter(r=>r.status==='verify'&&!r.needsApproval).length,label:T.kVerify,fg:'var(--green-600)'}];
+    const kpis = role==='manager' ? [{n:openR.length,label:T.kOpen,fg:'var(--c-accent)'},{n:openR.filter(r=>r.sev===3).length,label:T.kCrit,fg:'var(--c-bad-ink)'},{n:overdueR.length,label:T.kOver,fg:'var(--c-warn-ink)'},{n:R.filter(r=>r.status==='closed'&&daysAgo(r.updatedAt)<7).length,label:T.kClosed,fg:'var(--c-brand)'}]
+      : [{n:openR.filter(r=>r.level==='qa'&&r.status==='open').length,label:T.kReview,fg:'var(--c-accent)'},{n:R.filter(r=>r.hold).length,label:T.kHold,fg:'var(--c-ink)'},{n:openR.filter(r=>r.holdCheck&&r.holdCheck.status==='decision').length,label:T.kDecide,fg:'var(--c-bad-ink)'},{n:openR.filter(r=>r.status==='verify'&&!r.needsApproval).length,label:T.kVerify,fg:'var(--c-brand)'}];
     kpis.forEach(k=>k.onClick=()=>app.go('list',{filter:'open'}));
     const home={cta:role==='qc'||role==='supervisor',kpis:role==='qa'||role==='manager',checklist:role==='qc',team:role==='supervisor',trend:role==='manager'};
     const cks=s.checks||[]; const cdone=cks.filter(Boolean).length;
-    const checklist={done:cdone,total:T.checks.length,pct:Math.round(cdone/T.checks.length*100)+'%',items:T.checks.map(([l,tm],i)=>({label:l,time:tm,on:!!cks[i],bd:i?'var(--gray-100)':'transparent',
-      boxBg:cks[i]?'var(--green-600)':'#fff',boxBd:cks[i]?'var(--green-600)':'var(--gray-300)',fg:cks[i]?'var(--gray-500)':'var(--navy-900)',deco:cks[i]?'line-through':'none',
+    const checklist={done:cdone,total:T.checks.length,pct:Math.round(cdone/T.checks.length*100)+'%',items:T.checks.map(([l,tm],i)=>({label:l,time:tm,on:!!cks[i],bd:i?'var(--c-line-soft)':'transparent',
+      boxBg:cks[i]?'var(--c-brand)':'var(--c-field)',boxBd:cks[i]?'var(--c-brand)':'var(--c-line)',fg:cks[i]?'var(--c-muted)':'var(--c-ink)',deco:cks[i]?'line-through':'none',
       toggle:()=>app.toggleTick(i)}))};
-    const team=['qc','qa','manager'].map((k,i)=>{const tk=tasksOf(k); const f=tk[0]; return {...PEOPLE[k],roleLabel:T.roles[k],bd:i?'var(--gray-100)':'transparent',
-      doing:f?app.taskLabel(f.r,f.k,T)+' · '+f.r.id:T.idle,fg:f?'var(--navy-900)':'var(--gray-500)',count:tk.length+' '+(tk.length===1?T.taskW:T.tasksW),
-      cBg:tk.length?'var(--blue-100)':'var(--gray-100)',cFg:tk.length?'var(--blue-700)':'var(--gray-500)',open:()=>f&&app.go('detail',{selId:f.r.id})};});
+    const team=['qc','qa','manager'].map((k,i)=>{const tk=tasksOf(k); const f=tk[0]; return {...PEOPLE[k],roleLabel:T.roles[k],bd:i?'var(--c-line-soft)':'transparent',
+      doing:f?app.taskLabel(f.r,f.k,T)+' · '+f.r.id:T.idle,fg:f?'var(--c-ink)':'var(--c-muted)',count:tk.length+' '+(tk.length===1?T.taskW:T.tasksW),
+      cBg:tk.length?'var(--c-info-bg)':'var(--c-raised)',cFg:tk.length?'var(--c-info-ink)':'var(--c-muted)',open:()=>f&&app.go('detail',{selId:f.r.id})};});
     const tb=s.trendBy||'line'; const trData=app.trend(tb); if(!trData.length) trData.push(['—',0]); const trMax=Math.max(1,...trData.map(x=>x[1]));
-    const trendRows=trData.map(([l,n],i)=>({label:l,n,pct:Math.round(n/trMax*100)+'%',bar:i===0?'var(--red-500)':'var(--blue-500)'}));
-    const trendTabs=[['line',T.byLine],['product',T.byProduct]].map(([k,l])=>({label:l,bg:tb===k?'var(--navy-900)':'transparent',fg:tb===k?'#fff':'var(--navy-500)',pick:()=>app.setState({trendBy:k})}));
+    const trendRows=trData.map(([l,n],i)=>({label:l,n,pct:Math.round(n/trMax*100)+'%',bar:i===0?'var(--c-bad)':'var(--c-info)'}));
+    const trendTabs=[['line',T.byLine],['product',T.byProduct]].map(([k,l])=>({label:l,on:tb===k,bg:tb===k?'var(--c-selected-bg)':'transparent',fg:tb===k?'var(--c-selected-ink)':'var(--c-muted)',pick:()=>app.setState({trendBy:k})}));
     const attention=[...active].sort((a,b)=>(b.mine-a.mine)||(s.reports.find(x=>x.id===b.id).sev-s.reports.find(x=>x.id===a.id).sev)).slice(0,3);
 
     
@@ -207,7 +211,7 @@ export function buildViewModel(app) {
       F.lines.map(l=>({label:l,remove:()=>setF({lines:tog(F.lines,l)})})),F.products.map(p=>({label:p,remove:()=>setF({products:tog(F.products,p)})})),
       F.sevs.map(i=>({label:T.sev[i],remove:()=>setF({sevs:tog(F.sevs,i)})})));
     const nRes=listItems.length;
-    const filters=[['all',T.all],['open',T.open],['closed',T.closedF]].map(([k,l])=>{const on=s.filter===k; return {label:l,n:counts[k],bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)',onClick:()=>app.setState({filter:k})};});
+    const filters=[['all',T.all],['open',T.open],['closed',T.closedF]].map(([k,l])=>{const on=s.filter===k; return {label:l,n:counts[k],...pill(on),onClick:()=>app.setState({filter:k})};});
 
     const taskItems=tasksOf(role).map(({r,k})=>({...app.deco(r),taskLabel:app.taskLabel(r,k,T),taskIcon:TICON[k]}));
     const dueChecks=s.reports.filter(r=>app.canCheck(r)).map(r=>({head:T.hcDueHead,sub:T.hcTypes[r.holdCheck.type]+' · '+r.pname+(r.lot?' · '+r.lot:'')+(r.qty?' · '+r.qty+' '+r.unit:''),open:()=>app.go('detail',{selId:r.id})}));
@@ -215,28 +219,28 @@ export function buildViewModel(app) {
     // alerts for my role or for me by name (not the comment alerts I sent myself)
     const myNotes=s.notes.filter(n=>(n.roles.includes(role)||(n.userIds||[]).includes(myId))&&!(n.by&&n.by===myId&&OWN_HIDDEN.includes(n.icon)));
     const unread=myNotes.filter(n=>!s.read[n.key]).length;
-    const alertItems=myNotes.map((n,i)=>({text:n.text,t:timeLabel(n.t),icon:n.icon,icBg:TONE[n.tone][0],icFg:TONE[n.tone][1],unread:!s.read[n.key],bd:i?'var(--gray-100)':'transparent',bg:s.read[n.key]?'#fff':'var(--blue-50)',
+    const alertItems=myNotes.map((n,i)=>({text:n.text,t:timeLabel(n.t),icon:n.icon,icBg:TONE[n.tone][0],icFg:TONE[n.tone][1],unread:!s.read[n.key],bd:i?'var(--c-line-soft)':'transparent',bg:s.read[n.key]?'var(--c-surface)':'var(--c-bg)',
       open:()=>{ app.markRead(n.key); if(n.id) app.go('detail',{selId:n.id}); }}));
 
     const chatUnread=app.chatUnread();
     const tabDef=[['home','house',T.home],['list','clipboard-list',T.reports],['chat','message-circle',T.chat.tab],['tasks','list-checks',T.tasks],['alerts','bell',T.alerts]];
-    const tabs=tabDef.map(([k,ic,l])=>({key:k,icon:ic,label:l,fg:s.screen===k?'var(--blue-600)':'var(--navy-300)',go:()=>app.go(k),
+    const tabs=tabDef.map(([k,ic,l])=>({key:k,icon:ic,label:l,on:s.screen===k,fg:s.screen===k?'var(--c-accent)':'var(--c-muted)',go:()=>app.go(k),
       hasBadge:(k==='alerts'&&unread>0)||(k==='tasks'&&taskItems.length>0)||(k==='chat'&&chatUnread>0),badge:k==='alerts'?unread:k==='chat'?(chatUnread>99?'99+':chatUnread):taskItems.length}));
 
     // detail
     let sel={}, detailBar={show:false};
     const raw=s.reports.find(r=>r.id===s.selId);
     if(raw){ const d=app.deco(raw), si=ST[raw.status].i;
-      const steps=T.st.map((l,i)=>({label:l,done:i<si||raw.status==='closed',dotBg:i<si||raw.status==='closed'?'var(--green-600)':i===si?'#fff':'#fff',dotBd:i<=si?(i<si||raw.status==='closed'?'var(--green-600)':'var(--blue-600)'):'var(--gray-200)',
-        ring:i===si&&raw.status!=='closed'?'0 0 0 4px var(--blue-100)':'none',fg:i<=si?'var(--navy-900)':'var(--gray-500)',lineBg:i<=si?'var(--green-500)':'var(--gray-200)',lineOp:i===0?0:1}));
+      const steps=T.st.map((l,i)=>({label:l,done:i<si||raw.status==='closed',dotBg:i<si||raw.status==='closed'?'var(--c-brand)':'var(--c-field)',dotBd:i<=si?(i<si||raw.status==='closed'?'var(--c-brand)':'var(--c-accent)'):'var(--c-line-soft)',
+        ring:i===si&&raw.status!=='closed'?'0 0 0 4px var(--c-accent-soft)':'none',fg:i<=si?'var(--c-ink)':'var(--c-muted)',lineBg:i<=si?'var(--c-ok)':'var(--c-line-soft)',lineOp:i===0?0:1}));
       const pti=PTYPES.indexOf(raw.ptype), sup=(raw.support||[]).map(x=>T.supports[SUPPORTS.indexOf(x)]).join(', '), ui=UNITS.indexOf(raw.unit);
       const rows=[[T.rowLoc,raw.loc],[T.rowType,pti>=0?T.ptypes[pti]:''],[T.rowName,raw.pname],[T.rowLot,raw.lot],[T.rowQty,raw.qty?raw.qty+' '+T.units[ui<0?0:ui]:''],[T.rowHold,raw.hold?T.yes:T.no],
-        [T.troubleL,raw.desc],[T.rowDid,raw.action],[T.rowSug,raw.suggestion],[T.rowSup,sup]].concat(raw.voice?[[T.rowVoice,T.recorded]]:[]).concat([[T.reporter,raw.by+' · '+stampLabel(raw.signedAt||(raw.tl[0]&&raw.tl[0][2]))]]).map(([k,v],i)=>({k,v:v||T.missing,fg:v?'var(--navy-900)':'var(--gray-500)',bd:i?'var(--gray-100)':'transparent'}));
-      const tl=raw.tl.map((e,i)=>({text:T.tl[e[0]]+(e[3]||''),who:e[1],t:stampLabel(e[2]),dot:e[0]==='alert'?'var(--red-500)':e[0]==='verified'||e[0]==='closedBy'||e[0]==='fixed'||e[0]==='approved'?'var(--green-600)':e[0]==='reopened'?'var(--amber-500)':'var(--blue-500)',lineOp:i===raw.tl.length-1?0:1}));
+        [T.troubleL,raw.desc],[T.rowDid,raw.action],[T.rowSug,raw.suggestion],[T.rowSup,sup]].concat(raw.voice?[[T.rowVoice,T.recorded]]:[]).concat([[T.reporter,raw.by+' · '+stampLabel(raw.signedAt||(raw.tl[0]&&raw.tl[0][2]))]]).map(([k,v],i)=>({k,v:v||T.missing,fg:v?'var(--c-ink)':'var(--c-muted)',bd:i?'var(--c-line-soft)':'transparent'}));
+      const tl=raw.tl.map((e,i)=>({text:T.tl[e[0]]+(e[3]||''),who:e[1],t:stampLabel(e[2]),dot:e[0]==='alert'?'var(--c-bad)':e[0]==='verified'||e[0]==='closedBy'||e[0]==='fixed'||e[0]==='approved'?'var(--c-brand)':e[0]==='reopened'?'var(--c-warn)':'var(--c-info)',lineOp:i===raw.tl.length-1?0:1}));
       sel={...d,steps,rows,tl,hasCapa:!!raw.capa,capa:raw.capa?{...raw.capa,avatar:AV[raw.capa.owner]}:{},hasHc:!!raw.holdCheck, hc:app.hcView(raw,T,me), needsDetails:!raw.desc&&raw.by===me.name&&raw.status!=='closed', urgent:!!raw.urgent, hold:!!raw.hold};
       const lvI=ORDER.indexOf(raw.level||'qa');
-      sel.ladder=ORDER.map((k,i)=>({short:T.short[k],avatar:PEOPLE[k].avatar,arrow:i>0,bg:i===lvI&&raw.status!=='closed'?'var(--blue-50)':'#fff',bd:i===lvI&&raw.status!=='closed'?'var(--blue-600)':i<lvI?'var(--green-300)':'var(--gray-200)',
-        fg:i<=lvI?'var(--navy-900)':'var(--gray-500)',op:i<=lvI?1:.4}));
+      sel.ladder=ORDER.map((k,i)=>({short:T.short[k],avatar:PEOPLE[k].avatar,arrow:i>0,on:i===lvI&&raw.status!=='closed',bg:i===lvI&&raw.status!=='closed'?'var(--c-bg)':'var(--c-field)',bd:i===lvI&&raw.status!=='closed'?'var(--c-accent)':i<lvI?'var(--c-ok)':'var(--c-line-soft)',
+        fg:i<=lvI?'var(--c-ink)':'var(--c-muted)',op:i<=lvI?1:.4}));
       sel.discussion=buildDiscussion(app,T,raw.id);
       sel.levelNote=raw.status==='closed'?T.st[3]:T.nowWith+' '+PEOPLE[raw.level||'qa'].name;
       const act=app.canAct(raw), canE=app.canEsc(raw), nextL=ORDER[lvI+1];
@@ -258,9 +262,12 @@ export function buildViewModel(app) {
     const c=s.cap;
     const pickCat=k=>()=>app.setState(st=>({cap:{...st.cap,cat:k,stage:flow==='B'&&k!=='custom'?'sev':st.cap.stage}}));
     const pickSev=i=>()=>app.setState(st=>({cap:{...st.cap,sev:i,stage:flow==='C'?st.cap.stage:'sign'}}));
-    const cats=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',ic:on?'#fff':'var(--blue-600)',bd:on?'var(--blue-600)':'var(--blue-200)'};});
-    const catsDark=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),bg:on?'#fff':'rgba(255,255,255,.12)',fg:on?'var(--navy-900)':'#fff'};});
-    const sevs=T.sev.map((l,i)=>{const on=c.sev===i; return {label:l,pick:pickSev(i),bg:on?SEV[i].fg:SEV[i].bg,fg:on?'#fff':SEV[i].fg,bd:on?SEV[i].fg:'transparent'};});
+    const cats=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),...accentPill(on),ic:on?'var(--c-accent-ink)':'var(--c-accent)'};});
+    // On the camera, which is dark in both themes: a white chip with navy text when picked, else a translucent white one.
+    // Deliberate exceptions: the translucent white and the navy text (#0F2D58, the light --c-ink) do not follow the theme.
+    const catsDark=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),on,bg:on?'var(--c-on-dark)':'rgba(255,255,255,.12)',fg:on?'#0F2D58':'var(--c-on-dark)'};});
+    // A picked severity is a solid block of its colour with the text cut out in the card's colour (white in light).
+    const sevs=T.sev.map((l,i)=>{const on=c.sev===i; return {label:l,pick:pickSev(i),on,bg:on?SEV[i].fg:SEV[i].bg,fg:on?'var(--c-surface)':SEV[i].fg,bd:on?SEV[i].fg:'transparent'};});
     const sevsDark=T.sev.map((l,i)=>({label:l,pick:pickSev(i),bg:SEV[i].bg,fg:SEV[i].fg}));
     const sevCards=T.sev.map((l,i)=>({label:l,hint:T.sevHint[i],pick:pickSev(i),bar:SEV[i].bar,fg:SEV[i].fg}));
     const ci=CATS.findIndex(x=>x[0]===c.cat);
@@ -272,7 +279,7 @@ export function buildViewModel(app) {
       showSheet:flow==='C'&&c.stage==='pick',
       showSign:flow!=='C'&&c.stage==='sign',
       subCat:c.stage==='pick', subSev:c.stage==='sev', stepTitle:c.stage==='sev'?T.step2:T.step1,
-      bars:[0,1,2].map(i=>({bg:i<=stepIdx?'var(--blue-600)':'var(--blue-200)'})),
+      bars:[0,1,2].map(i=>({bg:i<=stepIdx?'var(--c-accent)':'var(--c-line)'})),
       sevOp:c.cat?1:.35, sevPe:c.cat?'auto':'none',
       catLabel:c.cat==='custom'?(c.customText||T.cats[8]):ci>=0?T.cats[ci]:'', sevLabel:c.sev!=null?T.sev[c.sev]:'', sevBg:c.sev!=null?SEV[c.sev].bg:'', sevFg:c.sev!=null?SEV[c.sev].fg:'', locLabel:(c.pre&&c.pre.loc)||app.locs()[0],
       critical:c.sev===3, isCustom:c.cat==='custom', customText:c.customText||'', customEmpty:!(c.customText||'').trim(),
@@ -284,23 +291,26 @@ export function buildViewModel(app) {
 
     // details draft
     const dr=s.draft;
-    const locs=app.locs().map(l=>{const on=dr.loc===l; return {label:l,pick:()=>app.setState(st=>({draft:{...st.draft,loc:l}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
+    const locs=app.locs().map(l=>{const on=dr.loc===l; return {label:l,pick:()=>app.setState(st=>({draft:{...st.draft,loc:l}})),...pill(on)};});
     const setD=patch=>app.setState(st=>({draft:{...st.draft,...patch}}));
     const ptypes=PTYPES.map((p,i)=>({label:T.ptypes[i],...pill(dr.ptype===p),pick:()=>setD({ptype:p,pname:''})}));
     const pnames=(PNAMES[dr.ptype]||[]).concat(['__other']).map(n=>({label:n==='__other'?T.other:n,...pill(dr.pname===n),pick:()=>setD({pname:n})}));
     const units=UNITS.map((u,i)=>({label:T.units[i],...pill(dr.unit===u),pick:()=>setD({unit:u})}));
-    const supports=SUPPORTS.map((x,i)=>{const on=(dr.support||[]).includes(x); return {label:T.supports[i],bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--blue-600)':'var(--blue-200)',
+    const supports=SUPPORTS.map((x,i)=>{const on=(dr.support||[]).includes(x); return {label:T.supports[i],...accentPill(on),
       pick:()=>setD({support:on?dr.support.filter(y=>y!==x):[...(dr.support||[]),x]})};});
-    const tg=(on,tone)=>({bg:on?tone[0]:'#fff',bd:on?tone[1]:'var(--blue-200)',ic:on?tone[2]:'var(--navy-500)',track:on?tone[2]:'var(--gray-300)',knob:on?'21px':'3px'});
-    const holdT={...tg(dr.hold,['var(--blue-50)','var(--navy-900)','var(--navy-900)']),toggle:()=>setD({hold:!dr.hold})};
-    const urgentT={...tg(dr.urgent,['var(--red-100)','var(--red-500)','var(--red-700)']),toggle:()=>setD({urgent:!dr.urgent})};
+    // A switch row: [background, border, icon and track] when on; the idle field otherwise.
+    const tg=(on,tone)=>({on:!!on,bg:on?tone[0]:'var(--c-field)',bd:on?tone[1]:'var(--c-line)',ic:on?tone[2]:'var(--c-muted)',track:on?(tone[3]||tone[2]):'var(--c-line)',knob:on?'21px':'3px'});
+    const holdT={...tg(dr.hold,['var(--c-bg)','var(--c-selected-line)','var(--c-selected-line)']),toggle:()=>setD({hold:!dr.hold})};
+    const urgentT={...tg(dr.urgent,['var(--c-bad-bg)','var(--c-bad)','var(--c-bad-ink)']),toggle:()=>setD({urgent:!dr.urgent})};
+    const okT=on=>tg(on,['var(--c-ok-bg)','var(--c-ok)','var(--c-ok-ink)','var(--c-brand)']);
     const hcTypes=HC_TYPES.map(k=>({label:T.hcTypes[k],...pill(dr.hcType===k),pick:()=>setD({hcType:k})}));
     const hcDaysL=HC_DAYS.map(d=>({label:d+' '+(d===1?T.day:T.days),...pill(dr.hcDays===d),pick:()=>setD({hcDays:d})}));
     const hcOwners=HC_OWNERS.map(o=>({label:o==='QC team'?T.qcTeam:o,...pill(dr.hcOwner===o),pick:()=>setD({hcOwner:o})}));
     const dc=s.dec||{}; const setDec=p=>app.setState(st=>({dec:{...st.dec,...p}}));
-    const decTone={escalate:['arrow-up-right','var(--navy-900)','#fff'],keep:['clock','var(--blue-100)','var(--blue-700)'],lab:['flask-conical','var(--blue-100)','var(--blue-700)'],reject:['trash-2','var(--red-100)','var(--red-700)'],other:['pencil-line','var(--gray-100)','var(--gray-700)']};
+    const decTone={escalate:['arrow-up-right','var(--c-selected-bg)','var(--c-selected-ink)'],keep:['clock','var(--c-info-bg)','var(--c-info-ink)'],lab:['flask-conical','var(--c-info-bg)','var(--c-info-ink)'],reject:['trash-2','var(--c-bad-bg)','var(--c-bad-ink)'],other:['pencil-line','var(--c-raised)','var(--c-ink-2)']};
+    // The picked option: the page colour behind it, an accent border and radio, and the accent glow in dark.
     const decOpts=(role==='qa'?['keep','lab','reject','other','escalate']:['keep','lab','reject','other']).map(k=>{const on=dc.choice===k; return {label:T.dec[k][0],sub:T.dec[k][1],icon:decTone[k][0],icBg:decTone[k][1],icFg:decTone[k][2],
-      bg:on?'var(--blue-50)':'#fff',bd:on?'var(--blue-600)':'var(--blue-200)',radio:on?'var(--blue-600)':'var(--gray-300)',dot:on?'var(--blue-600)':'transparent',pick:()=>setDec({choice:k})};});
+      on,bg:on?'var(--c-bg)':'var(--c-field)',bd:on?'var(--c-accent)':'var(--c-line)',radio:on?'var(--c-accent)':'var(--c-line)',dot:on?'var(--c-accent)':'transparent',glow:on?'var(--c-glow-accent)':'none',pick:()=>setDec({choice:k})};});
     const decDays=HC_DAYS.map(d=>({label:d+' '+(d===1?T.day:T.days),...pill(dc.days===d),pick:()=>setDec({days:d})}));
     const decOwners=HC_OWNERS.map(o=>({label:o==='QC team'?T.qcTeam:o,...pill(dc.owner===o),pick:()=>setDec({owner:o})}));
     const selR=s.reports.find(x=>x.id===s.selId);
@@ -313,15 +323,15 @@ export function buildViewModel(app) {
         if(c==='escalate') return {...x,level:'manager',holdCheck:{...hc,decider:'manager'},tl:[...x.tl,['esc',me.name,t,' Manager · hold decision']]};
         return {...x,holdCheck:{...hc,status:'decided',note:dc.text},tl:[...x.tl,['hcOther',me.name,t]]}; });
       app.setState({sheet:null}); if(c==='escalate') app.addNote({id:s.selId,icon:'gavel',tone:'red',text:'Hold decision escalated to you: '+decSub,roles:['manager']}); };
-    const voice=s.recording?{bg:'var(--red-100)',bd:'var(--red-500)',btn:'var(--red-500)',icon:'square',fg:'var(--red-700)',label:T.recording,anim:'lrPulse 1s infinite'}
-      : dr.voice?{bg:'var(--green-50)',bd:'var(--green-300)',btn:'var(--green-600)',icon:'play',fg:'var(--green-700)',label:T.recorded,anim:'none'}
-      : {bg:'#fff',bd:'var(--blue-200)',btn:'var(--blue-600)',icon:'mic',fg:'var(--navy-900)',label:T.record,anim:'none'};
+    const voice=s.recording?{bg:'var(--c-bad-bg)',bd:'var(--c-bad)',btn:'var(--c-bad)',icon:'square',fg:'var(--c-bad-ink)',label:T.recording,anim:'lrPulse 1s infinite'}
+      : dr.voice?{bg:'var(--c-ok-bg)',bd:'var(--c-ok)',btn:'var(--c-brand)',icon:'play',fg:'var(--c-ok-ink)',label:T.recorded,anim:'none'}
+      : {bg:'var(--c-field)',bd:'var(--c-line)',btn:'var(--c-accent)',icon:'mic',fg:'var(--c-ink)',label:T.record,anim:'none'};
 
     // assign sheet
     const a=s.asg||{};
-    const roots=T.roots.map((l,i)=>{const on=a.root===i; return {label:l,pick:()=>app.setState(st=>({asg:{...st.asg,root:i}})),bg:on?'var(--blue-600)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--blue-600)':'var(--blue-200)'};});
-    const owners=app.staffNames().map(n=>{const on=a.owner===n; return {name:n,avatar:AV[n],pick:()=>app.setState(st=>({asg:{...st.asg,owner:n}})),bg:on?'var(--blue-50)':'#fff',bd:on?'var(--blue-600)':'var(--blue-200)'};});
-    const dues=T.dues.map((l,i)=>{const on=a.due===i; return {label:l,pick:()=>app.setState(st=>({asg:{...st.asg,due:i}})),bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)'};});
+    const roots=T.roots.map((l,i)=>{const on=a.root===i; return {label:l,pick:()=>app.setState(st=>({asg:{...st.asg,root:i}})),...accentPill(on)};});
+    const owners=app.staffNames().map(n=>{const on=a.owner===n; return {name:n,avatar:AV[n],pick:()=>app.setState(st=>({asg:{...st.asg,owner:n}})),on,bg:on?'var(--c-bg)':'var(--c-field)',bd:on?'var(--c-accent)':'var(--c-line)',glow:on?'var(--c-glow-accent)':'none'};});
+    const dues=T.dues.map((l,i)=>{const on=a.due===i; return {label:l,pick:()=>app.setState(st=>({asg:{...st.asg,due:i}})),...pill(on)};});
 
     // Account sheet: your photo and name, sign out; managers get "Manage team".
     const myProfile=app.profile()||{};
@@ -333,7 +343,7 @@ export function buildViewModel(app) {
       saveName:()=>{app.patchProfile(myProfile.id,{name:s.myName.trim()},T.people.saved); app.setState({myName:null});},
       manageTeam:()=>app.setState({sheet:null},()=>app.go('team'))};
     // Team screen (managers): everyone who can sign in.
-    const roleChip={qc:['var(--blue-100)','var(--blue-700)'],qa:['var(--green-100)','var(--green-700)'],supervisor:['var(--amber-100)','var(--amber-700)'],manager:['var(--navy-900)','#fff']};
+    const roleChip={qc:['var(--c-info-bg)','var(--c-info-ink)'],qa:['var(--c-ok-bg)','var(--c-ok-ink)'],supervisor:['var(--c-warn-bg)','var(--c-warn-ink)'],manager:['var(--c-selected-bg)','var(--c-selected-ink)']};
     const teamList=(s.profiles||[]).map(p=>({id:p.id,name:p.name||'—',email:p.email||'',avatar:app.avatarOf(p.name,p),isMe:p.id===me.id,active:p.active!==false,
       roleLabel:T.roles[p.role]||p.role,roleBg:(roleChip[p.role]||roleChip.qc)[0],roleFg:(roleChip[p.role]||roleChip.qc)[1],open:()=>app.openPerson(p.id),
       roles:ORDER.map(k=>({label:T.short[k],...pill(p.role===k),pick:()=>app.setRole(p.id,k)}))}));
@@ -345,7 +355,7 @@ export function buildViewModel(app) {
       saveName:()=>{app.patchProfile(pp.id,{name:s.personName.trim()},T.people.saved); app.setState({personName:null});},
       onPhoto:e=>{const f=e.target.files&&e.target.files[0]; e.target.value=''; app.changePhoto(pp.id,f);},
       roles:ORDER.map(k=>({label:T.short[k],...pill(pp.role===k),pick:()=>app.setRole(pp.id,k)})),
-      activeT:{bg:pp.active!==false?'var(--green-50)':'#fff',bd:pp.active!==false?'var(--green-300)':'var(--blue-200)',ic:pp.active!==false?'var(--green-700)':'var(--navy-500)',track:pp.active!==false?'var(--green-600)':'var(--gray-300)',knob:pp.active!==false?'21px':'3px',
+      activeT:{...okT(pp.active!==false),
         toggle:()=>app.patchProfile(pp.id,{active:pp.active===false},T.people.saved)},
       pw:s.personPw||'',onPw:e=>app.setState({personPw:e.target.value}),pwDisabled:!!s.busy||(s.personPw||'').length<6,setPw:()=>app.setPersonPassword(pp.id),
       confirm:!!s.personConfirm,askRemove:()=>app.setState({personConfirm:true}),cancelRemove:()=>app.setState({personConfirm:false}),remove:()=>app.removePerson(pp.id),busy:!!s.busy}:null;
@@ -359,7 +369,7 @@ export function buildViewModel(app) {
     const ps=s.push, P=T.push, pOn=ps.on;
     const push={support:ps.support, on:pOn, busy:ps.busy,
       status:ps.support==='ios-install'?P.iosInstall:ps.permission==='denied'?P.blocked:pOn?P.onSub:P.offSub,
-      toggle:{bg:pOn?'var(--green-50)':'#fff',bd:pOn?'var(--green-300)':'var(--blue-200)',ic:pOn?'var(--green-700)':'var(--navy-500)',track:pOn?'var(--green-600)':'var(--gray-300)',knob:pOn?'21px':'3px',
+      toggle:{...okT(pOn),
         toggle:()=>{ if(ps.busy) return; if(pOn) app.disablePush(); else app.enablePush(); }},
       test:()=>app.testPush(), enable:()=>app.enablePush(), later:()=>app.pushLater(),
       showCard:ps.support==='yes'&&ps.permission!=='denied'&&!pOn&&!ps.later};
@@ -372,7 +382,7 @@ export function buildViewModel(app) {
         n:i+1, total:steps.length, first:i===0, last:i===steps.length-1, dots:steps.map((x,j)=>j===i),
         next:()=>app.tourGo(i+1), back:()=>app.tourGo(i-1), skip:()=>app.endTour(),
         labels:{skip:G.skip,next:i===steps.length-1?G.start:G.next,back:G.back,of:G.of}}; }
-    const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,bg:on?'var(--navy-900)':'transparent',fg:on?'#fff':'var(--navy-500)',pick:()=>app.setState({lang:k})};});
+    const langs=[['en','EN'],['km','ខ្មែរ']].map(([k,l])=>{const on=app.lang()===k; return {label:l,on,bg:on?'var(--c-selected-bg)':'transparent',fg:on?'var(--c-selected-ink)':'var(--c-muted)',pick:()=>app.setState({lang:k})};});
 
     return {
       t:T, me, is, nav, stats, attention, lines, linesHead, lineSheet, lineForm, home, kpis, homeSections, checklist, team, trendRows, trendTabs, filters, listItems, listEmpty:!listItems.length, taskItems, tasksEmpty:!taskItems.length, alertItems,
@@ -388,7 +398,7 @@ export function buildViewModel(app) {
       addDetailsNow:()=>{ const r=s.reports.find(x=>x.id===s.lastId); app.setState({selId:s.lastId}); app.go('details',{draft:draftOf(r),recording:false}); },
       draft:dr, locs, voice, q:s.q||'', hasQ:!!(s.q||''), onQ:e=>app.setState({q:e.target.value}), clearQ:()=>app.setState({q:''}),
       fDates, fLines, fProducts, fSevs, activeF, openFilters:()=>app.setState({sheet:'filters'}), resetF:()=>app.setState({f:{date:'any',lines:[],products:[],sevs:[]}}),
-      fBtn:{has:activeF.length>0,n:activeF.length,bg:activeF.length?'var(--navy-900)':'#fff',bd:activeF.length?'var(--navy-900)':'var(--blue-200)',fg:activeF.length?'#fff':'var(--navy-900)'},
+      fBtn:{has:activeF.length>0,n:activeF.length,...pill(activeF.length>0)},
       resultText:nRes+' '+(nRes===1?T.resultW:T.resultsW), showResults:T.showN+' '+nRes+' '+(nRes===1?T.resultW:T.resultsW), decOpts, decDays, decOwners, decSub, confirmDecision,
       dec:{showSched:dc.choice==='keep'||dc.choice==='lab',showText:dc.choice==='other',text:dc.text||'',dueText:T.remindOn+' '+dueLabel(dc.days||3),disabled:dc.choice==='other'&&!(dc.text||'').trim()},
       onDecText:e=>setDec({text:e.target.value}), hcTypes, hcDaysL, hcOwners, hcDueText:T.remindOn+' '+dueLabel(dr.hcDays||3), dueChecks, ptypes, pnames, units, supports, holdT, urgentT, hasPtype:!!dr.ptype, pnameOther:dr.pname==='__other',
@@ -411,7 +421,7 @@ export function buildViewModel(app) {
         app.setState({sheet:null}); if(needA) app.addNote({id:s.selId,icon:'stamp',tone:'blue',text:'Approval needed to close '+s.selId+': '+rr.title,roles:['manager']}); },
       esc:(()=>{const rr=s.reports.find(x=>x.id===s.selId); const nx=rr?ORDER[ORDER.indexOf(rr.level||'qa')+1]:null; const e=s.esc||{};
         return {toLabel:nx?T.short[nx]:'',toName:nx?PEOPLE[nx].name:'',avatar:nx?PEOPLE[nx].avatar:'',note:e.note||'',disabled:e.reason==null};})(),
-      escReasons:T.reasons.map((l,i)=>{const on=(s.esc||{}).reason===i; return {label:l,bg:on?'var(--navy-900)':'#fff',fg:on?'#fff':'var(--navy-900)',bd:on?'var(--navy-900)':'var(--blue-200)',pick:()=>app.setState(st=>({esc:{...st.esc,reason:i}}))};}),
+      escReasons:T.reasons.map((l,i)=>{const on=(s.esc||{}).reason===i; return {label:l,...pill(on),pick:()=>app.setState(st=>({esc:{...st.esc,reason:i}}))};}),
       onEscNote:e=>{const v=e.target.value; app.setState(st=>({esc:{...st.esc,note:v}}));},
       doEscalate:()=>{ const rr=s.reports.find(x=>x.id===s.selId); const nx=ORDER[ORDER.indexOf(rr.level||'qa')+1]; const e=s.esc||{}; const t=app.now();
         const why=T.reasons[e.reason]+(e.note?' · '+e.note:'');

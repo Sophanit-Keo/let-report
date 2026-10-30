@@ -51,9 +51,12 @@ export function CameraStep({ v }) {
     }
   };
 
+  // The camera is dark in both themes: its text and marks are var(--c-on-dark), and its backdrop, translucent white
+  // buttons and text shadow are deliberate fixed colours (the theme's names would turn them light in the dark theme).
   const round = { width: 52, height: 52, borderRadius: 12, background: 'rgba(255,255,255,.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' };
   return (
     <div style={{ flex: 1, position: 'relative', display: 'flex', flexDirection: 'column' }}>
+      {/* Deliberate: the dark camera backdrop, the same in both themes */}
       <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(120% 70% at 50% 40%,#2A3F5E 0%,#0B1A30 70%)' }} />
       <video ref={videoRef} className="cam-video" playsInline muted autoPlay style={{ opacity: live ? 1 : 0, transition: 'opacity 200ms' }} />
       <input ref={shootInput} type="file" accept="image/*" capture="environment" onChange={fromFile} style={{ display: 'none' }} />
@@ -61,30 +64,31 @@ export function CameraStep({ v }) {
 
       <div className="cap-top" style={{ position: 'relative', display: 'flex', alignItems: 'center', padding: '0 16px' }}>
         <div {...tap(v.nav.home)} aria-label="Close" style={{ width: 40, height: 40, borderRadius: '50%', background: 'rgba(255,255,255,.14)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Icon name="x" size={22} color="#fff" />
+          <Icon name="x" size={22} color="var(--c-on-dark)" />
         </div>
-        <div style={{ flex: 1, textAlign: 'center', color: '#fff', fontSize: 15, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,.4)' }}>{t.pointAt}</div>
+        <div style={{ flex: 1, textAlign: 'center', color: 'var(--c-on-dark)', fontSize: 15, fontWeight: 700, textShadow: '0 1px 4px rgba(0,0,0,.4)' }}>{t.pointAt}</div>
         <div style={{ width: 40 }} />
       </div>
 
       <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 44px' }}>
         <div style={{ position: 'relative', width: '100%', maxWidth: 300, aspectRatio: '1', maxHeight: '100%' }}>
-          <div style={{ position: 'absolute', left: 0, top: 0, width: 36, height: 36, borderLeft: '3px solid #fff', borderTop: '3px solid #fff', borderRadius: '10px 0 0 0' }} />
-          <div style={{ position: 'absolute', right: 0, top: 0, width: 36, height: 36, borderRight: '3px solid #fff', borderTop: '3px solid #fff', borderRadius: '0 10px 0 0' }} />
-          <div style={{ position: 'absolute', left: 0, bottom: 0, width: 36, height: 36, borderLeft: '3px solid #fff', borderBottom: '3px solid #fff', borderRadius: '0 0 0 10px' }} />
-          <div style={{ position: 'absolute', right: 0, bottom: 0, width: 36, height: 36, borderRight: '3px solid #fff', borderBottom: '3px solid #fff', borderRadius: '0 0 10px 0' }} />
-          {failed ? <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 28, textAlign: 'center', color: 'var(--blue-200)', fontSize: 13, lineHeight: 1.5, fontWeight: 600 }}>{t.cameraOff}</div> : null}
+          <div style={{ position: 'absolute', left: 0, top: 0, width: 36, height: 36, borderLeft: '3px solid var(--c-on-dark)', borderTop: '3px solid var(--c-on-dark)', borderRadius: '10px 0 0 0' }} />
+          <div style={{ position: 'absolute', right: 0, top: 0, width: 36, height: 36, borderRight: '3px solid var(--c-on-dark)', borderTop: '3px solid var(--c-on-dark)', borderRadius: '0 10px 0 0' }} />
+          <div style={{ position: 'absolute', left: 0, bottom: 0, width: 36, height: 36, borderLeft: '3px solid var(--c-on-dark)', borderBottom: '3px solid var(--c-on-dark)', borderRadius: '0 0 0 10px' }} />
+          <div style={{ position: 'absolute', right: 0, bottom: 0, width: 36, height: 36, borderRight: '3px solid var(--c-on-dark)', borderBottom: '3px solid var(--c-on-dark)', borderRadius: '0 0 10px 0' }} />
+          {/* Deliberate: the design's pale blue (blue-200) fixed, as the camera stays dark; var(--blue-200) turns dark in the dark theme */}
+          {failed ? <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 28, textAlign: 'center', color: '#C4DFFA', fontSize: 13, lineHeight: 1.5, fontWeight: 600 }}>{t.cameraOff}</div> : null}
         </div>
       </div>
 
       <div className="cap-bottom" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 40px' }}>
         <div {...tap(() => pickInput.current && pickInput.current.click())} aria-label={t.gallery} style={round}>
-          <Icon name="image" size={22} color="#fff" />
+          <Icon name="image" size={22} color="var(--c-on-dark)" />
         </div>
-        <div {...tap(shoot)} aria-label={t.reportIssue} style={{ width: 78, height: 78, borderRadius: '50%', border: '4px solid #fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div style={{ width: 62, height: 62, borderRadius: '50%', background: '#fff' }} />
+        <div {...tap(shoot)} aria-label={t.reportIssue} style={{ width: 78, height: 78, borderRadius: '50%', border: '4px solid var(--c-on-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: 62, height: 62, borderRadius: '50%', background: 'var(--c-on-dark)' }} />
         </div>
-        <div {...tap(v.skipPhoto)} style={{ ...round, color: '#fff', fontSize: 11, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>{t.skip}</div>
+        <div {...tap(v.skipPhoto)} style={{ ...round, color: 'var(--c-on-dark)', fontSize: 11, fontWeight: 700, textAlign: 'center', lineHeight: 1.2 }}>{t.skip}</div>
       </div>
     </div>
   );

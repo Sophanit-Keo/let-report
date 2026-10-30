@@ -30,11 +30,11 @@ export function AddDetailsScreen({ v }) {
         <div style={{ ...grid(3), marginTop: -10 }}>{v.units.map((o, i) => <Pill key={i} o={o} px={8} />)}</div>
         <Toggle o={v.holdT} icon="circle-pause" title={t.hold} sub={t.holdSub} />
         {dr.hold ? (
-          <div style={{ marginTop: -10, background: '#fff', border: '1.5px solid var(--navy-900)', borderTop: 'none', borderRadius: '0 0 14px 14px', padding: 14, display: 'flex', flexDirection: 'column', gap: 14, animation: 'lrFade 160ms' }}>
+          <div style={{ marginTop: -10, background: 'var(--c-surface)', border: '1.5px solid var(--c-selected-line)', borderTop: 'none', borderRadius: '0 0 14px 14px', padding: 14, display: 'flex', flexDirection: 'column', gap: 14, animation: 'lrFade 160ms' }}>
             <Field label={t.hcType}><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{v.hcTypes.map((o, i) => <Pill key={i} o={o} h={36} px={12} />)}</div></Field>
             <Field label={t.hcRemind}>
               <div style={{ ...grid(3), gap: 6 }}>{v.hcDaysL.map((o, i) => <Pill key={i} o={o} h={36} px={8} />)}</div>
-              <div style={{ fontSize: 12, color: 'var(--gray-500)', display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="bell-ring" size={14} color="var(--gray-500)" />{v.hcDueText}</div>
+              <div style={{ fontSize: 12, color: 'var(--c-muted)', display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="bell-ring" size={14} color="var(--c-muted)" />{v.hcDueText}</div>
             </Field>
             <Field label={t.hcWho}><div style={{ ...grid(2), gap: 6 }}>{v.hcOwners.map((o, i) => <Pill key={i} o={o} h={36} px={8} />)}</div></Field>
           </div>
@@ -47,7 +47,7 @@ export function AddDetailsScreen({ v }) {
         <Field label={t.voice}>
           <div {...tap(v.toggleVoice)} style={{ height: 56, borderRadius: 14, border: '1.5px solid ' + v.voice.bd, background: v.voice.bg, display: 'flex', alignItems: 'center', gap: 12, padding: '0 14px' }}>
             <div style={{ width: 36, height: 36, borderRadius: '50%', background: v.voice.btn, display: 'flex', alignItems: 'center', justifyContent: 'center', animation: v.voice.anim, flex: 'none' }}>
-              <Icon name={v.voice.icon} size={18} color="#fff" />
+              <Icon name={v.voice.icon} size={18} color="var(--c-accent-ink)" />
             </div>
             <div style={{ flex: 1, fontSize: 14, fontWeight: 700, color: v.voice.fg }}>{v.voice.label}</div>
           </div>
