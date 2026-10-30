@@ -263,9 +263,9 @@ export function buildViewModel(app) {
     const pickCat=k=>()=>app.setState(st=>({cap:{...st.cap,cat:k,stage:flow==='B'&&k!=='custom'?'sev':st.cap.stage}}));
     const pickSev=i=>()=>app.setState(st=>({cap:{...st.cap,sev:i,stage:flow==='C'?st.cap.stage:'sign'}}));
     const cats=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),...accentPill(on),ic:on?'var(--c-accent-ink)':'var(--c-accent)'};});
-    // On the camera, which is dark in both themes: a white chip with navy text when picked, else a translucent white one.
-    // Deliberate exceptions: the translucent white and the navy text (#0F2D58, the light --c-ink) do not follow the theme.
-    const catsDark=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),on,bg:on?'var(--c-on-dark)':'rgba(255,255,255,.12)',fg:on?'#0F2D58':'var(--c-on-dark)'};});
+    // Flow A's categories over the photo, on a sheet that is navy in both themes: a white chip with navy text when picked,
+    // else a translucent white one. Deliberate exception (always dark): #fff, #0F2D58 and the translucent white stay fixed.
+    const catsDark=CATS.map(([k,ic],i)=>{const on=c.cat===k; return {label:T.cats[i],icon:ic,pick:pickCat(k),on,bg:on?'#fff':'rgba(255,255,255,.12)',fg:on?'#0F2D58':'var(--c-on-dark)'};});
     // A picked severity is a solid block of its colour with the text cut out in the card's colour (white in light).
     const sevs=T.sev.map((l,i)=>{const on=c.sev===i; return {label:l,pick:pickSev(i),on,bg:on?SEV[i].fg:SEV[i].bg,fg:on?'var(--c-surface)':SEV[i].fg,bd:on?SEV[i].fg:'transparent'};});
     const sevsDark=T.sev.map((l,i)=>({label:l,pick:pickSev(i),bg:SEV[i].bg,fg:SEV[i].fg}));

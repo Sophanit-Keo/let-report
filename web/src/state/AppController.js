@@ -30,15 +30,6 @@ function initialsAvatar(name) {
   return "data:image/svg+xml;utf8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='${c}'/><text x='20' y='26' font-family='Arial,sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'>${ini}</text></svg>`);
 }
 
-// The signature as it is kept: navy strokes on a clear background, whichever theme it was drawn in (in dark the pen
-// on screen is light). Deliberate exception: #0F2D58 (the light --c-ink) is the colour of the record, not of the screen.
-const SIG_INK = '#0F2D58';
-function sigImage(el) {
-  const out = document.createElement('canvas'); out.width = el.width; out.height = el.height;
-  const x = out.getContext('2d'); x.drawImage(el, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = SIG_INK; x.fillRect(0, 0, out.width, out.height);
-  return out.toDataURL('image/png');
-}
-
 // A scheduled hold check whose date has come becomes "due".
 // Easy-to-read temporary password, e.g. "mango-4821".
 const WORDS = ['mango', 'lotus', 'river', 'tiger', 'mekong', 'jasmine', 'rice', 'palm', 'amber', 'cloud'];
@@ -333,12 +324,11 @@ export class AppController extends React.Component {
     if (!el || el === this._sig) return; this._sig = el;
     // size the drawing buffer to the on-screen size (sharp on retina, any screen width)
     const r = el.getBoundingClientRect(), k = Math.min(3, Math.max(2, window.devicePixelRatio || 1)); el.width = Math.round((r.width || 362) * k); el.height = Math.round((r.height || 100) * k);
-    const ctx = el.getContext('2d'); ctx.lineWidth = 2.5 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // The pen is the theme's text colour (--c-ink), read when a stroke starts, so it shows on the pad in light and dark.
-    // A canvas cannot use a CSS variable; SIG_INK (the light --c-ink) is only the fallback for a browser that gives none.
-    const ink = () => window.getComputedStyle(el).getPropertyValue('--c-ink').trim() || SIG_INK;
+    // Deliberate exception: the pad is white and the pen navy (#0F2D58) in both themes, because the signature is kept as an
+    // image and must look the same whoever signed and in which theme.
+    const ctx = el.getContext('2d'); ctx.lineWidth = 2.5 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0F2D58';
     let down = false; const pos = e => { const b = el.getBoundingClientRect(); return [(e.clientX - b.left) * el.width / b.width, (e.clientY - b.top) * el.height / b.height]; };
-    el.onpointerdown = e => { down = true; try { el.setPointerCapture(e.pointerId); } catch (_) { /* old browsers */ } const [x, y] = pos(e); ctx.strokeStyle = ink(); ctx.beginPath(); ctx.moveTo(x, y); e.preventDefault(); };
+    el.onpointerdown = e => { down = true; try { el.setPointerCapture(e.pointerId); } catch (_) { /* old browsers */ } const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); e.preventDefault(); };
     el.onpointermove = e => { if (!down) return; const [x, y] = pos(e); ctx.lineTo(x, y); ctx.stroke(); if (!this.state.signed) this.setState({ signed: true }); e.preventDefault(); };
     el.onpointerup = el.onpointercancel = () => { down = false; };
   };
@@ -353,7 +343,7 @@ export class AppController extends React.Component {
     const holdCheck = pre.hold ? { type: 'swollen', days: 3, owner: 'QC team', status: 'scheduled', dueAt: addDaysIso(3), due: dueLabel(3) } : null;
     if (holdCheck) tl.push(['hcSet', me, t]);
     const title = cap.cat === 'custom' ? (cap.customText || '').trim() : TITLES[cap.cat];
-    let signature = null; try { signature = this._sig ? sigImage(this._sig) : null; } catch (e) { signature = null; }
+    let signature = null; try { signature = this._sig ? this._sig.toDataURL('image/png') : null; } catch (e) { signature = null; }
     this.setState({ busy: true });
     try {
       const photoPath = cap.photoUrl ? await repo.uploadImage(cap.photoUrl, 'reports') : null;
