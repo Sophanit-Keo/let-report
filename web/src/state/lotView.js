@@ -5,7 +5,7 @@ import { fromLocalInput } from '../utils/time.js';
 
 const ms = v => Date.parse(v) || 0;
 const EVENT_ICON = { start: 'play', status: 'circle-pause', fill_cip: 'refresh-ccw', continue: 'play', finish: 'square', note: 'pencil-line' };
-const EVENT_COLOR = { start: 'var(--green-700)', status: 'var(--amber-700)', fill_cip: 'var(--blue-700)', continue: 'var(--green-700)', finish: 'var(--navy-900)', note: 'var(--gray-700)' };
+const EVENT_COLOR = { start: 'var(--c-ok-ink)', status: 'var(--c-warn-ink)', fill_cip: 'var(--c-info-ink)', continue: 'var(--c-ok-ink)', finish: 'var(--c-ink)', note: 'var(--c-ink-2)' };
 const ADD_KINDS = ['stopped', 'running', 'maintenance', 'fill', 'cont', 'note'];
 const EDIT_STATUSES = ['stopped', 'running', 'maintenance', 'changeover', 'idle'];
 // Columns that are bookkeeping, not something a person changed
@@ -56,7 +56,7 @@ export function formatLog(g, { T, stLabelOf, stampLabel }) {
     const detail = c.detail ? (c.detail[1] || c.detail[0]) : '', hours = c.hours ? (c.hours[1] != null ? c.hours[1] : c.hours[0]) : null;
     title = L[g.action === 'create' ? 'evAdd' : g.action === 'delete' ? 'evDelete' : 'evEdit'] + ': ' + eventLabel(T, stLabelOf, g.eventKind, detail, g.action === 'edit' ? null : hours);
   }
-  return { id: g.id, title, lines, who: g.byName || '—', when: stampLabel(g.at), tone: g.action === 'delete' ? 'var(--red-700)' : g.action === 'create' ? 'var(--green-700)' : 'var(--blue-700)' };
+  return { id: g.id, title, lines, who: g.byName || '—', when: stampLabel(g.at), tone: g.action === 'delete' ? 'var(--c-bad-ink)' : g.action === 'create' ? 'var(--c-ok-ink)' : 'var(--c-info-ink)' };
 }
 
 export function buildLotView(app, { T, pill, stLabelOf, hoursLabel, stampLabel, P }) {
@@ -95,7 +95,7 @@ export function buildLotView(app, { T, pill, stLabelOf, hoursLabel, stampLabel, 
       statuses: ev.kind === 'status' ? EDIT_STATUSES.map(k => ({ label: stLabelOf(k), ...pill(f.detail === k), pick: () => set('evEdit', { detail: k }) })) : null,
       note: f.note, onNote: e => set('evEdit', { note: e.target.value }),
       disabled: !!s.busy || !!bad, save: app.saveEvEdit, cancel: () => app.setState({ evEdit: null }) }; })() : null;
-    return { id: ev.id, kind: ev.kind, icon: EVENT_ICON[ev.kind] || 'clock', color: EVENT_COLOR[ev.kind] || 'var(--gray-700)',
+    return { id: ev.id, kind: ev.kind, icon: EVENT_ICON[ev.kind] || 'clock', color: EVENT_COLOR[ev.kind] || 'var(--c-ink-2)',
       time: stampLabel(ev.at), label: eventLabel(T, stLabelOf, ev.kind, ev.detail, ev.hours), by: ev.byName, note: ev.note,
       edit: () => app.openEvEdit(ev), canDelete: !fixed, fixedNote: fixed ? T.lotd.fixed : '',
       askDelete: () => app.setState({ evDel: ev.id, evEdit: null }), confirming: s.evDel === ev.id, del: () => app.deleteEvent(ev.id), cancelDel: () => app.setState({ evDel: null }), editing: ed };

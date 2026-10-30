@@ -2,7 +2,7 @@
 import { Button, Field, Icon, PhotoPicker, Pill, Toggle } from '../components/index.js';
 import { tap } from '../utils/tap.js';
 import { inputStyle } from '../styles/inline.js';
-import { title, col, grid } from './sheetStyles.js';
+import { title, col, grid, dangerPanel, dangerBtn, dangerAsk } from './sheetStyles.js';
 
 export function PersonSheet({ v }) {
   const t = v.t, p = v.person;
@@ -12,8 +12,8 @@ export function PersonSheet({ v }) {
       <div style={{ display: 'flex', gap: 14, alignItems: 'center', paddingRight: 40 }}>
         <PhotoPicker src={p.avatar} size={64} onChange={p.onPhoto} label={t.people.changePhoto} busy={p.busy} />
         <div style={{ flex: 1, minWidth: 0, ...col(2) }}>
-          <h2 style={title}>{p.name}{p.isMe ? <span style={{ color: 'var(--gray-500)', fontWeight: 600, fontSize: 15 }}> · {t.you}</span> : null}</h2>
-          <div style={{ fontSize: 13, color: 'var(--gray-500)', overflowWrap: 'anywhere' }}>{p.email}</div>
+          <h2 style={title}>{p.name}{p.isMe ? <span style={{ color: 'var(--c-muted)', fontWeight: 600, fontSize: 15 }}> · {t.you}</span> : null}</h2>
+          <div style={{ fontSize: 13, color: 'var(--c-muted)', overflowWrap: 'anywhere' }}>{p.email}</div>
         </div>
       </div>
 
@@ -41,17 +41,17 @@ export function PersonSheet({ v }) {
 
       {!p.isMe ? (
         p.confirm ? (
-          <div style={{ ...col(10), padding: 14, borderRadius: 14, background: 'var(--red-100)', border: '1.5px solid var(--red-500)' }}>
-            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--red-700)' }}>{t.people.removeQ}</div>
-            <div style={{ fontSize: 13, color: 'var(--red-700)', lineHeight: 1.4 }}>{t.people.removeSub}</div>
+          <div style={dangerPanel}>
+            <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--c-bad-ink)' }}>{t.people.removeQ}</div>
+            <div style={{ fontSize: 13, color: 'var(--c-bad-ink)', lineHeight: 1.4 }}>{t.people.removeSub}</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
               <Button variant="secondary" fullWidth onClick={p.cancelRemove}>{t.people.cancel}</Button>
-              <button type="button" disabled={p.busy} onClick={p.remove} style={{ height: 40, borderRadius: 8, border: 'none', background: 'var(--red-700)', color: '#fff', fontWeight: 700, fontSize: 16, cursor: 'pointer', fontFamily: 'inherit' }}>{t.people.remove}</button>
+              <button type="button" disabled={p.busy} onClick={p.remove} style={dangerBtn}>{t.people.remove}</button>
             </div>
           </div>
         ) : (
-          <div {...tap(p.askRemove)} style={{ height: 40, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 15, fontWeight: 700, color: 'var(--red-700)', border: '2px solid var(--red-100)' }}>
-            <Icon name="trash-2" size={16} color="var(--red-700)" />{t.people.remove}
+          <div {...tap(p.askRemove)} style={dangerAsk}>
+            <Icon name="trash-2" size={16} color="var(--c-bad-ink)" />{t.people.remove}
           </div>
         )
       ) : null}

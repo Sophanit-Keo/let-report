@@ -6,7 +6,7 @@ export function TopBar({ onBack, icon = 'chevron-left', title, label }) {
   return (
     <div className="topbar">
       <div {...tap(onBack, 'icon-btn')} aria-label={label || 'Back'}>
-        <Icon name={icon} size={icon === 'x' ? 22 : 24} color="var(--navy-900)" />
+        <Icon name={icon} size={icon === 'x' ? 22 : 24} color="var(--c-ink)" />
       </div>
       <div className="topbar-title">{title}</div>
       <div style={{ width: 40 }} />

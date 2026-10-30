@@ -23,7 +23,7 @@ export function SheetHost({ v }) {
       <div className="sheet-backdrop" onClick={v.closeSheet} />
       <div className="sheet" role="dialog" aria-modal="true">
         <div className="sheet-handle" />
-        <div {...tap(v.closeSheet, 'icon-btn sheet-close')} aria-label="Close"><Icon name="x" size={20} color="var(--navy-500)" /></div>
+        <div {...tap(v.closeSheet, 'icon-btn sheet-close')} aria-label="Close"><Icon name="x" size={20} color="var(--c-muted)" /></div>
         {s.person ? <PersonSheet v={v} /> : null}
         {s.addPerson ? <AddPersonSheet v={v} /> : null}
         {s.line ? <LineSheet v={v} /> : null}

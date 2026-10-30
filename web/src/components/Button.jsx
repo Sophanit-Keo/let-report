@@ -1,4 +1,5 @@
-// Design-system Button: primary / success / secondary / navy, with hover and press states.
+// Design-system Button: primary / success / secondary / navy, with hover and press states. Colours are the theme's --c-*
+// tokens; the secondary outline and two hovers that differ by theme are --lr-btn-* in styles/base.css.
 import { useState } from 'react';
 import { Icon } from './Icon.jsx';
 
@@ -6,11 +7,12 @@ import { Icon } from './Icon.jsx';
 
 const SZ = { sm: { h: 40, px: 18, fs: 18, r: 8, ic: 18 }, md: { h: 52, px: 24, fs: 22, r: 10, ic: 22 } };
 
+// bd: an outline (flat, no shadow); ln: an edge on a raised button (keeps its shadow; the same colour as the fill in light).
 const V = {
-  primary: { bg: 'var(--blue-600)', hv: 'var(--blue-700)', fg: 'var(--white)' },
-  success: { bg: 'var(--green-600)', hv: 'var(--green-700)', fg: 'var(--white)' },
-  secondary: { bg: 'var(--white)', hv: 'var(--blue-50)', fg: 'var(--blue-700)', bd: 'var(--blue-600)' },
-  navy: { bg: 'var(--navy-900)', hv: 'var(--navy-800)', fg: 'var(--white)' },
+  primary: { bg: 'var(--c-accent)', hv: 'var(--c-accent-hover)', fg: 'var(--c-accent-ink)' },
+  success: { bg: 'var(--c-brand)', hv: 'var(--c-brand-hover)', fg: 'var(--c-brand-ink)' },
+  secondary: { bg: 'var(--c-field)', hv: 'var(--lr-btn2-hover)', fg: 'var(--c-accent-hover)', bd: 'var(--lr-btn2-line)' },
+  navy: { bg: 'var(--c-selected-bg)', hv: 'var(--lr-btn-navy-hover)', fg: 'var(--c-selected-ink)', ln: 'var(--c-selected-line)' },
 };
 
 export function Button({ variant = 'primary', size = 'sm', icon, iconRight, fullWidth, disabled, onClick, children, type = 'button' }) {
@@ -19,10 +21,10 @@ export function Button({ variant = 'primary', size = 'sm', icon, iconRight, full
   const s = SZ[size] || SZ.sm;
   const v = V[variant] || V.primary;
   const st = disabled ? 'disabled' : down ? 'active' : hover ? 'hover' : 'default';
-  let bg = v.bg, fg = v.fg, bd = v.bd, shadow = v.bd ? 'none' : 'var(--shadow-button)', ty = 0;
+  let bg = v.bg, fg = v.fg, bd = v.bd || v.ln, shadow = v.bd ? 'none' : 'var(--shadow-button)', ty = 0;
   if (st === 'hover') bg = v.hv;
   if (st === 'active') { bg = v.hv; shadow = v.bd ? 'none' : 'var(--shadow-button-pressed)'; ty = 2; }
-  if (st === 'disabled') { bg = 'var(--gray-100)'; fg = 'var(--gray-500)'; bd = 'var(--gray-200)'; shadow = 'none'; }
+  if (st === 'disabled') { bg = 'var(--c-raised)'; fg = 'var(--c-muted)'; bd = 'var(--c-line-soft)'; shadow = 'none'; }
   return (
     <button
       type={type}

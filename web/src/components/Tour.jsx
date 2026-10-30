@@ -61,7 +61,7 @@ export function Tour({ tour }) {
         : <div className="tour-dim" />}
       <div className="tour-card" ref={cardRef} style={style} tabIndex={-1}>
         <div className="tour-card-top">
-          <div className="tour-ic"><Icon name={tour.icon} size={20} color="#fff" /></div>
+          <div className="tour-ic"><Icon name={tour.icon} size={20} color="var(--c-accent-ink)" /></div>
           <span className="tour-count">{tour.n} {tour.labels.of} {tour.total}</span>
           {!tour.last ? <span {...tap(tour.skip, 'tour-skip')}>{tour.labels.skip}</span> : null}
         </div>

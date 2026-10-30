@@ -15,7 +15,7 @@ export function Bubbles({ items, delLabel }) {
           <div className={'msg-bubble' + (b.sending ? ' sending' : '')}>
             {b.hasPhoto ? (
               b.photo ? <a href={b.photo} target="_blank" rel="noreferrer" className="msg-photo"><img src={b.photo} alt="" loading="lazy" /></a>
-                : <div className="msg-photo placeholder"><Icon name="image" size={22} color="var(--gray-400)" /></div>
+                : <div className="msg-photo placeholder"><Icon name="image" size={22} color="var(--c-muted)" /></div>
             ) : null}
             {b.body ? <div className="msg-text">{b.body}</div> : null}
           </div>
@@ -71,17 +71,17 @@ export function Composer({ c, id }) {
       {c.photo ? (
         <div className="composer-photo">
           <img src={c.photo} alt="" />
-          <span {...tap(c.clear, 'composer-photo-x')} aria-label={c.labels.remove}><Icon name="x" size={14} color="#fff" /></span>
+          <span {...tap(c.clear, 'composer-photo-x')} aria-label={c.labels.remove}><Icon name="x" size={14} color="var(--c-surface)" /></span>
         </div>
       ) : null}
       <div className="composer-row">
         <label className="composer-btn" aria-label={c.labels.add} title={c.labels.add}>
-          <Icon name="image-plus" size={22} color="var(--blue-600)" />
+          <Icon name="image-plus" size={22} color="var(--c-accent)" />
           <input type="file" accept="image/*" onChange={c.onPick} style={{ position: 'absolute', width: 1, height: 1, opacity: 0, overflow: 'hidden' }} />
         </label>
         <textarea id={id} ref={ref} rows={1} value={c.text} onChange={c.onText} onKeyDown={onKey} placeholder={c.placeholder} maxLength={4000} />
         <button type="button" className="composer-send" disabled={!c.canSend} onClick={c.send} aria-label={c.labels.send} title={c.labels.send}>
-          <Icon name="send-horizontal" size={20} color="#fff" />
+          <Icon name="send-horizontal" size={20} />
         </button>
       </div>
     </div>
