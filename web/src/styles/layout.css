@@ -153,10 +153,10 @@
 @media (min-width: 1024px) { .install-card.above-tabs { bottom: 24px; } }
 
 /* ---------- Dark control room only (light keeps today's look) ---------- */
-/* a faint engineering grid behind every page, in the dividers' colour */
+/* a faint engineering grid behind every page (--c-grid, the simulation's grid colour) */
 :root[data-theme="dark"] .app {
-  background-image: linear-gradient(var(--c-line-soft) 1px, transparent 1px), linear-gradient(90deg, var(--c-line-soft) 1px, transparent 1px);
-  background-size: 44px 44px; background-position: -1px -1px;
+  background-image: linear-gradient(var(--c-grid) 1px, transparent 1px), linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px;
 }
 :root[data-theme="dark"] .auth-wrap { background: transparent; }
 :root[data-theme="dark"] .sheet { border: 1px solid var(--c-line); border-bottom: 0; box-shadow: 0 -12px 40px var(--c-shadow); }

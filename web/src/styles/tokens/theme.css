@@ -40,6 +40,7 @@
   --c-info: var(--blue-500);  --c-info-ink: var(--blue-700);  --c-info-bg: var(--blue-100);
   /* the control room's glows: none in light */
   --c-glow-ok: none; --c-glow-warn: none; --c-glow-bad: none; --c-glow-accent: none;
+  --c-grid: transparent;              /* the backdrop grid: none in light */
   color-scheme: light;
 }
 
@@ -75,6 +76,9 @@
   --c-glow-warn: 0 0 10px rgba(245, 177, 52, .5);
   --c-glow-bad: 0 0 10px rgba(255, 91, 74, .55);
   --c-glow-accent: 0 0 14px rgba(56, 189, 248, .35);
+  --c-grid: rgba(56, 189, 248, .045);  /* the faint backdrop grid, as in the simulation */
+  /* section labels as control-room tags (sheetStyles.label reads them; light keeps today's bold label) */
+  --lr-label-size: 12px; --lr-label-case: uppercase; --lr-label-track: .06em; --lr-label-ink: var(--c-muted);
 
   /* A safety net for anything still on the design system's hue names: light tints become dark tints and dark
      shades become light ones, so text stays readable. It cannot fix a dark hue used as a BACKGROUND (a selected
