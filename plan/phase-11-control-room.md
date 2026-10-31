@@ -39,7 +39,17 @@ Three `lr-ui` agents in parallel, each on its own files; none commits. The simul
 
 ## Exit checklist
 
-- [ ] No hex colour or hue name left for a surface, text, border or state outside `tokens/` (a grep shows only deliberate exceptions, each commented).
-- [ ] `npm run lint` shows no new warnings; `npm run build` passes.
-- [ ] Screenshots of Home, Reports, a report, the capture flow, Edit line info, Plan, Chat and sign-in, in both themes, on a phone and a computer, reviewed.
-- [ ] The switch keeps the choice after a reload; the app opens dark for someone who has not chosen.
+- [x] No hex colour or hue name left for a surface, text, border or state outside `tokens/` (a grep shows only deliberate exceptions, each commented).
+- [x] `npm run lint` shows no new warnings; `npm run build` passes. (181 warnings against 179: three new "ThemeToggle is defined but never used", in `Sidebar.jsx`, `AuthScreen.jsx` and `RoleSheet.jsx`, and one gone from `TabBar.jsx`. All are false: the lint setup does not see components used in JSX, as with the warnings already there.)
+- [x] Screenshots of Home, Reports, a report, the capture flow, Edit line info, Plan, Chat and sign-in, in both themes, on a phone and a computer, reviewed.
+- [x] The switch keeps the choice after a reload; the app opens dark for someone who has not chosen.
+
+## Status
+
+Built on 30 and 31 October by three `lr-ui` agents in parallel (shell, screens, sheets), checked by the simulation's `qa`:
+
+- Deliberate exceptions, each commented: the camera and the photo overlays stay dark in both themes; the signature pad stays white with a navy pen (the signature is stored as an image); the avatars' image colours; the `theme-color` meta values; severity "Low"'s neutral greys.
+- `lead` added `--c-grid` (the faint backdrop grid, as in the simulation) and turned on the uppercase section labels in dark (`--lr-label-*`).
+- Light keeps today's design, with a few shades one step off where no token matched exactly (dividers, idle tab text, progress tracks, the cleaning bar); the agents listed each.
+- `qa`: a new person gets dark even when the OS asks for light; the choice survives a reload; 36 screenshots (nine screens × two themes × phone and computer) with no problem new to this phase.
+- Open: the developer's own look on a phone and a computer.
