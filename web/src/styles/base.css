@@ -1,4 +1,4 @@
-/* Fonts, resets, keyframes and focus/tap states. */
+/* Fonts, resets, keyframes and focus/tap states. Colours are the theme's --c-* tokens (tokens/theme.css). */
 :root {
   --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-body: var(--font-display);
@@ -8,14 +8,23 @@
   --safe-b: env(safe-area-inset-bottom, 0px);
   --sidebar-w: 256px;
   --page-pad: 20px;
+  /* Button (components/Button.jsx): where the light design and the dark control room need different --c-* tokens */
+  --lr-btn2-line: var(--c-accent);       /* the secondary button's outline: today's blue in light */
+  --lr-btn2-hover: var(--c-bg);
+  --lr-btn-navy-hover: var(--navy-800);  /* deliberate hue name: today's hover of the navy button in light; no --c-* token is this navy */
+}
+:root[data-theme="dark"] {
+  --lr-btn2-line: var(--c-line);         /* dark: a quiet 1-line ghost button */
+  --lr-btn2-hover: var(--c-tint);
+  --lr-btn-navy-hover: var(--c-accent-soft);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; height: 100%; }
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body {
-  background: var(--blue-50);
-  color: var(--navy-900);
+  background: var(--c-bg);
+  color: var(--c-ink);
   font-family: var(--font-body);
   font-weight: 500;
   -webkit-font-smoothing: antialiased;
@@ -25,13 +34,13 @@ body {
 }
 #root { height: var(--app-h); }
 img { max-width: 100%; }
-button, input, textarea { font-family: inherit; }
-input, textarea { font-size: 15px; color: var(--navy-900); }
-input::placeholder, textarea::placeholder { color: var(--gray-500); opacity: 1; }
+button, input, textarea, select { font-family: inherit; }
+input, textarea, select { font-size: 15px; color: var(--c-ink); background-color: var(--c-field); }
+input::placeholder, textarea::placeholder { color: var(--c-muted); opacity: 1; }
 /* iOS zooms into inputs smaller than 16px — keep them at 16px on touch screens */
 @media (pointer: coarse) { input, textarea { font-size: 16px !important; } }
-a { color: var(--blue-600); }
-a:hover { color: var(--navy-900); }
+a { color: var(--c-accent); }
+a:hover { color: var(--c-ink); }
 
 @keyframes lrUp { from { transform: translateY(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @keyframes lrFade { from { opacity: 0; } to { opacity: 1; } }
@@ -41,11 +50,22 @@ a:hover { color: var(--navy-900); }
 
 .tap { cursor: pointer; -webkit-user-select: none; user-select: none; }
 .tap:focus { outline: none; }
-.tap:focus-visible, button:focus-visible { outline: 2.5px solid var(--blue-500); outline-offset: 2px; }
+.tap:focus-visible, button:focus-visible { outline: 2.5px solid var(--c-accent); outline-offset: 2px; }
 .card-tap { transition: border-color 120ms var(--ease-standard), box-shadow 120ms var(--ease-standard), transform 120ms var(--ease-standard); }
 @media (hover: hover) {
   .card-tap:hover { box-shadow: var(--shadow-floating) !important; }
   .pill-tap:hover { filter: brightness(.97); }
 }
 .card-tap:active { transform: scale(.99); }
+
+/* ---------- Dark control room only (light keeps today's look) ---------- */
+/* A glow is a whole box-shadow (the --c-glow-* tokens are 'none' in light, which cannot sit in a shadow list), so the
+   glows that join another shadow live here. */
+:root[data-theme="dark"] .tap:focus-visible, :root[data-theme="dark"] button:focus-visible { box-shadow: var(--c-glow-accent); }
+:root[data-theme="dark"] input:not([type="file"]):not([type="checkbox"]):not([type="radio"]):focus,
+:root[data-theme="dark"] textarea:focus, :root[data-theme="dark"] select:focus { border-color: var(--c-accent) !important; box-shadow: var(--c-glow-accent); }
+@media (hover: hover) {
+  :root[data-theme="dark"] .card-tap:hover { box-shadow: 0 10px 30px var(--c-shadow) !important; border-color: var(--c-selected-line) !important; }
+  :root[data-theme="dark"] .pill-tap:hover { filter: brightness(1.18); }
+}
 

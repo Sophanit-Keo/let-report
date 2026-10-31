@@ -19,6 +19,7 @@ import { tourState, tourMethods } from './tour.js';
 
 const REFRESH_MS = 15000;
 const AVATARS = { Sokha: 'images/avatars/sokha.png', Vina: 'images/avatars/vina.png', Dara: 'images/avatars/dara.png', Chanthy: MGR_AV };
+// Deliberate exception: the colours are drawn into the avatar image itself (like a photo), so they stay the same in both themes.
 const COLORS = ['#0F2D58', '#1F74D0', '#1E8449', '#8A5300', '#B42318', '#155AA3'];
 
 // Round avatar with initials, for people without a photo.
@@ -263,7 +264,8 @@ export class AppController extends React.Component {
 
   hcView(r, T, me) {
     const hc = r.holdCheck; if (!hc) return {}; const st = hc.status;
-    const tone = { scheduled: ['var(--blue-100)', 'var(--blue-700)', 'clock', 'var(--blue-200)'], due: ['var(--amber-100)', 'var(--amber-700)', 'bell-ring', 'var(--amber-500)'], passed: ['var(--green-100)', 'var(--green-700)', 'circle-check', 'var(--green-300)'], failed: ['var(--red-100)', 'var(--red-700)', 'circle-x', 'var(--red-500)'], decision: ['var(--red-100)', 'var(--red-700)', 'triangle-alert', 'var(--red-500)'], decided: ['var(--blue-100)', 'var(--navy-900)', 'gavel', 'var(--blue-200)'] }[st] || ['var(--blue-100)', 'var(--blue-700)', 'clock', 'var(--blue-200)'];
+    // [background, text, icon, border] by the check's status, in the theme's --c-* tokens
+    const tone = { scheduled: ['var(--c-info-bg)', 'var(--c-info-ink)', 'clock', 'var(--c-line)'], due: ['var(--c-warn-bg)', 'var(--c-warn-ink)', 'bell-ring', 'var(--c-warn)'], passed: ['var(--c-ok-bg)', 'var(--c-ok-ink)', 'circle-check', 'var(--c-ok)'], failed: ['var(--c-bad-bg)', 'var(--c-bad-ink)', 'circle-x', 'var(--c-bad)'], decision: ['var(--c-bad-bg)', 'var(--c-bad-ink)', 'triangle-alert', 'var(--c-bad)'], decided: ['var(--c-info-bg)', 'var(--c-ink)', 'gavel', 'var(--c-line)'] }[st] || ['var(--c-info-bg)', 'var(--c-info-ink)', 'clock', 'var(--c-line)'];
     const can = this.canCheck(r); const ownerL = hc.owner === 'QC team' ? T.qcTeam : hc.owner;
     const finish = ok => () => {
       const t = this.now(); const hist = [...(hc.history || []), { ok, t, by: me.name }];
@@ -274,7 +276,7 @@ export class AppController extends React.Component {
         else this.addNote({ id: r.id, icon: 'triangle-alert', tone: 'red', text: 'Decision needed: problem found at hold check for ' + (r.pname || r.title) + (r.lot ? ', lot ' + r.lot : ''), roles: [this.decider(r)] });
       }
     };
-    const history = (hc.history || []).map((x, i) => ({ n: i + 1, res: (x.ok ? T.resOk : T.resBad) + ' · ' + x.by, t: stampLabel(x.t), fg: x.ok ? 'var(--green-700)' : 'var(--red-700)' }));
+    const history = (hc.history || []).map((x, i) => ({ n: i + 1, res: (x.ok ? T.resOk : T.resBad) + ' · ' + x.by, t: stampLabel(x.t), fg: x.ok ? 'var(--c-ok-ink)' : 'var(--c-bad-ink)' }));
     const due = st === 'due' ? 'Today' : hc.dueAt ? dueLabel(hc.dueAt) : hc.due;
     return { typeLabel: T.hcTypes[hc.type] + ((hc.history || []).length && st !== 'decision' && st !== 'passed' && st !== 'failed' ? ' · ' + T.checkN + ' ' + ((hc.history || []).length + 1) : ''), sub: (r.qty ? r.qty + ' ' + r.unit + ' · ' : '') + (r.pname || '') + (r.lot ? ' · ' + r.lot : ''), due, owner: ownerL,
       stLabel: T.hcSt[st], stBg: tone[0], stFg: tone[1], icon: tone[2], icBg: tone[0], icFg: tone[1], bd: tone[3],
@@ -322,6 +324,8 @@ export class AppController extends React.Component {
     if (!el || el === this._sig) return; this._sig = el;
     // size the drawing buffer to the on-screen size (sharp on retina, any screen width)
     const r = el.getBoundingClientRect(), k = Math.min(3, Math.max(2, window.devicePixelRatio || 1)); el.width = Math.round((r.width || 362) * k); el.height = Math.round((r.height || 100) * k);
+    // Deliberate exception: the pad is white and the pen navy (#0F2D58) in both themes, because the signature is kept as an
+    // image and must look the same whoever signed and in which theme.
     const ctx = el.getContext('2d'); ctx.lineWidth = 2.5 * k; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.strokeStyle = '#0F2D58';
     let down = false; const pos = e => { const b = el.getBoundingClientRect(); return [(e.clientX - b.left) * el.width / b.width, (e.clientY - b.top) * el.height / b.height]; };
     el.onpointerdown = e => { down = true; try { el.setPointerCapture(e.pointerId); } catch (_) { /* old browsers */ } const [x, y] = pos(e); ctx.beginPath(); ctx.moveTo(x, y); e.preventDefault(); };

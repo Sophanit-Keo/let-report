@@ -2,7 +2,7 @@
 import { Button, Field, Pill } from '../components/index.js';
 import { tap } from '../utils/tap.js';
 import { inputStyle } from '../styles/inline.js';
-import { title, col, grid } from './sheetStyles.js';
+import { title, col, grid, small } from './sheetStyles.js';
 
 export function AddPersonSheet({ v }) {
   const t = v.t, a = v.addPerson;
@@ -14,9 +14,9 @@ export function AddPersonSheet({ v }) {
       <Field label={t.people.tempPw}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <input id="new-password" value={a.password} onChange={a.onPassword} autoComplete="new-password" style={{ ...inputStyle, flex: 1, fontFamily: 'ui-monospace,Menlo,monospace' }} />
-          <div {...tap(a.generate)} style={{ fontSize: 13, fontWeight: 700, color: 'var(--blue-600)', padding: '0 4px', whiteSpace: 'nowrap' }}>{t.people.generate}</div>
+          <div {...tap(a.generate)} style={{ fontSize: 13, fontWeight: 700, color: 'var(--c-accent)', padding: '0 4px', whiteSpace: 'nowrap' }}>{t.people.generate}</div>
         </div>
-        <div style={{ fontSize: 12, color: 'var(--gray-500)', lineHeight: 1.4 }}>{t.people.tempPwSub}</div>
+        <div style={small}>{t.people.tempPwSub}</div>
       </Field>
       <Field label={t.people.role}><div role="radiogroup" style={grid(4)}>{a.roles.map((o, i) => <Pill key={i} o={o} h={38} px={4} />)}</div></Field>
       <Button type="submit" variant="primary" icon="user-plus" fullWidth disabled={a.disabled}>{a.busy ? '…' : t.people.add}</Button>

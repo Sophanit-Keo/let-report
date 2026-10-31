@@ -14,9 +14,9 @@ export function AssignSheet({ v }) {
       <Field label={t.owner}>
         <div style={grid(4, 8)}>
           {v.owners.map((o, i) => (
-            <div key={i} {...tap(o.pick)} aria-pressed={o.bd === 'var(--blue-600)'} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '10px 4px', borderRadius: 14, border: '1.5px solid ' + o.bd, background: o.bg }}>
+            <div key={i} {...tap(o.pick)} aria-pressed={o.on} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '10px 4px', borderRadius: 14, border: '1.5px solid ' + o.bd, background: o.bg, boxShadow: o.glow, transition: 'all 120ms' }}>
               <Avatar src={o.avatar} size={40} />
-              <div style={{ fontSize: 13, fontWeight: 700 }}>{o.name}</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--c-ink)' }}>{o.name}</div>
             </div>
           ))}
         </div>
@@ -24,7 +24,7 @@ export function AssignSheet({ v }) {
       <Field label={t.due}>
         <div style={grid(3, 8)}>
           {v.dues.map((o, i) => (
-            <div key={i} {...tap(o.pick)} style={{ height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, background: o.bg, color: o.fg, border: '1.5px solid ' + o.bd }}>{o.label}</div>
+            <div key={i} {...tap(o.pick)} aria-pressed={o.on} style={{ height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 700, background: o.bg, color: o.fg, border: '1.5px solid ' + o.bd }}>{o.label}</div>
           ))}
         </div>
       </Field>

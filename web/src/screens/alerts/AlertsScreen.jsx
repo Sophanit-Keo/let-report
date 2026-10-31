@@ -2,7 +2,7 @@
 import { Icon } from '../../components/index.js';
 import { tap } from '../../utils/tap.js';
 
-const card = { background: '#fff', border: '1.5px solid var(--blue-200)', borderRadius: 20 };
+const card = { background: 'var(--c-surface)', border: '1.5px solid var(--c-line)', borderRadius: 20 };
 
 export function AlertsScreen({ v }) {
   return (
@@ -16,9 +16,9 @@ export function AlertsScreen({ v }) {
             </div>
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
               <div style={{ fontSize: 14, lineHeight: 1.4, fontWeight: 600 }}>{n.text}</div>
-              <div style={{ fontSize: 12, color: 'var(--gray-500)' }}>{n.t}</div>
+              <div style={{ fontSize: 12, color: 'var(--c-muted)' }}>{n.t}</div>
             </div>
-            {n.unread ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue-500)', marginTop: 6, flex: 'none' }} /> : null}
+            {n.unread ? <div style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--c-info)', boxShadow: 'var(--c-glow-accent)', marginTop: 6, flex: 'none' }} /> : null}
           </div>
         ))}
       </div>

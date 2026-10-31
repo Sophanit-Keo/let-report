@@ -1,5 +1,5 @@
 // Left sidebar navigation (computers, 1024px and wider).
-import { Button, Icon, LangToggle, Avatar } from '../components/index.js';
+import { Button, Icon, LangToggle, ThemeToggle, Avatar } from '../components/index.js';
 import { tap } from '../utils/tap.js';
 
 export function Sidebar({ v }) {
@@ -15,7 +15,7 @@ export function Sidebar({ v }) {
       </div>
       <nav style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {tabs.map((tb, i) => {
-          const on = tb.fg === 'var(--blue-600)';
+          const on = !!v.is[tb.key];
           return (
             <div key={i} {...tap(tb.go, 'nav-item' + (on ? ' on' : ''))} aria-current={on ? 'page' : undefined} data-tour={tb.key}>
               <Icon name={tb.icon} size={20} />
@@ -32,15 +32,15 @@ export function Sidebar({ v }) {
         ) : null}
       </nav>
       <div style={{ flex: 1 }} />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 16, borderTop: '1.5px solid var(--blue-100)' }}>
-        <div style={{ display: 'flex', justifyContent: 'flex-start' }}><LangToggle v={v} /></div>
-        <div {...tap(v.openRoles)} aria-label={v.t.switchRole} data-tour="me" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, border: '1.5px solid var(--blue-200)', background: 'var(--blue-50)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 16, borderTop: '1.5px solid var(--c-tint)' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}><LangToggle v={v} /><ThemeToggle v={v} /></div>
+        <div {...tap(v.openRoles)} aria-label={v.t.switchRole} data-tour="me" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 14, border: '1.5px solid var(--c-line)', background: 'var(--c-bg)' }}>
           <Avatar src={v.me.avatar} size={36} />
           <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 1 }}>
             <span style={{ fontSize: 14, fontWeight: 800 }}>{v.me.name}</span>
-            <span style={{ fontSize: 12, color: 'var(--gray-500)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.me.roleLabel}</span>
+            <span style={{ fontSize: 12, color: 'var(--c-muted)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{v.me.roleLabel}</span>
           </div>
-          <Icon name="repeat-2" size={16} color="var(--navy-500)" />
+          <Icon name="repeat-2" size={16} color="var(--c-muted)" />
         </div>
       </div>
     </aside>

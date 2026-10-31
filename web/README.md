@@ -8,7 +8,7 @@ It works in the browser on phones, tablets and computers:
 |---|---|
 | Phone (under 768 px) | Same as the design: full screen, bottom tab bar with the green camera button, bottom sheets |
 | Tablet (768–1023 px) | Wider pages, 2-column report lists, sheets become centered dialogs, the camera opens as a panel |
-| Computer (1024 px and up) | Left sidebar (Report an issue, Home / Reports / Tasks / Alerts, language, role switcher), 2-column home and report detail |
+| Computer (1024 px and up) | Left sidebar (Report an issue, Home / Reports / Tasks / Alerts, language, Dark / Light, your account), 2-column home and report detail |
 
 Tested browsers: Chrome, Edge and Samsung Internet (Chrome 87+), Firefox 78+, and Safari on iPhone, iPad and Mac (iOS/Safari 14.5+).
 
@@ -107,8 +107,8 @@ web/
 │   │   ├── tour.js            the "How to use" guide: steps, start, skip, remember it was seen
 │   │   ├── chatView.js        what the Chat screen and a trouble's Discussion show
 │   │   ├── draft.js           "Add details" form values
-│   │   └── storage.js         language preference (this browser)
-│   ├── components/            shared UI: Button, Icon, Pill, Field, Avatar, ReportCard, TopBar, Toggle…
+│   │   └── storage.js         language and Dark / Light preference (this browser)
+│   ├── components/            shared UI: Button, Icon, Pill, Field, Avatar, ReportCard, TopBar, Toggle, LangToggle, ThemeToggle…
 │   ├── layout/                Sidebar (computer), TabBar (phone/tablet)
 │   ├── screens/               one folder per screen
 │   │   ├── team/              team management (managers)
@@ -121,10 +121,11 @@ web/
 │   │   └── capture/           camera, flows A/B/C, sign step, shared parts
 │   ├── sheets/                SheetHost + one file per sheet (account, line, line form, assign, escalate, close, filters, decision, verify)
 │   ├── styles/
-│   │   ├── tokens/            design-system tokens (colours, type, spacing, effects)
+│   │   ├── tokens/            design-system tokens (colours, type, spacing, effects) and theme.css: the --c-* colours, light and dark
 │   │   ├── base.css           fonts, resets, animations, focus states
 │   │   ├── layout.css         responsive shell: phone, tablet ≥768px, computer ≥1024px
 │   │   ├── chat.css           chat screen, message bubbles, composer, discussion
+│   │   ├── tour.css           the "How to use" guide
 │   │   ├── index.css          imports everything above
 │   │   └── inline.js          shared inline styles (chips, inputs)
 │   └── utils/
@@ -138,7 +139,7 @@ web/
 - Demo data, product lines or people: `src/data/`
 - Workflow rules (who can do what): `src/state/AppController.js`
 - A screen's look: `src/screens/<screen>/`
-- Colours and spacing: `src/styles/tokens/`
+- Colours and spacing: `src/styles/tokens/`. Components, screens and sheets use only the `--c-*` colours of `tokens/theme.css` (what a colour is for: page, card, ink, line, accent, selected, brand green, ok / warn / bad / info), never a hex value or a hue name such as `--navy-900`, so each one is right in both the light and the dark look. Each CSS file keeps its dark-only touches (the page grid, glows) in a block at its end.
 
 ## Features
 
@@ -166,6 +167,7 @@ web/
 - **Push notifications:** turn them on from the card on Home or in the account menu (each phone, tablet or computer separately; iPhone/iPad need the app added to the Home Screen first). You get a notification for chat messages, comments, new troubles, critical troubles, escalations, corrective actions assigned to you or sent back, actions ready to verify, and troubles closed, even when the app is closed. Tapping it opens that trouble or chat. When the app is open on screen you see it in the app instead. The database sends them (a trigger calls the `push` function), so they arrive no matter who made the change.
 - **How-to guide:** new people get a short guided tour the first time they sign in. It highlights each part of the app (report button, reports, tasks, chat, alerts, lines, account) with a role-specific explanation. **Skip** at any step; it won't show again (saved on the profile, so not on other devices either). Open it again any time from the account menu: **How to use Let Report**.
 - **English and Khmer** switch at the top.
+- **Dark and light:** the app opens in a dark control-room look (graphite pages, cyan for selection and focus, glowing status dots); **Dark / Light**, next to the language switch, brings back the light design. It is next to the language switch in the sidebar on computers, in the account menu on phones (tap your avatar) and on the sign-in screen, and this browser remembers the choice.
 - Everything is saved in the Supabase database and shared between all devices.
 
 ### Start options in the link

@@ -1,6 +1,7 @@
-/* App shell and responsive layout: phone (default), tablet (≥768px), computer (≥1024px). */
+/* App shell and responsive layout: phone (default), tablet (≥768px), computer (≥1024px).
+   Colours are the theme's --c-* tokens (tokens/theme.css); the dark control room's extras are at the end. */
 /* ---------- App shell ---------- */
-.app { height: var(--app-h); display: flex; overflow: hidden; background: var(--blue-50); }
+.app { height: var(--app-h); display: flex; overflow: hidden; background-color: var(--c-bg); }
 .app.km { font-family: 'Plus Jakarta Sans', 'Noto Sans Khmer', system-ui, sans-serif; }
 .sidebar { display: none; }
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; position: relative; overflow: hidden; }
@@ -14,7 +15,7 @@
 .topbar { display: flex; align-items: center; gap: 8px; padding: 8px 12px; }
 .topbar-title { flex: 1; font-weight: 700; font-size: 15px; text-align: center; }
 .icon-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex: none; }
-@media (hover: hover) { .icon-btn:hover { background: var(--blue-100); } }
+@media (hover: hover) { .icon-btn:hover { background: var(--c-tint); } }
 
 .home-grid { display: flex; flex-direction: column; gap: 20px; }
 .home-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
@@ -27,42 +28,43 @@
 
 /* bottom tab bar (phone + tablet) */
 .tabbar {
-  flex: none; background: #fff; border-top: 1.5px solid var(--blue-200);
+  flex: none; background: var(--c-surface); border-top: 1.5px solid var(--c-line);
   display: grid; grid-template-columns: repeat(6, 1fr); align-items: start;
   padding: 8px 0 calc(var(--safe-b) + 10px); min-height: 66px; position: relative; z-index: 2;
 }
 .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; position: relative; padding-top: 2px; }
 .tab-label { font-size: 11px; font-weight: 700; }
 .fab {
-  width: 58px; height: 58px; margin-top: -24px; border-radius: 50%; background: var(--green-600);
+  width: 58px; height: 58px; margin-top: -24px; border-radius: 50%; background: var(--c-brand);
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 0 rgba(15,45,88,.18), 0 0 0 5px #fff; transition: background 120ms, transform 120ms;
+  box-shadow: var(--shadow-button), 0 0 0 5px var(--c-surface); transition: background 120ms, transform 120ms;
 }
-.fab:active { transform: translateY(2px); background: var(--green-700); }
+.fab:active { transform: translateY(2px); background: var(--c-brand-hover); }
 .tab-badge {
   position: absolute; top: -4px; left: 50%; margin-left: 6px; min-width: 18px; height: 18px; border-radius: 9px;
-  background: var(--red-500); color: #fff; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
-  padding: 0 4px; border: 2px solid #fff;
+  background: var(--c-bad); color: var(--c-on-dark); font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  padding: 0 4px; border: 2px solid var(--c-surface); box-shadow: var(--c-glow-bad);
 }
 
 /* fixed bottom bars inside main (detail actions / save details) */
 .bottombar {
-  position: absolute; left: 0; right: 0; bottom: 0; background: #fff; border-top: 1.5px solid var(--blue-200);
+  position: absolute; left: 0; right: 0; bottom: 0; background: var(--c-surface); border-top: 1.5px solid var(--c-line);
   padding: 14px 20px calc(var(--safe-b) + 16px); z-index: 3;
 }
 .bottombar-inner { display: flex; flex-direction: column; gap: 8px; max-width: 640px; margin: 0 auto; }
 
 /* ---------- Overlays ---------- */
 .sheet-wrap { position: fixed; inset: 0; z-index: 30; display: flex; flex-direction: column; justify-content: flex-end; }
-.sheet-backdrop { position: absolute; inset: 0; background: rgba(15,45,88,.45); animation: lrFade 160ms; }
+.sheet-backdrop { position: absolute; inset: 0; background: var(--c-scrim); animation: lrFade 160ms; }
 .sheet {
-  position: relative; background: #fff; border-radius: 28px 28px 0 0; padding: 10px 20px calc(var(--safe-b) + 28px);
+  position: relative; background: var(--c-surface); color: var(--c-ink); border-radius: 28px 28px 0 0; padding: 10px 20px calc(var(--safe-b) + 28px);
   display: flex; flex-direction: column; gap: 18px; max-height: calc(var(--app-h) - var(--safe-t) - 24px); overflow-y: auto;
   animation: lrUp 200ms var(--ease-standard); -webkit-overflow-scrolling: touch;
 }
-.sheet-handle { width: 40px; height: 5px; border-radius: 3px; background: var(--gray-200); align-self: center; flex: none; }
+.sheet-handle { width: 40px; height: 5px; border-radius: 3px; background: var(--c-line-soft); align-self: center; flex: none; }
 .sheet-close { display: none; }
 
+/* The camera is dark in both themes (deliberate hex: no --c-* token is a surface that stays dark; the overlay's text is --c-on-dark). */
 .capture-wrap { position: fixed; inset: 0; z-index: 20; background: #0B1A30; display: flex; align-items: center; justify-content: center; }
 .capture {
   position: relative; width: 100%; height: 100%; background: #0B1A30; display: flex; flex-direction: column; overflow: hidden;
@@ -72,7 +74,9 @@
 .cap-bottom { padding-bottom: calc(var(--safe-b) + 36px); }
 .cam-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .photo-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.sig-canvas { width: 100%; display: block; border-radius: 14px; background: #fff; border: 1.5px dashed var(--blue-300); touch-action: none; cursor: crosshair; }
+/* The signature pad is white paper in both themes (deliberate #fff: AppController draws the ink in navy and the signature is
+   stored as an image, so it must look the same in both); a 1 px dashed line edge sits well on light and dark pages. */
+.sig-canvas { width: 100%; display: block; border-radius: 14px; background: #fff; border: 1px dashed var(--c-line); touch-action: none; cursor: crosshair; }
 
 /* ---------- Tablet (≥ 768px) ---------- */
 @media (min-width: 768px) {
@@ -85,8 +89,8 @@
   .sheet { width: 100%; max-width: 520px; border-radius: 24px; padding: 20px 24px 24px; max-height: calc(var(--app-h) - 48px); animation: lrPop 200ms var(--ease-standard); box-shadow: var(--shadow-floating); }
   .sheet-handle { display: none; }
   .sheet-close { display: flex; position: absolute; top: 14px; right: 14px; }
-  .capture-wrap { background: rgba(11,26,48,.72); padding: 24px; animation: lrFade 160ms; }
-  .capture { width: 440px; height: min(880px, calc(var(--app-h) - 48px)); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+  .capture-wrap { background: rgba(11,26,48,.72); padding: 24px; animation: lrFade 160ms; }   /* deliberate: the camera's dark backdrop, both themes */
+  .capture { width: 440px; height: min(880px, calc(var(--app-h) - 48px)); border-radius: 28px; box-shadow: 0 20px 60px rgba(0,0,0,.35); }   /* deliberate: the camera panel's shadow, dark in both themes */
   .capture .cap-top { padding-top: 24px; }
   .capture .cap-bottom { padding-bottom: 32px; }
 }
@@ -95,8 +99,8 @@
 @media (min-width: 1024px) {
   :root { --page-pad: 40px; --sidebar-w: 272px; }
   .sidebar {
-    display: flex; flex-direction: column; gap: 6px; width: var(--sidebar-w); flex: none; background: #fff;
-    border-right: 1.5px solid var(--blue-200); padding: 24px 16px 20px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 6px; width: var(--sidebar-w); flex: none; background: var(--c-surface);
+    border-right: 1.5px solid var(--c-line); padding: 24px 16px 20px; overflow-y: auto;
   }
   .tabbar { display: none; }
   .home-head-mobile { display: none !important; }
@@ -120,30 +124,53 @@
 
 
 /* Sidebar navigation (computer) */
-.nav-item { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 700; color: var(--navy-500); position: relative; }
-@media (hover: hover) { .nav-item:hover { background: var(--blue-50); color: var(--navy-900); } }
-.nav-item.on { background: var(--blue-100); color: var(--blue-700); }
-.nav-badge { margin-left: auto; min-width: 22px; height: 22px; border-radius: 11px; background: var(--red-500); color: #fff; font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 6px; }
-.nav-badge.blue { background: var(--blue-600); }
+.nav-item { display: flex; align-items: center; gap: 12px; height: 44px; padding: 0 12px; border-radius: 12px; font-size: 15px; font-weight: 700; color: var(--c-muted); position: relative; }
+@media (hover: hover) { .nav-item:hover { background: var(--c-bg); color: var(--c-ink); } }
+.nav-item.on { background: var(--c-accent-soft); color: var(--c-accent-hover); }
+.nav-badge { margin-left: auto; min-width: 22px; height: 22px; border-radius: 11px; background: var(--c-bad); color: var(--c-on-dark); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; padding: 0 6px; box-shadow: var(--c-glow-bad); }
+.nav-badge.blue { background: var(--c-accent); color: var(--c-accent-ink); box-shadow: var(--c-glow-accent); }
 
 /* Sign-in, loading and error pages */
 .auth-wrap { flex: 1; min-height: 100%; display: flex; align-items: center; justify-content: center; padding: calc(var(--safe-t) + 24px) 20px calc(var(--safe-b) + 24px); background: var(--gradient-sky); overflow-y: auto; }
-.auth-card { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: 22px; background: #fff; border: 1.5px solid var(--blue-200); border-radius: 24px; padding: 28px 24px; box-shadow: var(--shadow-card); }
-@media (max-width: 480px) { .auth-card { border: none; box-shadow: none; background: transparent; padding: 8px 4px; } .auth-wrap { align-items: flex-start; background: var(--blue-50); } }
-.spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--blue-200); border-top-color: var(--blue-600); animation: lrSpin 800ms linear infinite; flex: none; }
+.auth-card { width: 100%; max-width: 440px; display: flex; flex-direction: column; gap: 22px; background: var(--c-surface); border: 1.5px solid var(--c-line); border-radius: 24px; padding: 28px 24px; box-shadow: var(--shadow-card); }
+@media (max-width: 480px) { .auth-card { border: none; box-shadow: none; background: transparent; padding: 8px 4px; } .auth-wrap { align-items: flex-start; background: var(--c-bg); } }
+.spinner { width: 20px; height: 20px; border-radius: 50%; border: 3px solid var(--c-line); border-top-color: var(--c-accent); animation: lrSpin 800ms linear infinite; flex: none; }
 @keyframes lrSpin { to { transform: rotate(360deg); } }
 
-/* Toast */
+/* Toast: navy with white text in light (the ink, inverted); a raised panel in dark (below) */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); top: calc(var(--safe-t) + 12px); z-index: 50; width: calc(100% - 24px); max-width: 480px;
-  display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--navy-900); color: #fff; font-size: 14px; font-weight: 600; line-height: 1.4;
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 16px; background: var(--c-ink); color: var(--c-surface); font-size: 14px; font-weight: 600; line-height: 1.4;
   box-shadow: var(--shadow-floating); animation: lrFade 200ms var(--ease-standard); }
 
 /* "Install the app" card (phones and tablets) */
 .install-card {
   position: fixed; left: 12px; right: 12px; bottom: calc(var(--safe-b) + 12px); z-index: 25; margin: 0 auto; max-width: 480px;
   display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 20px;
-  background: var(--blue-50); border: 1.5px solid var(--blue-200); box-shadow: var(--shadow-floating);
+  background: var(--c-bg); border: 1.5px solid var(--c-line); box-shadow: var(--shadow-floating);
   animation: lrUp 240ms var(--ease-standard);
 }
 .install-card.above-tabs { bottom: calc(var(--safe-b) + 84px); }
 @media (min-width: 1024px) { .install-card.above-tabs { bottom: 24px; } }
+
+/* ---------- Dark control room only (light keeps today's look) ---------- */
+/* a faint engineering grid behind every page (--c-grid, the simulation's grid colour) */
+:root[data-theme="dark"] .app {
+  background-image: linear-gradient(var(--c-grid) 1px, transparent 1px), linear-gradient(90deg, var(--c-grid) 1px, transparent 1px);
+  background-size: 24px 24px; background-position: -1px -1px;
+}
+:root[data-theme="dark"] .auth-wrap { background: transparent; }
+:root[data-theme="dark"] .sheet { border: 1px solid var(--c-line); border-bottom: 0; box-shadow: 0 -12px 40px var(--c-shadow); }
+:root[data-theme="dark"] .sheet-handle { background: var(--c-line); }
+:root[data-theme="dark"] .tab.on::before { content: ''; position: absolute; top: -9px; width: 28px; height: 2px; border-radius: 2px; background: var(--c-accent); box-shadow: var(--c-glow-accent); }
+:root[data-theme="dark"] .fab { box-shadow: 0 0 0 5px var(--c-surface), var(--c-glow-ok); }
+:root[data-theme="dark"] .nav-item.on { box-shadow: inset 3px 0 0 var(--c-accent); }
+:root[data-theme="dark"] .toast { background: var(--c-raised); color: var(--c-ink); box-shadow: 0 12px 34px var(--c-shadow), inset 0 0 0 1px var(--c-line), inset 3px 0 0 var(--c-accent); }
+:root[data-theme="dark"] .install-card { background: var(--c-surface); box-shadow: 0 12px 34px var(--c-shadow); }
+:root[data-theme="dark"] .auth-card { box-shadow: 0 18px 50px var(--c-shadow); }
+/* dark phones: the sign-in stays a centred card on the grid (light phones keep today's card-less form) */
+@media (max-width: 480px) {
+  :root[data-theme="dark"] .auth-card { margin: auto 0; background: var(--c-surface); border: 1.5px solid var(--c-line); padding: 24px 20px; }
+}
+@media (min-width: 768px) {
+  :root[data-theme="dark"] .sheet { border-bottom: 1px solid var(--c-line); box-shadow: 0 24px 60px var(--c-shadow); }
+}

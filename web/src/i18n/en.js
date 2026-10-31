@@ -138,4 +138,5 @@ export const EN = {
   install:{title:'Install Let Report', sub:'Open it from your home screen like an app: full screen, faster, one tap away.', btn:'Install', later:'Not now',
     iosTitle:'Add Let Report to your Home Screen', ios1:'Tap the Share button', ios1b:'in the browser bar', ios2:'Choose "Add to Home Screen"', ios3:'Tap "Add"',
     other1:'Open the browser menu', other2:'Choose "Install app" or "Add to Home screen"', menuItem:'Install app', done:'Let Report is installed. Open it from your home screen.'},
+  theme:{label:'Dark or light screen', dark:'Dark', light:'Light'},
 };

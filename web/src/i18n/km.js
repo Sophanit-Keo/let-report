@@ -135,4 +135,5 @@ export const KM = {
   install:{title:'ដំឡើង Let Report', sub:'បើកពីអេក្រង់ដើមដូចកម្មវិធី៖ ពេញអេក្រង់ លឿនជាង ចុចតែម្តង។', btn:'ដំឡើង', later:'ពេលក្រោយ',
     iosTitle:'បន្ថែម Let Report ទៅអេក្រង់ដើម', ios1:'ចុចប៊ូតុងចែករំលែក', ios1b:'នៅរបារកម្មវិធីរុករក', ios2:'ជ្រើស "Add to Home Screen"', ios3:'ចុច "Add"',
     other1:'បើកម៉ឺនុយកម្មវិធីរុករក', other2:'ជ្រើស "Install app" ឬ "Add to Home screen"', menuItem:'ដំឡើងកម្មវិធី', done:'Let Report បានដំឡើងហើយ។ បើកពីអេក្រង់ដើម។'},
+  theme:{label:'អេក្រង់ងងឹត ឬភ្លឺ', dark:'ងងឹត', light:'ភ្លឺ'},
 };

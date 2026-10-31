@@ -14,8 +14,12 @@ export const RUN_MAX_HOURS=36; export const RUN_CHOICES=[24,28,32,36];
 export const FILL_CIP_HOURS=2; export const FILL_CIP_CHOICES=[1,2,3,4];
 // Fillers and their rated speed (packs per hour, Tetra Pak's published ratings); the pack size (ml) a filler starts with.
 export const FILLERS=[['TFA',3600],['TBA/19',7500],['TBA/22',20000],['A3/Speed',24000]]; export const PACK_ML_DEFAULT=100;
-export const SEV = [{bg:'var(--gray-100)',fg:'var(--gray-700)',bar:'var(--gray-300)'},{bg:'var(--blue-100)',fg:'var(--blue-700)',bar:'var(--blue-500)'},{bg:'var(--amber-100)',fg:'var(--amber-700)',bar:'var(--amber-500)'},{bg:'var(--red-100)',fg:'var(--red-700)',bar:'var(--red-500)'}];
-export const ST = {open:{i:0,bg:'var(--blue-100)',fg:'var(--blue-700)'},action:{i:1,bg:'var(--amber-100)',fg:'var(--amber-700)'},verify:{i:2,bg:'var(--blue-100)',fg:'var(--navy-900)'},closed:{i:3,bg:'var(--green-100)',fg:'var(--green-700)'}};
+// Severity and status colours: the theme's --c-* state tokens (styles/tokens/theme.css), so they follow light and dark.
+// Deliberate exception: Low (SEV[0]) is neutral, and the contract has no neutral state token, so it keeps today's greys;
+// theme.css's dark safety net maps --gray-100 and --gray-300 to dark greys.
+export const SEV = [{bg:'var(--gray-100)',fg:'var(--c-ink-2)',bar:'var(--gray-300)'},{bg:'var(--c-info-bg)',fg:'var(--c-info-ink)',bar:'var(--c-info)'},{bg:'var(--c-warn-bg)',fg:'var(--c-warn-ink)',bar:'var(--c-warn)'},{bg:'var(--c-bad-bg)',fg:'var(--c-bad-ink)',bar:'var(--c-bad)'}];
+export const ST = {open:{i:0,bg:'var(--c-info-bg)',fg:'var(--c-info-ink)'},action:{i:1,bg:'var(--c-warn-bg)',fg:'var(--c-warn-ink)'},verify:{i:2,bg:'var(--c-info-bg)',fg:'var(--c-ink)'},closed:{i:3,bg:'var(--c-ok-bg)',fg:'var(--c-ok-ink)'}};
+// The manager's placeholder portrait is an image (SVG): CSS colours cannot reach inside it, so its navy and white are fixed (deliberate).
 export const MGR_AV = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'><rect width='40' height='40' fill='%230F2D58'/><text x='20' y='26' font-family='Arial,sans-serif' font-size='15' font-weight='700' fill='white' text-anchor='middle'>CH</text></svg>";
 export const ORDER = ['qc','qa','supervisor','manager'];
 export const PEOPLE = {qc:{name:'Sokha',avatar:'images/avatars/sokha.png'},qa:{name:'Vina',avatar:'images/avatars/vina.png'},supervisor:{name:'Dara',avatar:'images/avatars/dara.png'},manager:{name:'Chanthy',avatar:MGR_AV}};
@@ -28,4 +32,4 @@ export const LINES = [
   {name:'Yogurt line 3',type:'Yogurt',product:'Yogurt Sweet',qty:35,target:60,status:'running'},
   {name:'UHT line 4',type:'UHT',product:'Bestcows',qty:0,target:90,status:'cleaning'}];
 export const TITLES = {temperature:'Temperature out of range',hygiene:'Hygiene problem',foreign:'Foreign object found',pest:'Pest seen',equipment:'Equipment fault',allergen:'Allergen control issue',labelling:'Labelling error',cleaning:'Cleaning not done',custom:'Other problem'};
-export const TONE = {red:['var(--red-100)','var(--red-700)'],blue:['var(--blue-100)','var(--blue-700)'],green:['var(--green-100)','var(--green-700)'],amber:['var(--amber-100)','var(--amber-700)']};
+export const TONE = {red:['var(--c-bad-bg)','var(--c-bad-ink)'],blue:['var(--c-info-bg)','var(--c-info-ink)'],green:['var(--c-ok-bg)','var(--c-ok-ink)'],amber:['var(--c-warn-bg)','var(--c-warn-ink)']};

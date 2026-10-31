@@ -2,9 +2,7 @@
 // and its place in the factory: the UHT that feeds it, its filler, speed and pack size (the simulation's Factory board reads them).
 import { Button, Field, Pill } from '../components/index.js';
 import { inputStyle } from '../styles/inline.js';
-import { title, col, grid } from './sheetStyles.js';
-
-const hint = { fontSize: 12, color: 'var(--gray-500)', lineHeight: 1.4 };
+import { title, col, grid, small as hint } from './sheetStyles.js';
 
 export function LineFormSheet({ v }) {
   const t = v.t, f = v.lineForm;
@@ -26,7 +24,7 @@ export function LineFormSheet({ v }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {f.fillOpts.map((o, i) => <Pill key={i} o={o} h={36} px={14} />)}
           <input id="line-fill-every" aria-label={t.lot.fillEvery} inputMode="numeric" value={f.fillEvery} onChange={f.onFillEvery} style={{ ...inputStyle, width: 72, height: 36, padding: '0 10px', fontSize: 14, fontWeight: 700, textAlign: 'center', borderRadius: 999 }} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--gray-500)' }}>{t.lot.hoursShort}</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--c-muted)' }}>{t.lot.hoursShort}</span>
         </div>
         <div style={hint}>{t.lot.fillEverySub}</div>
       </Field>
@@ -46,7 +44,7 @@ export function LineFormSheet({ v }) {
           <Field label={t.line.speed}><input id="line-speed" inputMode="numeric" value={f.packsPerH} onChange={f.onPacksPerH} style={inputStyle} /></Field>
           <Field label={t.line.packMl}><input id="line-pack-ml" inputMode="numeric" value={f.packMl} onChange={f.onPackMl} style={inputStyle} /></Field>
         </div>
-        {f.lph ? <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--navy-900)' }}>{f.lph}</div> : null}
+        {f.lph ? <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--c-ink)' }}>{f.lph}</div> : null}
       </div>
       <Button type="submit" variant="primary" fullWidth disabled={f.disabled}>{f.isNew ? t.line.create : t.line.save}</Button>
     </form>

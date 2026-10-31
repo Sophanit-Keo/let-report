@@ -11,7 +11,7 @@ export function EscalateSheet({ v }) {
         <Avatar src={e.avatar} size={44} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <h2 style={title}>{t.escTitle} {e.toLabel}</h2>
-          <div style={{ fontSize: 13, color: 'var(--gray-500)', lineHeight: 1.4 }}>{e.toName} {t.escSub}</div>
+          <div style={{ fontSize: 13, color: 'var(--c-muted)', lineHeight: 1.4 }}>{e.toName} {t.escSub}</div>
         </div>
       </div>
       <Field label={t.escReason}><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{v.escReasons.map((o, i) => <Pill key={i} o={o} h={36} px={12} />)}</div></Field>
